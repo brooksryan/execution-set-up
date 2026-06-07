@@ -10,10 +10,6 @@ const path = require('path');
 
 const PKG_ROOT = path.resolve(__dirname, '..');
 const TEMPLATE_DIR = path.join(PKG_ROOT, 'template');
-const GITIGNORE_BLOCK = [
-  '# to-execution: ephemeral agent work-tracking (promote durable conclusions out before relying on git)',
-  'tmp/',
-];
 
 function usage() {
   process.stdout.write(
@@ -24,7 +20,8 @@ function usage() {
       '  npx to-execution init [target]   stamp template/ into target (default: cwd)',
       '  npx to-execution init --force    overwrite existing files',
       '',
-      'init never overwrites an existing file unless --force. tmp/ is added to .gitignore.',
+      'init stamps the .excn/ namespace; .excn/.gitignore keeps .excn/tmp/ out of git.',
+      'init never overwrites an existing file unless --force.',
       '',
     ].join('\n')
   );
@@ -38,23 +35,6 @@ function walk(dir, base = dir) {
     else out.push(path.relative(base, abs));
   }
   return out;
-}
-
-function ensureGitignore(target) {
-  const file = path.join(target, '.gitignore');
-  let current = '';
-  try {
-    current = fs.readFileSync(file, 'utf8');
-  } catch (_) {
-    /* no .gitignore yet */
-  }
-  const ignoresTmp = current
-    .split('\n')
-    .some((line) => line.trim().replace(/\/$/, '') === 'tmp');
-  if (ignoresTmp) return 'tmp/ already ignored';
-  const prefix = current && !current.endsWith('\n') ? '\n' : '';
-  fs.appendFileSync(file, `${prefix}\n${GITIGNORE_BLOCK.join('\n')}\n`);
-  return 'added tmp/ to .gitignore';
 }
 
 function init(args) {
@@ -81,17 +61,14 @@ function init(args) {
     written.push(rel);
   }
 
-  const gitignore = ensureGitignore(target);
-
   process.stdout.write(
     [
       `Stamped invariant layout into ${target}`,
       `  wrote   ${written.length} file(s)`,
       `  skipped ${skipped.length} existing file(s)${skipped.length ? ` (use --force to overwrite): ${skipped.join(', ')}` : ''}`,
-      `  ${gitignore}`,
       '',
       'Next: the Setup Skill runs the Setup Grill to write the variant files',
-      '(CONTEXT.md terms, PHILOSOPHY.md, TEAM_DIRECTIVE.md, Teammate defs).',
+      '(.excn/CONTEXT.md terms, .excn/PHILOSOPHY.md, .excn/TEAM_DIRECTIVE.md, Teammate defs).',
       '',
     ].join('\n')
   );
