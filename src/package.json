@@ -5,6 +5,9 @@
   "bin": {
     "to-execution": "bin/cli.js"
   },
+  "scripts": {
+    "prepublishOnly": "node bin/preflight.js"
+  },
   "files": [
     "bin/",
     "template/",
@@ -12,5 +15,14 @@
     "principles.md",
     "authoring-adherence-agents.md"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brooksryan/execution-set-up.git",
+    "directory": "src"
+  },
+  "author": "Brooks Ryan <brooksryan19@gmail.com>",
+  "engines": {
+    "node": ">=18"
+  },
   "license": "MIT"
 }
