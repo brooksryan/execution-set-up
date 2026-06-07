@@ -1,1 +1,6 @@
-tmp/
+sprints/
+issues/
+prds/
+retros/
+*_progress.json
+drafts/

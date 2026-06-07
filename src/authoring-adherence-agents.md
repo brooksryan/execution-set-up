@@ -11,7 +11,7 @@ Every Adherence Agent, stamped or one-off, obeys the same *output contract*:
 1. Read its rubric document in full.
 2. Review exactly one input against every rule.
 3. Return `PASS` or `FAIL` with each violation cited by rule name.
-4. Append the verdict to the active progress JSON (`.excn/tmp/.../*_progress.json` or the sprint JSON).
+4. Append the verdict to the active progress JSON (`.excn/*_progress.json` or the sprint JSON).
 5. **Never** fix the input. **Never** re-judge whether a rule should apply — every rule applies until the lead changes the rubric.
 
 The *input* contract is per-agent — that is the part you decide when authoring.

@@ -20,7 +20,7 @@ The split is the point: identical-across-projects files are stamped by the packa
 ├── adr/                     design-time decision records
 ├── research/                durable research reports
 ├── schemas/                 sprint / issue / prd / progress JSON    (invariant)
-└── tmp/                     work-tracking (ephemeral, self-gitignored)
+└── sprints/ issues/ prds/ retros/   flat work-tracking (ephemeral, self-gitignored)
 .claude/agents/              scribe + process-adherence + alignment (stamped) + grilled team
 CLAUDE.md / AGENTS.md        host's own files — wired with an append-only pointer block, never overwritten
 ```

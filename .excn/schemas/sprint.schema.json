@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Sprint Artifact",
-  "description": "One file per sprint at .excn/tmp/sprints/sprint_<N>.json. scribe owns it; the JSON is the source of truth.",
+  "description": "One file per sprint at .excn/sprints/sprint_<N>.json. scribe owns it; the JSON is the source of truth.",
   "type": "object",
   "additionalProperties": false,
   "required": [

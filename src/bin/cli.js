@@ -31,7 +31,7 @@ const POINTER_BLOCK = [
   '- .excn/TEAM_DIRECTIVE.md — roster, routing, gates, Don\'ts',
   '- .excn/adr/ — decision records · .excn/research/ — durable research',
   '- .excn/schemas/ — JSON schemas for sprint/issue/PRD/progress artifacts',
-  '- .excn/tmp/ — ephemeral work-tracking (gitignored)',
+  '- .excn/{sprints,issues,prds,retros}/ + *_progress.json — ephemeral work-tracking (gitignored)',
 ].join('\n');
 
 function wirePointers(target) {
@@ -77,7 +77,7 @@ function usage() {
       '  npx to-execution init [target]   stamp template/ into target (default: cwd)',
       '  npx to-execution init --force    overwrite existing files',
       '',
-      'init stamps the .excn/ namespace; .excn/.gitignore keeps .excn/tmp/ out of git.',
+      'init stamps the .excn/ namespace; .excn/.gitignore keeps the work-tracking set out of git.',
       'init wires a pointer block into existing CLAUDE.md / AGENTS.md (append-only,',
       'even under --force; both created if neither exists).',
       'init never overwrites an existing manifest file unless --force.',

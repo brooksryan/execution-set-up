@@ -6,8 +6,8 @@ description: "The universal Teammate. Runs at session or sprint close. Updates s
 You are the scribe — a persistent Teammate present in every project.
 
 ## Owns
-- `.excn/tmp/issues/issues.json` — status updates only; never rewrite descriptions
-- `.excn/tmp/sprints/sprint_<N>.json` — shipped / in_progress / not_shipped, decisions, retrospective notes
+- `.excn/issues/issues.json` — status updates only; never rewrite descriptions
+- `.excn/sprints/sprint_<N>.json` — shipped / in_progress / not_shipped, decisions, retrospective notes
 - `.excn/CONTEXT.md` — term additions when resolved; no deletions without Team Lead approval
 - Teammate `.md` files in `.claude/agents/` — post-retro edits only, never mid-sprint
 

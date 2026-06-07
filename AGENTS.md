@@ -10,4 +10,4 @@ and only when the work needs them.
 - .excn/TEAM_DIRECTIVE.md — roster, routing, gates, Don'ts
 - .excn/adr/ — decision records · .excn/research/ — durable research
 - .excn/schemas/ — JSON schemas for sprint/issue/PRD/progress artifacts
-- .excn/tmp/ — ephemeral work-tracking (gitignored)
+- .excn/{sprints,issues,prds,retros}/ + *_progress.json — ephemeral work-tracking (gitignored)

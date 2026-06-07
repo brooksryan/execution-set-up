@@ -13,7 +13,7 @@ Confirm these global skills are installed (look in `~/.claude/skills/`): `grill-
 
 ## 2. Stamp the invariant layout
 
-Run `npx to-execution init` in the project root. This deterministically writes everything identical across projects — the `.excn/` namespace (docs, seeds, `schemas/`, `adr/`, `research/`, `tmp/`) and the universal agents — and wires the host's instruction files (`CLAUDE.md`/`AGENTS.md`) with an append-only pointer block. Do not hand-write any of it — let the package stamp it.
+Run `npx to-execution init` in the project root. This deterministically writes everything identical across projects — the `.excn/` namespace (docs, seeds, `schemas/`, `adr/`, `research/`, and the flat work-tracking dirs) and the universal agents — and wires the host's instruction files (`CLAUDE.md`/`AGENTS.md`) with an append-only pointer block. Do not hand-write any of it — let the package stamp it.
 
 ## 3. Setup Grill
 
@@ -35,6 +35,6 @@ Confirm the layout, then tell the user: **setup is done — exit, restart in a f
 - The split: the **Scaffolder** (npm) stamps invariant files; the **agent** writes only variant (grilled) files. If you find yourself hand-copying a file that is identical across projects, it belongs in the package, not in your output.
 - Read lightly. Defer to the bundled references (`principles.md`, `authoring-adherence-agents.md`, `PROCESS.md`) and to your judgment. Do not prescribe every step to the user.
 - The two universal Adherence Agents enforce invariant rubrics: `process-adherence` (rubric `.excn/PROCESS.md`) and `alignment` (rubric Principles + `.excn/PHILOSOPHY.md`). Variant rubrics get one-off agents the Team Lead authors.
-- Work-tracking lives in `.excn/tmp/` (ephemeral, gitignored). Durable conclusions are promoted out into the committed `.excn/` docs via the Retro Loop.
+- Work-tracking lives flat in `.excn/` — `sprints/`, `issues/`, `prds/`, `retros/`, `*_progress.json` (ephemeral, gitignored). Durable conclusions are promoted out into the committed `.excn/` docs via the Retro Loop.
 
 </supporting-info>

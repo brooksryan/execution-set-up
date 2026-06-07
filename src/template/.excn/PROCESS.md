@@ -25,7 +25,7 @@ Hard-to-reverse decisions surfaced at grill time are recorded as **ADRs** — co
 
 ## Sprint tracking
 
-Each sprint is one JSON file at `.excn/tmp/sprints/sprint_<N>.json`, conforming to `.excn/schemas/sprint.schema.json`. scribe owns it. The JSON is the source of truth.
+Each sprint is one JSON file at `.excn/sprints/sprint_<N>.json`, conforming to `.excn/schemas/sprint.schema.json`. scribe owns it. The JSON is the source of truth.
 
 - **Open:** scribe creates the JSON with `status: "active"`, a one-sentence goal, the team, and items in `not_shipped`.
 - **In flight:** Teammates work items. When one ships, they message scribe with what shipped; scribe moves it to `shipped`.

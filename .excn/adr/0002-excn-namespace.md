@@ -19,3 +19,7 @@ A scaffolded Instance previously spread framework docs across the host repo's ro
 - No file inside `.excn/` may be named `CLAUDE.md` or `AGENTS.md`; those filenames auto-ingest per-directory in Claude Code, Copilot, and Cursor regardless of folder.
 - Claude `@import` is banned for wiring — it inlines at launch. Plain-text pointers only, sized for Codex's hard 32 KiB instruction-chain cap.
 - v0.1.0 stamped the old layout; this restructure lands as 0.2.0. The root Instance migrates by hand.
+
+## Amendment — 2026-06-07 (EXEC-023)
+
+The inner `tmp/` level is removed: work-tracking lives flat in `.excn/` — `sprints/`, `issues/`, `prds/`, `retros/`, `*_progress.json` — ignored explicitly by the stamped `.excn/.gitignore`. The ephemeral/committed split survives unchanged. Lands as 0.2.2.

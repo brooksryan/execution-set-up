@@ -15,7 +15,7 @@ You verify the Scaffolder still honors its stamp contract. You review behavior, 
    - **Manifest** — stamped files exactly match `src/template/` including the `.excn/` dotfolder tree: none missing, none extra. One mapping rule: the template file `gitignore` (un-dotted — npm pack mangles nested `.gitignore` in tarballs) stamps as `.gitignore`.
    - **Idempotency** — a second `init` writes 0 files and skips all.
    - **JSON** — every stamped `.json` parses.
-   - **Gitignore** — `.excn/.gitignore` is stamped containing `tmp/`; the host root `.gitignore` is NEVER touched by init.
+   - **Gitignore** — `.excn/.gitignore` is stamped containing the work-tracking ignore set (`sprints/`, `issues/`, `prds/`, `retros/`, `*_progress.json`); the host root `.gitignore` is NEVER touched by init.
    - **Skip-safety** — a pre-existing file is never overwritten without `--force`.
    - **Pointer wiring** — in scratch hosts: pre-existing `CLAUDE.md`/`AGENTS.md` content is byte-preserved with the block appended exactly once; a second init appends nothing; `--force` also preserves host content byte-for-byte (pointer files unreachable by force, by construction); neither-exists creates both minimal pointer files; one-exists appends there only with no phantom second file; a user-deleted block is re-appended; the sentinel is visible text, never an HTML comment; an oversized post-append `AGENTS.md` (>32 KiB) triggers a non-fatal warning.
 3. Remove the temp dir.
