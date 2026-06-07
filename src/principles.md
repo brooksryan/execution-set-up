@@ -24,6 +24,4 @@ Distinct from **Philosophy**: Principles are universal and fixed here; Philosoph
 
 - **Grill-first.** A new domain or major feature starts with a grill (`grill-with-docs`) before any code or content — grill → PRD → issues. Bug fixes and small additions skip it.
 
-## Not in this framework
-
-- **No ADRs.** The retro is the decision record. Hard-to-reverse decisions land in retrospective notes and, when they change terminology, in `CONTEXT.md`.
+- **Two decision records.** Hard-to-reverse design decisions are recorded as ADRs at grill time — offer criteria: hard to reverse, surprising without context, the result of a real trade-off. The retro records sprint-time decisions. Neither substitutes for the other.

@@ -20,7 +20,7 @@ Run `npx to-execution init` in the project root. This deterministically writes t
 Now interview the user. This is `grill-with-docs` plus a philosophy and team layer. Ask one thing at a time, recommend an answer each time, and write the output as each piece resolves:
 
 - **Context** — run `grill-with-docs` to resolve the domain. Write resolved terms into `CONTEXT.md` (pure glossary; no implementation detail).
-- **Philosophy** — ask: *what working philosophies are particular to this codebase?* (the universal Principles are already baked into the framework — do not re-litigate them). Write answers into `PHILOSOPHY.md`.
+- **Philosophy** — first spawn a read-only subagent to sweep the codebase for existing philosophy signals (readmes, contributor docs, lint/CI configs, prior documentation) and return candidates. Present each candidate as a confirmable proposal, then ask: *what other working philosophies are particular to this codebase?* (the universal Principles are already baked into the framework — do not re-litigate them). Write only user-confirmed philosophies into `PHILOSOPHY.md` — the scan itself never writes.
 - **Team** — ask what **persistent Teammates** this project needs and what each *owns*. For each, create it with `make-teammate` and add it to the roster in `CONTEXT.md`. Then fill `TEAM_DIRECTIVE.md`: roster, routing, QA gates, escalation, mission, Don'ts.
 - **One-off adherence agents** — ask what standards need a guardian (code style, source fidelity, etc.). For each variant rubric, author a one-off Adherence Agent from `authoring-adherence-agents.md`. (`process-adherence` and `alignment` are already stamped — do not re-create them.)
 

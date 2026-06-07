@@ -16,7 +16,7 @@ grill → PRD → issues → sprint → retro → edits of persistent docs & Tea
 - **Sprint.** Selected issues go into a sprint. The sprint JSON is the source of truth.
 - **Retro.** At sprint close, the retro records what is and feeds the only path to a definition change (below).
 
-There are no ADRs. The retro is the decision record.
+Hard-to-reverse decisions surfaced at grill time are recorded as **ADRs** — committed markdown, one decision per numbered file, colocated with the methodology docs. Offer criteria: hard to reverse, surprising without context, the result of a real trade-off. The retro records sprint-time decisions.
 
 ## Two grills, kept separate
 

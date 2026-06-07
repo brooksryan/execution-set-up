@@ -41,4 +41,3 @@ Blocked or in disagreement → Team Lead decides.
 - Never edit a root invariant copy directly — `src/` first, then mirror.
 - Never hand-copy an invariant file into a project — the Scaffolder stamps it.
 - Never publish to npm without Team Lead approval.
-- No ADRs — the retro is the decision record.

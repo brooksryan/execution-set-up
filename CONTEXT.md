@@ -32,13 +32,16 @@ A stateless agent definition the team spawns on demand as a tool — runs one ta
 The driving session: the human plus the primary Claude thread. Owns triage, arbitration, and final approval — including approving Teammate-definition changes. Also responsible for authoring one-off Adherence Agents that enforce project-specific rubrics (the Team Directive, code style, etc.) from the framework's shape-template. Not an agent definition and not a subagent; it is the main loop.
 
 ### Lifecycle
-The fixed sequence work moves through in every Instance: **grill → PRD → issues → sprint → retro → edits of persistent docs and Teammate definitions**. New domains and major features enter at the grill; small fixes skip it. The retro is the close-out step and the only feed into persistent-doc / Teammate-def change (see Retro Loop). The methodology does not use ADRs — the retro is the decision record.
+The fixed sequence work moves through in every Instance: **grill → PRD → issues → sprint → retro → edits of persistent docs and Teammate definitions**. New domains and major features enter at the grill; small fixes skip it. The retro is the close-out step and the only feed into persistent-doc / Teammate-def change (see Retro Loop). Hard-to-reverse design decisions are recorded as ADRs at grill time; the retro records sprint-time decisions.
 
 ### Retro Loop
 The sole path by which persistent documents and Teammate definitions change. scribe collects retro observations during a sprint, proposes minimal edits at close, spawns the alignment agent (an Adherence Agent) to gate them against the Principles and project Philosophy, and presents PASS results to the Team Lead for approval. Never ad-hoc, never mid-sprint.
 
+### ADR
+A design-time decision record for a hard-to-reverse choice, written at grill time when all three offer criteria hold: hard to reverse, surprising without context, the result of a real trade-off. Committed markdown colocated with the methodology docs — an understanding document for humans, not an adherence artifact. The retro remains the sprint-time decision record; neither substitutes for the other.
+
 ### Principles
-The universal, framework-level rules that hold in every Instance — stable, not re-litigated per project: Minimalism, Structured reference docs, JSON-for-progress (state in schema-validated JSON, never freeform Markdown), Persistent Teammates with consistent prompts, Adversarial and adherence Invoked Agents, Ownership-not-cognition agent definitions, Single responsibility, Non-prescriptive teardowns, Retro-loop-as-sole-change-path, and Grill-first. The Principles are the alignment agent's baked rubric.
+The universal, framework-level rules that hold in every Instance — stable, not re-litigated per project: Minimalism, Structured reference docs, JSON-for-progress (state in schema-validated JSON, never freeform Markdown), Persistent Teammates with consistent prompts, Adversarial and adherence Invoked Agents, Ownership-not-cognition agent definitions, Single responsibility, Non-prescriptive teardowns, Retro-loop-as-sole-change-path, Grill-first, and Two-decision-records (ADRs at grill time, the retro at sprint close). The Principles are the alignment agent's baked rubric.
 
 ### Philosophy
 The project-specific layer of working rules, held in a near-empty `PHILOSOPHY.md` that ships with each Instance and is filled during the setup grill (answering "what philosophies are particular to this codebase?"). Distinct from Principles, which are universal and baked into the framework. Philosophy grows only through the Retro Loop. The alignment agent checks proposed changes against both the baked Principles and the project Philosophy.
