@@ -1,14 +1,14 @@
 # Principles
 
-The universal rules of this framework. They hold in **every** project, are not re-litigated per project, and are baked into the agents and the Setup Skill rather than shipped as a per-project document. The `alignment` Adherence Agent checks proposed changes against these (plus the project's `PHILOSOPHY.md`).
+The universal rules of this framework. They hold in **every** project, are not re-litigated per project, and are baked into the agents and the Setup Skill rather than shipped as a per-project document. The `alignment` Adherence Agent checks proposed changes against these (plus the project's `.excn/PHILOSOPHY.md`).
 
-Distinct from **Philosophy**: Principles are universal and fixed here; Philosophy is project-specific and grilled into each project's `PHILOSOPHY.md`.
+Distinct from **Philosophy**: Principles are universal and fixed here; Philosophy is project-specific and grilled into each project's `.excn/PHILOSOPHY.md`.
 
 ## The principles
 
 - **Minimalism.** Prefer less — less documentation, less scaffolding, less prescription. Add only what is needed to reproduce the work or make a decision. If removing a sentence causes no confusion, remove it.
 
-- **Structured reference docs.** Every reference document has one declared, consistent shape. `CONTEXT.md` is a pure glossary and nothing else — no specs, no scratch, no implementation decisions.
+- **Structured reference docs.** Every reference document has one declared, consistent shape. `.excn/CONTEXT.md` is a pure glossary and nothing else — no specs, no scratch, no implementation decisions.
 
 - **JSON for progress.** Work and sprint and issue *state* lives in schema-validated JSON, never freeform Markdown. Markdown carries prose and reference; JSON carries state and adherence. Structure is what makes adherence checkable.
 

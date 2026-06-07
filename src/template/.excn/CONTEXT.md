@@ -8,7 +8,7 @@ _(the Setup Grill writes the first terms. One `### Term` heading per concept, fo
 
 ## Team roster
 
-_(persistent Teammates and what each owns — written as the team is grilled into existence. Interaction rules live in `TEAM_DIRECTIVE.md`, not here.)_
+_(persistent Teammates and what each owns — written as the team is grilled into existence. Interaction rules live in `.excn/TEAM_DIRECTIVE.md`, not here.)_
 
 | Teammate | Role | Owns |
 |---|---|---|

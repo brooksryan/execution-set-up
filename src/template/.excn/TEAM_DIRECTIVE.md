@@ -10,7 +10,7 @@ _(one paragraph: what this team builds and what done means.)_
 
 | Teammate | Role | Owns | Must not |
 |---|---|---|---|
-| scribe | structured artifacts | sprint/issue JSON, `CONTEXT.md` terms, the Retro Loop | code; next-steps language; def edits outside the Retro Loop |
+| scribe | structured artifacts | sprint/issue JSON, `.excn/CONTEXT.md` terms, the Retro Loop | code; next-steps language; def edits outside the Retro Loop |
 
 ## Routing
 

@@ -12,13 +12,17 @@ The split is the point: identical-across-projects files are stamped by the packa
 ## What a set-up project gets
 
 ```
-CONTEXT.md         glossary + team roster        (grilled)
-PHILOSOPHY.md      project working philosophies   (grilled; Principles are baked into the framework)
-PROCESS.md         the Lifecycle + Retro Loop     (invariant)
-TEAM_DIRECTIVE.md  roster, routing, QA gates      (grilled)
-.claude/agents/    scribe + process-adherence + alignment (stamped) + project Teammates/agents (grilled)
-schemas/           sprint / issue / progress JSON schemas (invariant)
-tmp/exec/          sprint / issue / prd / retro work-tracking (ephemeral, gitignored)
+.excn/                       everything the framework owns (ADR-0002)
+├── CONTEXT.md               glossary + team roster                  (grilled)
+├── PHILOSOPHY.md            project working philosophies            (grilled)
+├── PROCESS.md               the Lifecycle + Retro Loop              (invariant)
+├── TEAM_DIRECTIVE.md        roster, routing, QA gates               (grilled)
+├── adr/                     design-time decision records
+├── research/                durable research reports
+├── schemas/                 sprint / issue / prd / progress JSON    (invariant)
+└── tmp/                     work-tracking (ephemeral, self-gitignored)
+.claude/agents/              scribe + process-adherence + alignment (stamped) + grilled team
+CLAUDE.md / AGENTS.md        host's own files — wired with an append-only pointer block, never overwritten
 ```
 
 ## How work runs once set up

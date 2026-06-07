@@ -12,10 +12,10 @@ You verify the Scaffolder still honors its stamp contract. You review behavior, 
 ## What you do
 1. Create a fresh temp dir. Run `node <repo>/src/bin/cli.js init <tmpdir>`.
 2. Check every rule:
-   - **Manifest** — stamped files exactly match `src/template/`: none missing, none extra.
+   - **Manifest** — stamped files exactly match `src/template/` including the `.excn/` dotfolder tree: none missing, none extra.
    - **Idempotency** — a second `init` writes 0 files and skips all.
    - **JSON** — every stamped `.json` parses.
-   - **Gitignore** — `tmp/` is ignored in the target.
+   - **Gitignore** — `.excn/.gitignore` is stamped containing `tmp/`; the host root `.gitignore` is NEVER touched by init.
    - **Skip-safety** — a pre-existing file is never overwritten without `--force`.
 3. Remove the temp dir.
 4. Append to `progress_file` step_log: `{ "step": "package_qa_pass" | "package_qa_fail", "at": "<YYYY-MM-DD>", "artifact": "<change_summary>", "summary": "<verdict + violation count>" }`

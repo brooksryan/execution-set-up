@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Issues Backlog",
-  "description": "Single backlog file at tmp/exec/issues/issues.json. scribe updates status; descriptions are not rewritten.",
+  "description": "Single backlog file at .excn/tmp/issues/issues.json. scribe updates status; descriptions are not rewritten.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "issues"],
