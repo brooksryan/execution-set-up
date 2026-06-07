@@ -12,7 +12,7 @@ You verify the Scaffolder still honors its stamp contract. You review behavior, 
 ## What you do
 1. Create a fresh temp dir. Run `node <repo>/src/bin/cli.js init <tmpdir>`.
 2. Check every rule:
-   - **Manifest** — stamped files exactly match `src/template/` including the `.excn/` dotfolder tree: none missing, none extra.
+   - **Manifest** — stamped files exactly match `src/template/` including the `.excn/` dotfolder tree: none missing, none extra. One mapping rule: the template file `gitignore` (un-dotted — npm pack mangles nested `.gitignore` in tarballs) stamps as `.gitignore`.
    - **Idempotency** — a second `init` writes 0 files and skips all.
    - **JSON** — every stamped `.json` parses.
    - **Gitignore** — `.excn/.gitignore` is stamped containing `tmp/`; the host root `.gitignore` is NEVER touched by init.

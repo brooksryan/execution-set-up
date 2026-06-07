@@ -4,6 +4,18 @@
 
 **Question:** which instruction files each harness auto-loads, from which paths, and critically WHEN — session start in full, lazily on file-read, description-triggered, glob-triggered, or manual.
 
+## Legend — annotated tree grammar
+
+Each tool section below ends with an example annotated tree. Each file line carries `{#n}/<WHEN>/<RELOAD>/<WHERE>`:
+
+- `{#n}` — injection order within that tool's launch chain (1 = first injected); `{—}` = not part of the launch chain
+- **WHEN** — `SS` session start · `L` lazy / on-demand (when files in that dir are read or worked on) · `G` glob-triggered · `D` description-triggered (model decides) · `M` manual only
+- **RELOAD** — `R` re-read on change / re-injected per request · `NR` loaded once, not refreshed · `NR*` nuance in a footnote
+- **WHERE** — `SP` system prompt · `UM` user message / per-request context · `RET` retrieval-on-demand only
+- `(inf)` — inferred: the tool's official docs don't state this. Unmarked annotations are grounded in this doc's sections or a source cited in the tree's footnotes.
+
+Trees are hypothetical projects; the annotations are real behavior. Added 2026-06-07, same research pass.
+
 ---
 
 ## 1. Claude Code (Anthropic)
@@ -29,6 +41,39 @@ Source: official memory docs (code.claude.com/docs/en/memory), fetched 2026-06-0
 
 **Size guidance:** "target under 200 lines per CLAUDE.md file. Longer files consume more context and reduce adherence." No hard cap on CLAUDE.md ("loaded in full regardless of length"). Auto-memory MEMORY.md hard cap: 200 lines / 25KB. HTML block comments are stripped before injection (free maintainer notes). `claudeMdExcludes` setting skips files by glob. `--add-dir` directories' CLAUDE.md NOT loaded unless `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1`.
 
+**Example annotated tree** (legend at top):
+
+```
+/Library/Application Support/ClaudeCode/
+  CLAUDE.md                       {#1}/SS/NR/UM        ← managed policy; cannot be excluded
+$HOME/.claude/
+  CLAUDE.md                       {#2}/SS/NR/UM        ← user scope, all projects
+  rules/
+    house-style.md                {#3}/SS/NR/UM        ← unconditional user rule; before project rules
+  projects/<project>/memory/
+    MEMORY.md                     {#7}/SS/NR/UM        ← first 200 lines / 25KB only
+    debugging.md                  {—}/L/NR/RET         ← topic file; "not loaded at startup"
+repo/                             ← every ancestor dir's CLAUDE.md also joins the chain, root→cwd
+  CLAUDE.md                       {#4}/SS/NR/UM        ← an @docs/x.md import inlines AT LAUNCH into this slot (not lazy)
+  CLAUDE.local.md                 {#5}/SS/NR/UM        ← appended after same-level CLAUDE.md
+  .claude/
+    rules/
+      arch.md                     {#6}/SS/NR/UM        ← no paths: frontmatter
+      api.md                      {—}/G/NR*/UM         ← paths: src/api/** — injects when Claude reads matching files
+    skills/
+      deploy/SKILL.md             {—}/D/NR/RET         ← invoked, or model deems relevant
+  src/
+    CLAUDE.md                     {—}/L/NR*/UM         ← only when Claude reads files under src/
+elsewhere/                        ← added via --add-dir
+  CLAUDE.md                       {—}/M/—/—            ← ignored unless CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1
+```
+
+Footnotes:
+- WHERE = UM: launch-loaded CLAUDE.md/memory content arrives wrapped in `<system-reminder>` blocks attached to the user turn, NOT the API system prompt. Verified 2026-06-07: humanlayer.dev "Writing a good CLAUDE.md" **[community]**; confirmed empirically in a live Claude Code session (the claudeMd block rides a system-reminder).
+- NR: injected once at session start; mid-session edits are not re-injected **(inf — docs document no live reload)**.
+- NR*: subdir CLAUDE.md (and by the same mechanism, triggered rules) not re-injected after `/compact` until the next read in that subtree (§1 table).
+- Order: #1–#5 follow the documented precedence/concat order; #6–#7 placement observed empirically (memory block lands last), 2026-06-07.
+
 ---
 
 ## 2. OpenAI Codex CLI
@@ -44,6 +89,27 @@ Sources: developers.openai.com/codex/guides/agents-md and /codex/config-referenc
 **Composition:** no import syntax. Plain concatenation. A root AGENTS.md can *point* at deeper docs in prose; Codex may read them with its tools mid-task (advisory, not mechanism-enforced).
 
 **Caps:** `project_doc_max_bytes` — "Maximum bytes read from AGENTS.md when building project instructions"; **default 32 KiB** per the agents-md guide ("Codex skips empty files and stops adding files once the combined size reaches the limit"). `project_doc_fallback_filenames` adds alternative filenames. `model_instructions_file` replaces the built-in instructions file entirely.
+
+**Example annotated tree** (legend at top):
+
+```
+$CODEX_HOME/                      ← default ~/.codex
+  AGENTS.override.md              {#1}/SS/NR/UM(inf)   ← present → ~/.codex/AGENTS.md skipped
+  AGENTS.md                       {—}/—/—/—            ← read only when no override exists
+repo/                             ← repo root
+  AGENTS.md                       {#2}/SS/NR/UM(inf)
+  packages/
+    AGENTS.md                     {#3}/SS/NR/UM(inf)   ← on the root→cwd path
+    api/                          ← cwd (launch dir)
+      AGENTS.md                   {#4}/SS/NR/UM(inf)   ← last in chain → wins conflicts
+      src/
+        AGENTS.md                 {—}/M/—/—            ← below cwd: never auto-loaded (§2)
+```
+
+Footnotes:
+- NR: "rebuilds the instruction chain at every session start, not continuously" (§2) — no mid-session refresh.
+- WHERE = UM(inf): the official guide says only that AGENTS.md "is loaded first, before your prompt, and becomes part of the model's context" — system-vs-user role is not documented (re-checked 2026-06-07); pre-prompt/request-side placement inferred from that wording.
+- The whole chain shares the 32 KiB `project_doc_max_bytes` default; Codex stops adding files once the combined size hits the cap.
 
 ---
 
@@ -66,6 +132,28 @@ Source: cursor.com/docs/context/rules, fetched 2026-06-07.
 
 **Size guidance:** "Keep rules under 500 lines"; "Split large rules into multiple, composable rules." No published hard byte cap.
 
+**Example annotated tree** (legend at top):
+
+```
+(User Rules — Cursor settings, not a file)  {#1}/SS/R/SP(inf)  ← every Agent chat; not Inline Edit/Tab
+repo/
+  AGENTS.md                       {#3}/SS/R(inf)/UM(inf)  ← root: applied for work in the project
+  .cursorrules                    {#4}/SS/R(inf)/UM(inf)  ← deprecated, still read
+  .cursor/rules/
+    core.mdc                      {#2}/SS/R/SP(inf)    ← alwaysApply: true
+    api.mdc                       {—}/G/R/SP(inf)      ← globs: src/api/** — attaches when matching files are in context
+    perf.mdc                      {—}/D/R/RET          ← description only; agent reads desc, pulls body if relevant
+    release.mdc                   {—}/M/—/UM           ← no frontmatter; only via @release
+    notes.md                      {—}/—/—/—            ← plain .md ignored (needs .mdc frontmatter)
+  packages/api/
+    AGENTS.md                     {—}/L/R(inf)/UM(inf) ← applied when working with files in this dir/children
+```
+
+Footnotes:
+- WHERE = SP(inf): docs say always rules are "included at the start of the model context" — start-of-context reads as system-prompt region, but the exact API role is not documented.
+- R: rule contents are included per session/request, so saved edits ride the next request (inf — no explicit reload statement in docs).
+- Order: Cursor does not document inter-surface concatenation order — `{#n}` marks the always-on set only and the sequence is (inf).
+
 ---
 
 ## 4. GitHub Copilot
@@ -83,6 +171,29 @@ Sources: docs.github.com — add-repository-instructions, response-customization
 **Caps:** Copilot **code review reads only the first 4,000 characters** of any custom-instruction file. Copilot cloud agent guidance: "Instructions must be no longer than 2 pages." Code review on a PR uses instructions from the PR's **base branch**.
 
 **Composition:** no import syntax documented. Prose pointers possible; the coding agent has repo file access (advisory).
+
+**Example annotated tree** (legend at top):
+
+```
+(Personal instructions — github.com settings)   {—}/SS†/R/UM(inf)  ← priority: personal > repo > org
+(Org instructions — github.com settings)        {—}/SS†/R/UM(inf)
+repo/
+  .github/
+    copilot-instructions.md       {—}/SS†/R/UM(inf)    ← every request, all supported surfaces
+    instructions/
+      api.instructions.md         {—}/G/R/UM(inf)      ← applyTo: src/api/**
+  AGENTS.md                       {—}/L/R(inf)/UM(inf) ← anywhere in repo; nearest AGENTS.md wins
+  CLAUDE.md                       {—}/L/R(inf)/UM(inf) ← root-only shim; cloud coding-agent requests
+  services/auth/
+    AGENTS.md                     {—}/L/R(inf)/UM(inf) ← preferred over root AGENTS.md for work here
+```
+
+Footnotes:
+- † no persistent session: instructions attach per request; `SS` here means "from the first request, unconditionally."
+- `{—}` on every line: GitHub guarantees a *priority* order (personal > repository > organization) but no injection order — "no particular order" is guaranteed when instruction types combine (VS Code custom-instructions docs, checked 2026-06-07). So `{#n}` is undefined for Copilot.
+- R: "effective as soon as you save" (§4).
+- WHERE = UM(inf): docs say instructions are "automatically added to requests" and all layers are sent together per request; system-vs-user role not documented.
+- Reminder: code review reads only the first 4,000 chars of any instruction file (§4).
 
 ---
 
@@ -105,6 +216,29 @@ Source: docs.windsurf.com 307-redirects to docs.devin.ai/desktop/cascade/memorie
 
 **Caps:** 6,000 chars global file; 12,000 chars per rule file. (Older Windsurf docs cited a 12,000-char combined total; current Devin docs state per-file — current wording used here.)
 
+**Example annotated tree** (legend at top):
+
+```
+$HOME/.codeium/windsurf/memories/
+  global_rules.md                 {#1}/SS†/R/SP(inf)   ← every workspace; 6,000-char cap
+repo/                             ← git root; rules dirs are also searched up to here
+  .windsurfrules                  {#2}/SS†/R/SP(inf)   ← legacy single file
+  AGENTS.md                       {#3}/SS†/R/SP(inf)   ← root = always-on, mapped into rules engine
+  .devin/rules/                   ← preferred; .windsurf/rules/ = fallback; 12,000 chars/file
+    style.md                      {#4}/SS†/R/SP        ← always_on: "system prompt on every message"
+    api.md                        {—}/G/R/SP(inf)      ← glob: when Cascade reads/edits a matching file
+    arch.md                       {—}/D/R/SP+RET       ← model_decision: desc always in SP; body pulled on demand
+    release.md                    {—}/M/—/UM           ← manual: @rule-name only
+  services/auth/
+    AGENTS.md                     {—}/G/R/SP(inf)      ← subdir = auto-glob for that dir
+```
+
+Footnotes:
+- † re-injected "on every message" (§5) — hence R; `SS` marks the unconditional always-on set.
+- WHERE = SP grounded for always_on bodies and model_decision descriptions (§5 doc quotes); SP(inf) extends that to the other always-on surfaces, which the docs map into the same rules engine.
+- `SP+RET`: two-stage lazy — only the description costs tokens until the model pulls the body.
+- Order: per-surface ordering is not documented — `{#n}` sequence is (inf).
+
 ---
 
 ## 6. Aider
@@ -120,6 +254,24 @@ Sources: aider.chat/docs/usage/conventions.html and /docs/config/options.html, f
 **AGENTS.md:** agents.md lists Aider as an ecosystem adopter, but aider's own options reference documents **no** AGENTS.md auto-load and no `--conventions-file` flag (an open docs issue, Aider-AI/aider #4363, July 2025, proposes recommending the AGENTS.md name — doc change only). **Conflict flagged: treat aider as NOT auto-loading AGENTS.md.** Per-repo "auto"-load is achieved by committing `.aider.conf.yml` with `read: [AGENTS.md]`.
 
 **Caps:** none published. **[community]** guidance: keep conventions under 150–200 lines.
+
+**Example annotated tree** (legend at top):
+
+```
+$HOME/
+  .aider.conf.yml                 ← config fallback (home); not instructions
+repo/                             ← git root
+  .aider.conf.yml                 ← config; its read: [CONVENTIONS.md] line is the per-repo "auto"-load
+  CONVENTIONS.md                  {#1}/SS/NR*/UM(inf)  ← loads ONLY because pinned by the line above
+  docs/
+    architecture.md               {—}/M/NR*/UM(inf)    ← enters only via /read or --read
+  AGENTS.md                       {—}/M/—/—            ← never auto-loaded (§6)
+```
+
+Footnotes:
+- No file loads without explicit pinning (§6); `SS` on CONVENTIONS.md is conditional on the committed `read:` entry — remove it and the line becomes `{—}/M`.
+- WHERE = UM(inf): aider's prompt-caching docs list read-only files as a cache component *alongside* — not inside — the system prompt ("the system prompt; read only files added with --read or /read-only; the repository map; the editable files…"), implying chat-context placement. Verified 2026-06-07, aider.chat/docs/usage/caching.html.
+- NR*: pinned read-only files form the stable cached prefix when prompt caching is enabled; mid-session refresh behavior is undocumented.
 
 ---
 
@@ -192,3 +344,9 @@ So ripgrep-based agent search (the default in most harnesses) will not surface d
 - `.cursorrules` deprecation — Cursor community forum (forum.cursor.com/t/51779, /t/113200) + third-party migration guides [community]
 - `.agents` proposals — dot-agents.com; github.com/agentsfolder/spec; github.com/bgreenwell/dotagents [community]
 - Empirical: ripgrep 15.1.0 hidden-dir test (local, /tmp); GitHub code search `path:.excn` via `gh api` → 0 results
+
+Added 2026-06-07 for the annotated-tree WHERE/RELOAD column:
+
+- Aider prompt caching — https://aider.chat/docs/usage/caching.html (official; read-only files cached alongside, not inside, the system prompt)
+- "Writing a good CLAUDE.md" — https://www.humanlayer.dev/blog/writing-a-good-claude-md [community; CLAUDE.md rides a `<system-reminder>` in the user turn] — corroborated empirically in a live Claude Code session, 2026-06-07
+- VS Code custom instructions — https://code.visualstudio.com/docs/agent-customization/custom-instructions (official; Copilot layers merge per request, no order guaranteed)

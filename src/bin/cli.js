@@ -110,14 +110,18 @@ function init(args) {
   const skipped = [];
   for (const rel of walk(TEMPLATE_DIR)) {
     const src = path.join(TEMPLATE_DIR, rel);
-    const dest = path.join(target, rel);
+    // npm pack treats in-package .gitignore files as ignore specs and strips them,
+    // so the template ships them un-dotted; stamp restores the real name.
+    const destRel =
+      path.basename(rel) === 'gitignore' ? path.join(path.dirname(rel), '.gitignore') : rel;
+    const dest = path.join(target, destRel);
     fs.mkdirSync(path.dirname(dest), { recursive: true });
     if (fs.existsSync(dest) && !force) {
-      skipped.push(rel);
+      skipped.push(destRel);
       continue;
     }
     fs.copyFileSync(src, dest);
-    written.push(rel);
+    written.push(destRel);
   }
 
   const pointers = wirePointers(target);
