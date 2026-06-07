@@ -17,6 +17,7 @@ You verify the Scaffolder still honors its stamp contract. You review behavior, 
    - **JSON** — every stamped `.json` parses.
    - **Gitignore** — `.excn/.gitignore` is stamped containing `tmp/`; the host root `.gitignore` is NEVER touched by init.
    - **Skip-safety** — a pre-existing file is never overwritten without `--force`.
+   - **Pointer wiring** — in scratch hosts: pre-existing `CLAUDE.md`/`AGENTS.md` content is byte-preserved with the block appended exactly once; a second init appends nothing; `--force` also preserves host content byte-for-byte (pointer files unreachable by force, by construction); neither-exists creates both minimal pointer files; one-exists appends there only with no phantom second file; a user-deleted block is re-appended; the sentinel is visible text, never an HTML comment; an oversized post-append `AGENTS.md` (>32 KiB) triggers a non-fatal warning.
 3. Remove the temp dir.
 4. Append to `progress_file` step_log: `{ "step": "package_qa_pass" | "package_qa_fail", "at": "<YYYY-MM-DD>", "artifact": "<change_summary>", "summary": "<verdict + violation count>" }`
 5. Return:

@@ -11,6 +11,63 @@ const path = require('path');
 const PKG_ROOT = path.resolve(__dirname, '..');
 const TEMPLATE_DIR = path.join(PKG_ROOT, 'template');
 
+// Pointer wiring (CLI-owned, outside the manifest walk; see ADR-0002 / PRD-003).
+// Claude Code reads only CLAUDE.md; Codex/Cursor/Copilot/Devin read AGENTS.md.
+// Append-only under every flag including --force. Sentinel is visible text —
+// Claude Code strips HTML comments before injection. No @import: it inlines at launch.
+const POINTER_FILES = ['CLAUDE.md', 'AGENTS.md'];
+const POINTER_SENTINEL = '## to-execution framework (.excn/)';
+const CODEX_CHAIN_CAP = 32 * 1024;
+const POINTER_BLOCK = [
+  POINTER_SENTINEL,
+  '',
+  'This project runs on the to-execution framework. Framework docs live in `.excn/`,',
+  'a dotfolder hidden from default search — reach them by the explicit paths below,',
+  'and only when the work needs them.',
+  '',
+  '- .excn/CONTEXT.md — domain glossary and team roster',
+  '- .excn/PROCESS.md — how work moves: the Lifecycle, Retro Loop, QA gates',
+  '- .excn/PHILOSOPHY.md — project working philosophies',
+  '- .excn/TEAM_DIRECTIVE.md — roster, routing, gates, Don\'ts',
+  '- .excn/adr/ — decision records · .excn/research/ — durable research',
+  '- .excn/schemas/ — JSON schemas for sprint/issue/PRD/progress artifacts',
+  '- .excn/tmp/ — ephemeral work-tracking (gitignored)',
+].join('\n');
+
+function wirePointers(target) {
+  const report = [];
+  const existing = POINTER_FILES.filter((name) => fs.existsSync(path.join(target, name)));
+
+  if (existing.length === 0) {
+    for (const name of POINTER_FILES) {
+      fs.writeFileSync(path.join(target, name), `${POINTER_BLOCK}\n`);
+      report.push(`created ${name} (pointer)`);
+    }
+    return report;
+  }
+
+  for (const name of existing) {
+    const file = path.join(target, name);
+    const current = fs.readFileSync(file, 'utf8');
+    if (current.includes(POINTER_SENTINEL)) {
+      report.push(`${name}: pointer already present`);
+    } else {
+      const prefix = current === '' ? '' : current.endsWith('\n') ? '\n' : '\n\n';
+      fs.appendFileSync(file, `${prefix}${POINTER_BLOCK}\n`);
+      report.push(`${name}: pointer appended`);
+    }
+    if (name === 'AGENTS.md') {
+      const size = fs.statSync(file).size;
+      if (size > CODEX_CHAIN_CAP) {
+        process.stderr.write(
+          `warning: AGENTS.md is ${size} bytes — Codex truncates instruction chains at 32 KiB (project_doc_max_bytes default).\n`
+        );
+      }
+    }
+  }
+  return report;
+}
+
 function usage() {
   process.stdout.write(
     [
@@ -21,7 +78,9 @@ function usage() {
       '  npx to-execution init --force    overwrite existing files',
       '',
       'init stamps the .excn/ namespace; .excn/.gitignore keeps .excn/tmp/ out of git.',
-      'init never overwrites an existing file unless --force.',
+      'init wires a pointer block into existing CLAUDE.md / AGENTS.md (append-only,',
+      'even under --force; both created if neither exists).',
+      'init never overwrites an existing manifest file unless --force.',
       '',
     ].join('\n')
   );
@@ -61,11 +120,14 @@ function init(args) {
     written.push(rel);
   }
 
+  const pointers = wirePointers(target);
+
   process.stdout.write(
     [
       `Stamped invariant layout into ${target}`,
       `  wrote   ${written.length} file(s)`,
       `  skipped ${skipped.length} existing file(s)${skipped.length ? ` (use --force to overwrite): ${skipped.join(', ')}` : ''}`,
+      ...pointers.map((p) => `  ${p}`),
       '',
       'Next: the Setup Skill runs the Setup Grill to write the variant files',
       '(.excn/CONTEXT.md terms, .excn/PHILOSOPHY.md, .excn/TEAM_DIRECTIVE.md, Teammate defs).',
