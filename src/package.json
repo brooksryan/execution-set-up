@@ -1,0 +1,16 @@
+{
+  "name": "to-execution",
+  "version": "0.1.0",
+  "description": "Stamps the invariant layout for autonomous, agent-driven work into a project. Driven by the to-execution skill.",
+  "bin": {
+    "to-execution": "bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "template/",
+    "SKILL.md",
+    "principles.md",
+    "authoring-adherence-agents.md"
+  ],
+  "license": "MIT"
+}

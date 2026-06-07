@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sprint Artifact",
+  "description": "One file per sprint at tmp/exec/sprints/sprint_<N>.json. scribe owns it; the JSON is the source of truth.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "sprint_id",
+    "name",
+    "status",
+    "dates",
+    "team",
+    "goal",
+    "issues_addressed",
+    "shipped",
+    "in_progress",
+    "not_shipped",
+    "defects_discovered",
+    "decisions",
+    "retrospective_notes"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "sprint_id": { "type": "integer", "minimum": 1 },
+    "name": { "type": "string" },
+    "status": { "type": "string", "enum": ["planned", "active", "closed"] },
+    "dates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "type": "string", "format": "date" },
+        "end": { "type": ["string", "null"], "format": "date" },
+        "duration_note": { "type": ["string", "null"] }
+      }
+    },
+    "team": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "role"],
+        "properties": {
+          "name": { "type": "string" },
+          "role": { "type": "string" },
+          "owns": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "goal": { "type": "string", "description": "One sentence." },
+    "issues_addressed": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Issue IDs this sprint closes or advances."
+    },
+    "shipped": { "type": "array", "items": { "$ref": "#/$defs/work_item" } },
+    "in_progress": { "type": "array", "items": { "$ref": "#/$defs/work_item" } },
+    "not_shipped": { "type": "array", "items": { "$ref": "#/$defs/work_item" } },
+    "defects_discovered": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "severity", "discovered_by", "discovered_at", "summary"],
+        "properties": {
+          "id": { "type": "string" },
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+          "discovered_by": { "type": "string" },
+          "discovered_at": { "type": "string", "format": "date" },
+          "summary": { "type": "string" },
+          "root_cause": { "type": ["string", "null"] },
+          "fix": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "summary"],
+        "properties": {
+          "title": { "type": "string" },
+          "summary": { "type": "string" }
+        }
+      }
+    },
+    "retrospective_notes": {
+      "type": "array",
+      "description": "Observations during the sprint. scribe reads these at close to feed the Retro Loop.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "body"],
+        "properties": {
+          "title": { "type": "string" },
+          "body": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "work_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "title", "owner", "summary", "closes_issues"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["FEAT", "BUG", "REFACTOR", "TEST", "INFRA", "DOCS"]
+        },
+        "title": { "type": "string" },
+        "owner": { "type": "string" },
+        "summary": { "type": "string" },
+        "closes_issues": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Issue IDs this work item closes."
+        },
+        "notes": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Issues Backlog",
+  "description": "Single backlog file at tmp/exec/issues/issues.json. scribe updates status; descriptions are not rewritten.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "issues"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "issues": { "type": "array", "items": { "$ref": "#/$defs/issue" } }
+  },
+  "$defs": {
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "status", "severity", "scope", "actionable_now", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9]*-\\d{3,}$",
+          "description": "Stable identifier (e.g. PROJ-001), never reused."
+        },
+        "title": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "in_progress", "closed"] },
+        "severity": {
+          "type": "string",
+          "enum": ["P1", "P2", "P3"],
+          "description": "P1 blocking, P2 significant, P3 low-priority."
+        },
+        "scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "Which area(s) the fix lives in — project-defined."
+        },
+        "classification": {
+          "type": ["string", "null"],
+          "enum": ["macro", "local", "macro+local", "pre-existing", null],
+          "description": "macro = architecture-level; local = tactical; pre-existing = predates current work."
+        },
+        "actionable_now": {
+          "type": "boolean",
+          "description": "false = tracking only, no sprint work planned."
+        },
+        "description": { "type": "string" },
+        "prd": {
+          "type": ["string", "null"],
+          "pattern": "^PRD-\\d{3}$",
+          "description": "The PRD this issue traces to, null if filed directly."
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Verifiable criteria; the issue closes only when all hold."
+        },
+        "slice_type": {
+          "type": ["string", "null"],
+          "enum": ["HITL", "AFK", null],
+          "description": "HITL = needs human interaction; AFK = completable without it."
+        },
+        "root_cause": { "type": ["string", "null"] },
+        "fix": { "type": ["string", "null"] },
+        "depends_on": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Issue IDs that must close first."
+        },
+        "related_tickets": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "External tracker IDs."
+        },
+        "assigned_sprint": { "type": ["integer", "null"] },
+        "closed_in_sprint": { "type": ["integer", "null"] },
+        "notes": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

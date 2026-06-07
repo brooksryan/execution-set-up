@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Progress Tracker",
+  "description": "A rolling, append-only progress record for a unit of work (a feature, an investigation, a category). step_log is append-only; current_step indicates where the work is now. Adherence Agents append their verdicts here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "name", "current_step", "paused_at", "step_log", "decisions", "open_questions", "blockers"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "name": { "type": "string", "description": "What this progress file tracks." },
+    "current_step": { "type": "string", "description": "Where the work is now — project-defined step name, or 'complete' / 'blocked'." },
+    "paused_at": {
+      "description": "Non-null when paused mid-step; carries cursor state so the next spin-up can resume.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["paused_step", "summary"],
+          "properties": {
+            "paused_step": { "type": "string" },
+            "in_flight_artifact": { "type": ["string", "null"] },
+            "open_in_flight_questions": { "type": "array", "items": { "type": "string" } },
+            "summary": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "step_log": {
+      "type": "array",
+      "description": "Append-only log of state transitions and Adherence-Agent verdicts.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["step", "at"],
+        "properties": {
+          "step": { "type": "string", "description": "e.g. draft_generated, process_review_pass, alignment_review_fail." },
+          "at": { "type": "string", "format": "date" },
+          "artifact": { "type": ["string", "null"], "description": "Path to the artifact or transition this step concerns." },
+          "summary": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "summary"],
+        "properties": {
+          "title": { "type": "string" },
+          "summary": { "type": "string" }
+        }
+      }
+    },
+    "open_questions": { "type": "array", "items": { "type": "string" } },
+    "blockers": { "type": "array", "items": { "type": "string" } }
+  }
+}

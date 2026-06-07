@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PRD Artifact",
+  "description": "One file per PRD at tmp/exec/prds/PRD-<NNN>-<slug>.json. PRDs are adherence artifacts — agents execute against them (to-issues consumes user_stories and implementation_decisions; issues link back via their prd field). Prose for humans lives inside the string fields.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "title",
+    "status",
+    "created",
+    "problem_statement",
+    "solution",
+    "user_stories",
+    "implementation_decisions",
+    "testing_decisions",
+    "out_of_scope",
+    "issues"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "id": {
+      "type": "string",
+      "pattern": "^PRD-\\d{3}$",
+      "description": "Stable identifier, never reused."
+    },
+    "title": { "type": "string" },
+    "status": { "type": "string", "enum": ["draft", "published", "superseded"] },
+    "created": { "type": "string", "format": "date" },
+    "amended": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "Date of the most recent amendment, null if never amended."
+    },
+    "problem_statement": {
+      "type": "string",
+      "description": "The problem from the user's perspective."
+    },
+    "solution": {
+      "type": "string",
+      "description": "The solution from the user's perspective."
+    },
+    "user_stories": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "actor", "want", "benefit"],
+        "properties": {
+          "id": { "type": "integer", "minimum": 1 },
+          "actor": { "type": "string", "description": "As a(n) <actor>…" },
+          "want": { "type": "string", "description": "…I want <want>…" },
+          "benefit": { "type": "string", "description": "…so that <benefit>." }
+        }
+      }
+    },
+    "implementation_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "summary"],
+        "properties": {
+          "title": { "type": "string" },
+          "summary": { "type": "string" }
+        }
+      },
+      "description": "Decisions made, not file paths — name artifacts, not locations."
+    },
+    "testing_decisions": { "type": "array", "items": { "type": "string" } },
+    "out_of_scope": { "type": "array", "items": { "type": "string" } },
+    "issues": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*-\\d{3,}$" },
+      "description": "Forward links to the issues broken out of this PRD."
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Anything that must survive that fits no other field (e.g. a deviation catalog, amendment notes)."
+    }
+  }
+}
