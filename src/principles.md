@@ -20,7 +20,7 @@ Distinct from **Philosophy**: Principles are universal and fixed here; Philosoph
 
 - **Non-prescriptive teardowns.** Session and sprint close documents describe what *is*, not what comes next. "Next steps", "plan to", "consider", and "should" have no place in a teardown artifact. Future sessions choose their own trajectory.
 
-- **The Retro Loop is the sole path to a definition change.** Teammate and persistent-doc definitions are never edited ad hoc mid-sprint. Observations go into retrospective notes; scribe proposes changes at close; the `alignment` agent gates them; the Team Lead approves. That is the only path.
+- **The Retro Loop is the sole path to an _emergent_ definition change.** A Teammate or persistent-doc definition is never edited ad hoc mid-sprint: observations go into retrospective notes; scribe proposes changes at close; the `alignment` agent gates them; the Team Lead approves. The sole exception is a **chartered** change — one carried by a PRD→issue→sprint slice, alignment-gated and Team-Lead-approved — which lands mid-sprint as that slice (ADR-0004). Emergent changes take the Retro Loop; chartered changes take their slice.
 
 - **Grill-first.** A new domain or major feature starts with a grill before any code or content — grill → PRD → issues. Bug fixes and small additions skip it.
 

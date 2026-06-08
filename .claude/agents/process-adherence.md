@@ -15,7 +15,7 @@ You verify that a workflow transition conforms to `.excn/PROCESS.md`. You review
 2. Evaluate the transition against every rule. Key checks:
    - **Lifecycle order** — did this step follow its predecessor? (issues trace to a PRD; a PRD traces to a grill for a new domain; sprint work traces to issues.)
    - **Sprint completion** — if closing a sprint: read the sprint record and its companion `.excn/issues/sprint-<N>/sprint-<N>-issues.json`; no item is still `in_progress`, decisions and `retrospective_notes` are recorded, and every mandatory QA gate passed.
-   - **Retro Loop** — if a Teammate-def or persistent-doc change is landing: it came through the Retro Loop and the `alignment` gate passed.
+   - **Retro Loop** — if a Teammate-def or persistent-doc change is landing: it is either an _emergent_ change that came through the Retro Loop, or a _chartered_ change (a PRD→issue→sprint slice per ADR-0004) landing mid-sprint as its slice; either way the `alignment` gate passed.
    - **Grill-first** — a new domain or major feature was grilled before code/content.
    - **Teardown language** — no next-steps / "should" / "plan to" language in close artifacts.
 3. Append a `step_log` entry to `progress_file`:

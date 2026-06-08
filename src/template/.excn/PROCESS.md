@@ -35,15 +35,17 @@ Issues are partitioned by lifecycle location: open, unpulled issues live in `.ex
 
 A sprint is **complete** when every item is in `shipped` or `not_shipped` (none `in_progress`), decisions and retrospective notes are recorded, and any mandatory QA gates passed. `process-adherence` reads the sprint record plus its companion issues file and checks this before a sprint may close.
 
-## The Retro Loop — the only path to a definition change
+## The Retro Loop — the path for emergent definition changes
 
-Teammate definitions and persistent docs are never edited ad hoc mid-sprint. The only path:
+Teammate definitions and persistent docs are never edited ad hoc mid-sprint. An _emergent_ change — one surfaced by a retro observation rather than chartered as work — takes this path, and only this path:
 
 1. During the sprint, observations accumulate in the sprint JSON's `retrospective_notes`.
 2. At close, scribe reads the retro and drafts the minimal edits — one sentence per change, each tied to a specific observation.
 3. scribe spawns the `alignment` agent with the proposed change + Principles + `.excn/PHILOSOPHY.md`.
 4. On `PASS`, scribe presents the edits to the Team Lead for approval. On `FAIL`, scribe revises against the cited violations and re-submits (max 2 cycles, then surface BLOCKED).
 5. The Team Lead approves; only then does the definition change land.
+
+A **chartered** change is the exception: when a definition or persistent-doc edit is itself a planned PRD→issue→sprint slice, it lands mid-sprint as that slice — alignment-gated and Team-Lead-approved — and does not wait for the retro (ADR-0004).
 
 ## QA gates
 
