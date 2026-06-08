@@ -9,7 +9,7 @@ Set up this project for autonomous, agent-driven work. Run four phases in order.
 
 ## 1. Preflight (hard gate)
 
-Confirm these global skills are installed (look in `~/.claude/skills/`): `grill-with-docs`, `to-prd`, `to-issues`, `make-teammate`, `async-questions`. If any is missing, **stop** and tell the user which to install. Do not proceed.
+Confirm these global skills are installed (look in `~/.claude/skills/`): `make-teammate`, `async-questions`. If either is missing, **stop** and tell the user which to install. Do not proceed. The Lifecycle skills (`execution-grill-with-docs`, `execution-to-prd`, `execution-to-issues`) are not global — the Scaffolder stamps them into the Instance in step 2.
 
 ## 2. Stamp the invariant layout
 
@@ -17,16 +17,16 @@ Run `npx to-execution init` in the project root. This deterministically writes e
 
 ## 3. Setup Grill
 
-Now interview the user. This is `grill-with-docs` plus a philosophy and team layer. Ask one thing at a time, recommend an answer each time, and write the output as each piece resolves:
+Now interview the user. This is `execution-grill-with-docs` (stamped in step 2) plus a philosophy and team layer. Ask one thing at a time, recommend an answer each time, and write the output as each piece resolves:
 
-- **Context** — run `grill-with-docs` to resolve the domain. Write resolved terms into `.excn/CONTEXT.md` (pure glossary; no implementation detail).
+- **Context** — run `execution-grill-with-docs` to resolve the domain. It writes resolved terms into `.excn/CONTEXT.md` directly (pure glossary; no implementation detail).
 - **Philosophy** — first spawn a read-only subagent to sweep the codebase for existing philosophy signals (readmes, contributor docs, lint/CI configs, prior documentation) and return candidates. Present each candidate as a confirmable proposal, then ask: *what other working philosophies are particular to this codebase?* (the universal Principles are already baked into the framework — do not re-litigate them). Write only user-confirmed philosophies into `.excn/PHILOSOPHY.md` — the scan itself never writes.
 - **Team** — ask what **persistent Teammates** this project needs and what each *owns*. For each, create it with `make-teammate` and add it to the roster in `.excn/CONTEXT.md`. Then fill `.excn/TEAM_DIRECTIVE.md`: roster, routing, QA gates, escalation, mission, Don'ts.
 - **One-off adherence agents** — ask what standards need a guardian (code style, source fidelity, etc.). For each variant rubric, author a one-off Adherence Agent from `authoring-adherence-agents.md`. (`process-adherence` and `alignment` are already stamped — do not re-create them.)
 
 ## 4. Handoff (stop here)
 
-Confirm the layout, then tell the user: **setup is done — exit, restart in a fresh session, and run the Work Grill** (`grill-with-docs` → `to-prd` → `to-issues`) to start sprint 1 against the current goal. Do not plan or write sprint work in this session — keep setup context out of work context.
+Confirm the layout, then tell the user: **setup is done — exit, restart in a fresh session, and run the Work Grill** (`execution-grill-with-docs` → `execution-to-prd` → `execution-to-issues`) to start sprint 1 against the current goal. Do not plan or write sprint work in this session — keep setup context out of work context.
 
 </what-to-do>
 

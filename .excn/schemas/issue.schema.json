@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Issues Backlog",
-  "description": "Single backlog file at .excn/issues/issues.json. scribe updates status; descriptions are not rewritten.",
+  "title": "Issue Collection",
+  "description": "One shape for every issue partition: .excn/issues/backlog.json (open, unpulled issues) and .excn/issues/sprint-<N>/sprint-<N>-issues.json (a sprint's pulled issues — its archive once the sprint closes). An issue's file location is its lifecycle state; the record fields are identical in every partition. IDs are globally unique across all files and depends_on may reference any partition, so validation reads across files, not within one. scribe moves issues between files at sprint boundaries and updates status; descriptions are not rewritten.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "issues"],

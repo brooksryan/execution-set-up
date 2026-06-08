@@ -22,6 +22,6 @@ Distinct from **Philosophy**: Principles are universal and fixed here; Philosoph
 
 - **The Retro Loop is the sole path to a definition change.** Teammate and persistent-doc definitions are never edited ad hoc mid-sprint. Observations go into retrospective notes; scribe proposes changes at close; the `alignment` agent gates them; the Team Lead approves. That is the only path.
 
-- **Grill-first.** A new domain or major feature starts with a grill (`grill-with-docs`) before any code or content — grill → PRD → issues. Bug fixes and small additions skip it.
+- **Grill-first.** A new domain or major feature starts with a grill before any code or content — grill → PRD → issues. Bug fixes and small additions skip it.
 
 - **Two decision records.** Hard-to-reverse design decisions are recorded as ADRs at grill time — offer criteria: hard to reverse, surprising without context, the result of a real trade-off. The retro records sprint-time decisions. Neither substitutes for the other.

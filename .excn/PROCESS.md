@@ -10,9 +10,9 @@ Work moves through a fixed sequence:
 grill → PRD → issues → sprint → retro → edits of persistent docs & Teammate definitions
 ```
 
-- **Grill-first.** A new domain or major feature starts with `grill-with-docs` before any code or content. Bug fixes and small additions skip the grill — file the issue and assign it.
-- **PRD.** After a grill, run `to-prd`. A PRD answers: what problem, who benefits, the user stories, the implementation decisions. It does **not** name files or show code.
-- **Issues.** Run `to-issues` to break the PRD into independently-grabbable vertical slices.
+- **Grill-first.** A new domain or major feature starts with `execution-grill-with-docs` before any code or content. Bug fixes and small additions skip the grill — file the issue and assign it.
+- **PRD.** After a grill, run `execution-to-prd`. A PRD answers: what problem, who benefits, the user stories, the implementation decisions. It does **not** name files or show code.
+- **Issues.** Run `execution-to-issues` to break the PRD into independently-grabbable vertical slices.
 - **Sprint.** Selected issues go into a sprint. The sprint JSON is the source of truth.
 - **Retro.** At sprint close, the retro records what is and feeds the only path to a definition change (below).
 
@@ -27,11 +27,13 @@ Hard-to-reverse decisions surfaced at grill time are recorded as **ADRs** — co
 
 Each sprint is one JSON file at `.excn/sprints/sprint_<N>.json`, conforming to `.excn/schemas/sprint.schema.json`. scribe owns it. The JSON is the source of truth.
 
-- **Open:** scribe creates the JSON with `status: "active"`, a one-sentence goal, the team, and items in `not_shipped`.
-- **In flight:** Teammates work items. When one ships, they message scribe with what shipped; scribe moves it to `shipped`.
-- **Closed:** scribe sets `status: "closed"`, adds decisions and retrospective notes, then runs the Retro Loop.
+Issues are partitioned by lifecycle location: open, unpulled issues live in `.excn/issues/backlog.json`; a sprint's pulled issues live in its companion `.excn/issues/sprint-<N>/sprint-<N>-issues.json`, which becomes that sprint's archive once it closes. An issue's file IS its state; ids stay globally unique across all partitions. scribe moves issues at sprint boundaries.
 
-A sprint is **complete** when every item is in `shipped` or `not_shipped` (none `in_progress`), decisions and retrospective notes are recorded, and any mandatory QA gates passed. `process-adherence` checks this before a sprint may close.
+- **Open:** scribe creates the JSON with `status: "active"`, a one-sentence goal, the team, and items in `not_shipped`, and moves the pulled issues from `backlog.json` into the sprint's companion partition.
+- **In flight:** Teammates work items. When one ships, they message scribe with what shipped; scribe moves it to `shipped`.
+- **Closed:** scribe sets `status: "closed"`, adds decisions and retrospective notes, returns any unresolved issues to `backlog.json` (closed issues stay in the companion file as the archive), then runs the Retro Loop.
+
+A sprint is **complete** when every item is in `shipped` or `not_shipped` (none `in_progress`), decisions and retrospective notes are recorded, and any mandatory QA gates passed. `process-adherence` reads the sprint record plus its companion issues file and checks this before a sprint may close.
 
 ## The Retro Loop — the only path to a definition change
 
@@ -55,4 +57,4 @@ Session and sprint close artifacts describe what is, not what comes next. No "ne
 
 ## Trust the deployed state over message order
 
-If your inbox says one thing and the files on disk say another, the files are right. Messages can cross. When in doubt, read the file before acting on a message.
+If your inbox says one thing and the files on disk say another, the files are right. Messages can cross. When in doubt, read the file before acting on a message. An approved breakdown or ruling is written to its work artifact before any work executes against it.

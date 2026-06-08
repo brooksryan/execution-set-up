@@ -36,8 +36,18 @@ One-off agents this project needs: `package-qa`.
 
 Blocked or in disagreement → Team Lead decides.
 
+Cosmetic ratifications with a sane default (naming, visibility) default-and-flag — they never hold executed work.
+
+## Messaging
+
+- A dispatch that changes a Teammate's obligations completes only when the obligation is visible on disk — send-success is not delivery.
+- Long-lived work queues live in spawn prompts or on-disk artifacts, never only in message history.
+
 ## Don'ts
 
 - Never edit a root invariant copy directly — `src/` first, then mirror.
 - Never hand-copy an invariant file into a project — the Scaffolder stamps it.
 - Never publish to npm without Team Lead approval.
+- Never bend a guard to fit a procedure — change the procedure.
+- Never close a path-changing sweep without checking the live Instance's entry points (root CLAUDE.md, AGENTS.md).
+- Never sweep another owner's files — hand the owner the hit list.

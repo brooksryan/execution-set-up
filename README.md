@@ -29,7 +29,7 @@ CLAUDE.md / AGENTS.md        host's own files — wired with an append-only poin
 
 `grill → PRD → issues → sprint → retro → edits of persistent docs & Teammate definitions`
 
-Setup and work are separate sessions: the Setup Grill stops at handoff; the Work Grill (`grill-with-docs` → `to-prd` → `to-issues`) starts sprint 1 in a fresh session.
+Setup and work are separate sessions: the Setup Grill stops at handoff; the Work Grill (`execution-grill-with-docs` → `execution-to-prd` → `execution-to-issues`) starts sprint 1 in a fresh session.
 
 ## This repo is its own first customer
 
