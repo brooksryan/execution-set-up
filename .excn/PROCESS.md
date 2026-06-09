@@ -35,6 +35,8 @@ Issues are partitioned by lifecycle location: open, unpulled issues live in `.ex
 
 A sprint is **complete** when every item is in `shipped` or `not_shipped` (none `in_progress`), decisions and retrospective notes are recorded, and any mandatory QA gates passed. `process-adherence` reads the sprint record plus its companion issues file and checks this before a sprint may close.
 
+A sprint ends pushed: after `status` is `closed` and any Retro-Loop edits have landed, the sprint's committed work is pushed to the remote — the close is not done until the push lands.
+
 ## The Retro Loop — the path for emergent definition changes
 
 Teammate definitions and persistent docs are never edited ad hoc mid-sprint. An _emergent_ change — one surfaced by a retro observation rather than chartered as work — takes this path, and only this path:
