@@ -6,7 +6,7 @@
     "to-execution": "bin/cli.js"
   },
   "scripts": {
-    "prepublishOnly": "node bin/preflight.js"
+    "prepublishOnly": "node ../scripts/preflight.js"
   },
   "files": [
     "bin/",

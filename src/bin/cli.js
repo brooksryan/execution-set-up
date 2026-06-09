@@ -3,37 +3,67 @@
 
 // to-execution — stamps the invariant layout into a target project.
 // The Setup Skill runs this; the agent only writes the variant (grilled) files afterward.
-// Node builtins only. Never overwrites an existing file unless --force.
+// Contract: `init [target]` copies template/ into target, never overwriting an existing
+// file unless --force, and wires the framework pointer block (append-only, even under
+// --force) into the target's CLAUDE.md / AGENTS.md. Diagnostics to stderr, results to
+// stdout, non-zero exit on any failure. Node builtins only; pointer-block content lives
+// in the sibling data module.
 
 const fs = require('fs');
 const path = require('path');
+const { POINTER_FILES, POINTER_SENTINEL, CODEX_CHAIN_CAP, POINTER_BLOCK } = require('./pointer-block');
 
-const PKG_ROOT = path.resolve(__dirname, '..');
-const TEMPLATE_DIR = path.join(PKG_ROOT, 'template');
+// Package root is one level up from bin/; the template ships beside it.
+const PACKAGE_ROOT = path.resolve(__dirname, '..');
+const TEMPLATE_DIR = path.join(PACKAGE_ROOT, 'template');
 
-// Pointer wiring (CLI-owned, outside the manifest walk; see ADR-0002 / PRD-003).
-// Claude Code reads only CLAUDE.md; Codex/Cursor/Copilot/Devin read AGENTS.md.
-// Append-only under every flag including --force. Sentinel is visible text —
-// Claude Code strips HTML comments before injection. No @import: it inlines at launch.
-const POINTER_FILES = ['CLAUDE.md', 'AGENTS.md'];
-const POINTER_SENTINEL = '## to-execution framework (.excn/)';
-const CODEX_CHAIN_CAP = 32 * 1024;
-const POINTER_BLOCK = [
-  POINTER_SENTINEL,
-  '',
-  'This project runs on the to-execution framework. Framework docs live in `.excn/`,',
-  'a dotfolder hidden from default search — reach them by the explicit paths below,',
-  'and only when the work needs them.',
-  '',
-  '- .excn/CONTEXT.md — domain glossary and team roster',
-  '- .excn/PROCESS.md — how work moves: the Lifecycle, Retro Loop, QA gates',
-  '- .excn/PHILOSOPHY.md — project working philosophies',
-  '- .excn/TEAM_DIRECTIVE.md — roster, routing, gates, Don\'ts',
-  '- .excn/adr/ — decision records · .excn/research/ — durable research',
-  '- .excn/schemas/ — JSON schemas for sprint/issue/PRD/progress artifacts',
-  '- .excn/{sprints,issues,prds,retros}/ + *_progress.json — ephemeral work-tracking (gitignored)',
-].join('\n');
+// npm pack treats an in-package .gitignore as an ignore spec and strips it, so the
+// template ships the file un-dotted as `gitignore`; stamping restores the real name.
+const SHIPPED_GITIGNORE_NAME = 'gitignore';
+const STAMPED_GITIGNORE_NAME = '.gitignore';
 
+// First positional arg that is not a flag selects the target; this prefix marks a flag.
+const FLAG_PREFIX = '-';
+const FORCE_FLAG = '--force';
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+
+/**
+ * List every file under a directory tree, as paths relative to its root.
+ * @param {string} dir - directory to scan (recursed).
+ * @param {string} [root=dir] - tree root the returned paths are relative to.
+ * @returns {string[]} relative file paths (directories are descended, not listed).
+ */
+function listFilesRecursive(dir, root = dir) {
+  const files = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const absolutePath = path.join(dir, entry.name);
+    if (entry.isDirectory()) files.push(...listFilesRecursive(absolutePath, root));
+    else files.push(path.relative(root, absolutePath));
+  }
+  return files;
+}
+
+/**
+ * Resolve a template-relative path to its stamped destination name, restoring the
+ * dotted `.gitignore` that npm pack strips on publish (see SHIPPED_GITIGNORE_NAME).
+ * @param {string} relativePath - path of a template file, relative to TEMPLATE_DIR.
+ * @returns {string} the destination-relative path to write under the target.
+ */
+function stampedDestination(relativePath) {
+  if (path.basename(relativePath) !== SHIPPED_GITIGNORE_NAME) return relativePath;
+  return path.join(path.dirname(relativePath), STAMPED_GITIGNORE_NAME);
+}
+
+/**
+ * Wire the framework pointer block into the target's manifest files.
+ * If neither manifest exists, both are created carrying the block. Otherwise each
+ * existing manifest gets the block appended (idempotent: a file already containing
+ * the sentinel is left untouched). Append-only — never overwrites existing content,
+ * even under --force. Warns on stderr when AGENTS.md exceeds the Codex chain cap.
+ * @param {string} target - absolute path of the target project root.
+ * @returns {string[]} human-readable report lines describing each action taken.
+ */
 function wirePointers(target) {
   const report = [];
   const existing = POINTER_FILES.filter((name) => fs.existsSync(path.join(target, name)));
@@ -52,8 +82,10 @@ function wirePointers(target) {
     if (current.includes(POINTER_SENTINEL)) {
       report.push(`${name}: pointer already present`);
     } else {
-      const prefix = current === '' ? '' : current.endsWith('\n') ? '\n' : '\n\n';
-      fs.appendFileSync(file, `${prefix}${POINTER_BLOCK}\n`);
+      // Separate the appended block from prior content: nothing if the file is empty,
+      // one newline if it already ends in one, two to guarantee a blank-line gap.
+      const separator = current === '' ? '' : current.endsWith('\n') ? '\n' : '\n\n';
+      fs.appendFileSync(file, `${separator}${POINTER_BLOCK}\n`);
       report.push(`${name}: pointer appended`);
     }
     if (name === 'AGENTS.md') {
@@ -68,7 +100,12 @@ function wirePointers(target) {
   return report;
 }
 
-function usage() {
+/**
+ * Write the usage text to stdout. Used for --help / no command, and after an
+ * unrecognized command (the caller owns the non-zero exit in that case).
+ * @returns {void}
+ */
+function printUsage() {
   process.stdout.write(
     [
       'to-execution — stamp the invariant agent-execution layout',
@@ -86,19 +123,19 @@ function usage() {
   );
 }
 
-function walk(dir, base = dir) {
-  const out = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const abs = path.join(dir, entry.name);
-    if (entry.isDirectory()) out.push(...walk(abs, base));
-    else out.push(path.relative(base, abs));
-  }
-  return out;
-}
+// ── public surface ─────────────────────────────────────────────────────────────
 
+/**
+ * Run the `init` command: stamp the template into the target and wire pointers.
+ * Skips an existing destination file unless --force is set. Reports the write/skip
+ * counts and the pointer actions to stdout.
+ * @param {string[]} args - args after the `init` command word (target and flags).
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) if the template is missing.
+ */
 function init(args) {
-  const force = args.includes('--force');
-  const target = path.resolve(args.find((a) => !a.startsWith('-')) || '.');
+  const force = args.includes(FORCE_FLAG);
+  const target = path.resolve(args.find((arg) => !arg.startsWith(FLAG_PREFIX)) || '.');
 
   if (!fs.existsSync(TEMPLATE_DIR)) {
     process.stderr.write(`error: template not found at ${TEMPLATE_DIR}\n`);
@@ -108,20 +145,17 @@ function init(args) {
 
   const written = [];
   const skipped = [];
-  for (const rel of walk(TEMPLATE_DIR)) {
-    const src = path.join(TEMPLATE_DIR, rel);
-    // npm pack treats in-package .gitignore files as ignore specs and strips them,
-    // so the template ships them un-dotted; stamp restores the real name.
-    const destRel =
-      path.basename(rel) === 'gitignore' ? path.join(path.dirname(rel), '.gitignore') : rel;
-    const dest = path.join(target, destRel);
-    fs.mkdirSync(path.dirname(dest), { recursive: true });
-    if (fs.existsSync(dest) && !force) {
-      skipped.push(destRel);
+  for (const relativePath of listFilesRecursive(TEMPLATE_DIR)) {
+    const source = path.join(TEMPLATE_DIR, relativePath);
+    const destinationRel = stampedDestination(relativePath);
+    const destination = path.join(target, destinationRel);
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    if (fs.existsSync(destination) && !force) {
+      skipped.push(destinationRel);
       continue;
     }
-    fs.copyFileSync(src, dest);
-    written.push(destRel);
+    fs.copyFileSync(source, destination);
+    written.push(destinationRel);
   }
 
   const pointers = wirePointers(target);
@@ -131,7 +165,7 @@ function init(args) {
       `Stamped invariant layout into ${target}`,
       `  wrote   ${written.length} file(s)`,
       `  skipped ${skipped.length} existing file(s)${skipped.length ? ` (use --force to overwrite): ${skipped.join(', ')}` : ''}`,
-      ...pointers.map((p) => `  ${p}`),
+      ...pointers.map((line) => `  ${line}`),
       '',
       'Next: the Setup Skill runs the Setup Grill to write the variant files',
       '(.excn/CONTEXT.md terms, .excn/PHILOSOPHY.md, .excn/TEAM_DIRECTIVE.md, Teammate defs).',
@@ -140,18 +174,24 @@ function init(args) {
   );
 }
 
+/**
+ * Entry point: dispatch on the first CLI argument. `init` stamps; no command or
+ * -h/--help prints usage and exits zero; any other word fails non-zero with usage.
+ * @returns {void}
+ * @throws Exits non-zero (after usage on stderr+stdout) on an unrecognized command.
+ */
 function main() {
-  const [cmd, ...args] = process.argv.slice(2);
-  switch (cmd) {
+  const [command, ...args] = process.argv.slice(2);
+  switch (command) {
     case 'init':
       return init(args);
     case undefined:
     case '-h':
     case '--help':
-      return usage();
+      return printUsage();
     default:
-      process.stderr.write(`unknown command: ${cmd}\n\n`);
-      usage();
+      process.stderr.write(`unknown command: ${command}\n\n`);
+      printUsage();
       process.exit(1);
   }
 }
