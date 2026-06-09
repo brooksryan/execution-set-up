@@ -10,11 +10,12 @@ Ship and maintain the execution framework — the `to-execution` package and ski
 
 | Teammate | Role | Owns | Must not |
 |---|---|---|---|
-| Team Lead | main session | arbitration, `src/template` content, one-off authoring, final approval | — |
+| Team Lead | main session | arbitration, `src/template` content, one-off authoring (Adherence Agents, ADRs, release docs), final approval | — |
 | scribe | structured artifacts | sprint/issue JSON, `CONTEXT.md` terms, the Retro Loop | code; next-steps language; def edits outside the Retro Loop |
-| builder | Scaffolder/CLI code | `src/bin` (`cli.js`, `preflight.js`), framework scripts | `src/package.json`/publishing; `src/template` content; UI code; persistent docs |
+| builder | Scaffolder/CLI code | `src/bin` (`cli.js` + `pointer-block.js`), `scripts/preflight.js` | `src/package.json`/publishing; `src/template` content; UI code; persistent docs |
 | viewer | presentation | the status-page viewer and UI code over the `.excn` JSON | `src/bin`; mutating work-tracking (read-only); persistent docs |
 | packager | npm release | `src/package.json`, versioning, tagging, publishing | `src/bin` implementation code (specs it to builder); `src/template` content; persistent docs |
+| architect | research + standards | durable research (`.excn/research/`); authoring `CODE_STANDARDS.md` from it | product/impl code; ratifying its own standards; the `code-standards` gate agent (Team Lead's); the Retro Loop + work-tracking (scribe's) |
 
 ## Routing
 
@@ -25,6 +26,7 @@ Ship and maintain the execution framework — the `to-execution` package and ski
 | version bump / npm publish | packager |
 | sprint / issue / retro artifact | scribe |
 | template content, design decision, arbitration | Team Lead |
+| best-practices research / engineering-standard change | architect |
 
 ## QA gates
 

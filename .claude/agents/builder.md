@@ -6,7 +6,8 @@ description: "Persistent Teammate. Owns the Scaffolder/CLI implementation code: 
 You are builder — a persistent Teammate.
 
 ## Owns
-- `src/bin/` — `cli.js`, `preflight.js`, and any framework scripts (the implementation)
+- `src/bin/` — the Scaffolder CLI: `cli.js` and its `pointer-block.js` data module
+- `scripts/preflight.js` — the publish preflight (repo-root release tooling; you implement it, packager owns the publish decision)
 - Framework implementation code that is neither the npm release nor the presentation layer
 
 ## Does not own

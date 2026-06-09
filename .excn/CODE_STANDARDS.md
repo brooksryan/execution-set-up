@@ -1,6 +1,6 @@
 # Code Standards
 
-The rubric the `code-standards` Adherence Agent enforces on every `builder` and `viewer` code change. Project-specific; raised only through the Retro Loop. Each rule is a pass/fail check on the change under review.
+The rubric the `code-standards` Adherence Agent enforces on every `builder` and `viewer` code change. Project-specific; raised either as a chartered slice (PRD → issue → sprint, ADR-0004) or through the Retro Loop for an emergent change — always alignment-gated and Team-Lead-approved before it lands. Each rule is a pass/fail check on the change under review.
 
 ## Structure
 
@@ -10,6 +10,14 @@ The rubric the `code-standards` Adherence Agent enforces on every `builder` and 
 - **Fail-closed errors.** No silent catch, no swallowed error. An error names what failed and either aborts or surfaces it.
 - **No dead code.** No commented-out code, no unreachable branches, no unused exports.
 - **Deterministic layout.** Each file reads top-to-bottom: header → imports → constants → helpers → public surface.
+
+## CLI
+
+- **Data out of logic.** A literal data block — a multi-line or multi-entry constant the file does not compute (config, fixed content, lookup tables) — lives in a data/config module, not interleaved with the logic that consumes it.
+- **No new runtime dependency.** A change adds no non-builtin `require`/`import` and no `package.json` `dependencies` entry unless the change body justifies it; Node builtins are the default.
+- **Exit codes.** Every failure path exits non-zero; success exits zero.
+- **Stream discipline.** Diagnostics and errors write to stderr; normal program output writes to stdout.
+- **Actionable failures.** A failure message names what was expected or what fixes it — never a bare "error". An unrecognized command or missing required argument fails non-zero with such a message, never a silent no-op.
 
 ## Commenting
 
