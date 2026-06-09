@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!--
+  .excn status viewer — at-a-glance team status over the work-tracking JSON.
+  Contract: read-only render of the live sprint (highest-N "active") plus the
+  backlog. No build step; viewer.js fetches the .excn JSON client-side. Must be
+  served over http(s) — file:// blocks fetch() of sibling files (see README.md).
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>.excn status</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <h1>.excn status</h1>
+      <p class="subtitle" id="sprint-line">Loading…</p>
+    </header>
+
+    <!-- Surfaced when the JSON cannot be fetched (almost always: opened over file://). -->
+    <div id="load-error" class="load-error" hidden></div>
+
+    <main id="board" class="board" hidden>
+      <section class="lane lane-shipped">
+        <h2 class="lane-title">Shipped <span class="count" id="count-shipped">0</span></h2>
+        <div class="lane-body" id="lane-shipped"></div>
+      </section>
+
+      <section class="lane lane-in-progress">
+        <h2 class="lane-title">In&nbsp;progress <span class="count" id="count-in-progress">0</span></h2>
+        <div class="lane-body" id="lane-in-progress"></div>
+      </section>
+
+      <section class="lane lane-not-shipped">
+        <h2 class="lane-title">Not&nbsp;shipped <span class="count" id="count-not-shipped">0</span></h2>
+        <div class="lane-body" id="lane-not-shipped"></div>
+      </section>
+
+      <section class="lane lane-backlog">
+        <h2 class="lane-title">Backlog <span class="count" id="count-backlog">0</span></h2>
+        <div class="lane-body" id="lane-backlog"></div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <p id="footer-note">Read-only over the .excn work-tracking JSON.</p>
+    </footer>
+
+    <script src="viewer.js"></script>
+  </body>
+</html>
