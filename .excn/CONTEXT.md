@@ -97,4 +97,8 @@ Two hard-separated grills. The **Setup Grill** is the one-time Setup Skill inter
 | Teammate | Role | Owns |
 |---|---|---|
 | scribe | structured artifacts | sprint/issue JSON, CONTEXT.md term additions, the Retro Loop |
-| packager | scripts + npm | `src/bin`, `src/package.json`, versioning, publishing |
+| builder | Scaffolder/CLI code | `src/bin` (`cli.js`, `preflight.js`), framework scripts |
+| viewer | presentation | the status-page viewer and UI code over the `.excn` JSON |
+| packager | npm release | `src/package.json`, versioning, tagging, publishing |
+
+Code from `builder` and `viewer` is gated by the one-off `code-standards` Adherence Agent against `.excn/CODE_STANDARDS.md` — an Invoked Agent, not a Teammate.
