@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": 5,
+  "name": "Sprint 5",
+  "status": "active",
+  "dates": {
+    "start": "2026-06-10",
+    "end": null,
+    "duration_note": null
+  },
+  "team": [
+    {
+      "name": "team-lead",
+      "role": "Team Lead",
+      "owns": "arbitration, src/template, final approval"
+    },
+    {
+      "name": "scribe",
+      "role": "Scribe",
+      "owns": "work-tracking JSON + Retro Loop"
+    },
+    {
+      "name": "builder",
+      "role": "Builder",
+      "owns": "src/bin + hooks"
+    },
+    {
+      "name": "viewer",
+      "role": "Viewer",
+      "owns": "status-page viewer/UI"
+    },
+    {
+      "name": "packager",
+      "role": "Packager",
+      "owns": "npm release"
+    },
+    {
+      "name": "architect",
+      "role": "Architect",
+      "owns": "research + standards"
+    }
+  ],
+  "goal": "Grill and start the viewer-server track, settle the gate-verdict location, and let the prior-art agent persist its own digests.",
+  "issues_addressed": [
+    "EXEC-054",
+    "EXEC-052",
+    "EXEC-053",
+    "EXEC-057"
+  ],
+  "shipped": [],
+  "in_progress": [],
+  "not_shipped": [
+    {
+      "id": "S5-1",
+      "type": "DOCS",
+      "title": "Grill\u2192PRD: viewer-server track (auto-run server, global-package discovery, viewer read-write)",
+      "owner": "team-lead",
+      "summary": "Grill\u2192PRD: viewer-server track (auto-run server, global-package discovery, viewer read-write)",
+      "closes_issues": [],
+      "notes": "HITL, grill-first; sets EXEC-055/056 criteria; EXEC-054 implementation follows the PRD."
+    },
+    {
+      "id": "S5-2",
+      "type": "FEAT",
+      "title": "EXEC-054: session-start auto-run viewer server (validate on the dogfood Instance)",
+      "owner": "builder",
+      "summary": "EXEC-054: session-start auto-run viewer server (validate on the dogfood Instance)",
+      "closes_issues": [
+        "EXEC-054"
+      ],
+      "notes": "AFK after the grill resolves the mechanism."
+    },
+    {
+      "id": "S5-3",
+      "type": "INFRA",
+      "title": "EXEC-052+053: settle where gate verdicts live; align gate-watch sensing + sprint schema",
+      "owner": "builder",
+      "summary": "EXEC-052+053: settle where gate verdicts live; align gate-watch sensing + sprint schema",
+      "closes_issues": [
+        "EXEC-052",
+        "EXEC-053"
+      ],
+      "notes": "AFK; one decision drives both; schema change is Src-First."
+    },
+    {
+      "id": "S5-4",
+      "type": "DOCS",
+      "title": "prior-art agent writes its digest to .excn/research/",
+      "owner": "team-lead",
+      "summary": "prior-art agent writes its digest to .excn/research/",
+      "closes_issues": [
+        "EXEC-057"
+      ],
+      "notes": "HITL: chartered def change, alignment-gated, Brooks approval."
+    }
+  ],
+  "defects_discovered": [],
+  "decisions": [],
+  "retrospective_notes": [],
+  "step_log": [
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": "src/template/.claude/agents/nothing-new-under-the-sun.md",
+      "summary": "PASS, 0 violations \u2014 chartered EXEC-057 change (digest persists to .excn/research/prior-art-<prd-id>.md) conforms to Principles and Philosophy; namespaced file coexists with architect's research ownership."
+    }
+  ]
+}
