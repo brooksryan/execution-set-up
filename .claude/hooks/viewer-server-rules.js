@@ -46,17 +46,21 @@ const PROBE_TIMEOUT_MS = 300;
 const SPAWN_POLL_ATTEMPTS = 10;
 const SPAWN_POLL_INTERVAL_MS = 100;
 
-// Serving whitelist (ADR-0007): viewer assets plus the .excn JSON the page reads —
-// top-level .excn/*.json and .excn/schemas/*.json. Patterns match the root-relative
-// POSIX path of the *resolved* request; anything unmatched is a 404.
+// Serving whitelist (ADR-0007): viewer assets (under the .excn namespace per
+// ADR-0002) plus the .excn JSON the page reads — top-level .excn/*.json,
+// .excn/schemas/*.json, and the sprint/backlog JSON viewer.js fetches from
+// .excn/sprints/ and .excn/issues/. Patterns match the root-relative POSIX
+// path of the *resolved* request; anything unmatched is a 404.
 const PATH_WHITELIST = [
-  /^viewer\/[^/]+$/,
+  /^\.excn\/viewer\/[^/]+$/,
   /^\.excn\/[^/]+\.json$/,
   /^\.excn\/schemas\/[^/]+\.json$/,
+  /^\.excn\/sprints\/[^/]+\.json$/,
+  /^\.excn\/issues\/[^/]+\.json$/,
 ];
 
 // The page the bare URL lands on.
-const INDEX_RELATIVE_PATH = 'viewer/index.html';
+const INDEX_RELATIVE_PATH = '.excn/viewer/index.html';
 
 // Content types for the whitelisted asset extensions; anything else serves as octets.
 const MIME_TYPES = {

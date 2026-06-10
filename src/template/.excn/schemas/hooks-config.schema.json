@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Hook Feature Toggles",
-  "description": "Enable/disable switches for the stamped hook features (ADR-0006). One boolean per feature; the per-feature scripts in .claude/hooks/ read this at every firing and no-op when their toggle is off, missing, or malformed (fail safe). Defaults at stamp: gate_reminders on; message_nudge, load_reporting, and viewer_server off.",
+  "description": "Enable/disable switches for the stamped hook features (ADR-0006). One boolean per feature; the per-feature scripts in .claude/hooks/ read this at every firing and no-op when their toggle is off, missing, or malformed (fail safe). Defaults at stamp: gate_reminders on; message_nudge, load_reporting, viewer_server, and spawn_guard off. spawn_guard and its persistent-types list are optional so configs stamped before EXEC-064 stay schema-valid (this file is variant-classed — update never refreshes it).",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "features"],
@@ -15,8 +15,14 @@
         "gate_reminders": { "type": "boolean", "description": "PostToolUse reminder + Stop block when gate-relevant paths are edited without a recorded gate verdict." },
         "message_nudge": { "type": "boolean", "description": "Follow-through nudge in the sender's session after a teammate message (EXEC-044)." },
         "load_reporting": { "type": "boolean", "description": "Per-tool-event load records appended to .excn/load_progress.json (EXEC-045)." },
-        "viewer_server": { "type": "boolean", "description": "SessionStart auto-start of the localhost viewer server — idempotent start, idle self-exit, discovery record in .excn/viewer-server_progress.json (EXEC-054)." }
+        "viewer_server": { "type": "boolean", "description": "SessionStart auto-start of the localhost viewer server — idempotent start, idle self-exit, discovery record in .excn/viewer-server_progress.json (EXEC-054)." },
+        "spawn_guard": { "type": "boolean", "description": "PreToolUse deny when a one-shot agent spawn requests a type listed in spawn_guard_persistent_types (EXEC-064)." }
       }
+    },
+    "spawn_guard_persistent_types": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "This Instance's rostered persistent-Teammate types (TEAM_DIRECTIVE roster); spawn_guard denies one-shot spawns of these. Per-Instance state — edit alongside the roster."
     }
   }
 }

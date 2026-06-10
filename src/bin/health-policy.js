@@ -11,9 +11,12 @@
 //   hooks-config schema's required feature list).
 // - `scripts` are the basenames the stamped .claude/settings.json commands invoke;
 //   doctor calls a feature broken (disarmed) when a script is unwired or missing.
-// - `evidence` is the *_progress.json heartbeat the feature writes when it fires,
-//   or null for stateless features that leave no firing trace (wired+enabled is the
-//   strongest claim doctor can make for those).
+// - Heartbeats come from the unified invocation log (INVOCATION_LOG_PATH; every
+//   wired hook appends a {ts, script, event, outcome} record per CODE_STANDARDS
+//   ## Hooks): a feature's latest record across its `scripts` is its heartbeat.
+// - `evidence` is the feature's own *_progress.json state file, kept as the
+//   fallback heartbeat for Instances stamped before the invocation log existed;
+//   null when the feature writes none.
 // - `spawnedScripts` (optional) are scripts the feature's hook spawns itself rather
 //   than settings invoking them — checked for disk presence only, never for wiring.
 // - `liveness` (optional) marks a feature whose evidence is a live-process discovery
@@ -43,7 +46,17 @@ const HOOK_FEATURES = [
     evidence: '.excn/viewer-server_progress.json',
     liveness: true,
   },
+  {
+    key: 'spawn_guard',
+    scripts: ['spawn-guard.js'],
+    evidence: null,
+  },
 ];
+
+// The unified hook invocation log (CODE_STANDARDS ## Hooks) — doctor's primary
+// heartbeat source; mirrors INVOCATION_LOG_RELATIVE_PATH in the stamped hook-lib.js
+// (one contract, two packages).
+const INVOCATION_LOG_PATH = '.excn/hook-invocations_progress.json';
 
 // How doctor probes a viewer_server discovery record: the daemon's loopback health
 // endpoint (it echoes {repo, pid, version}), with a short budget so a wedged
@@ -68,6 +81,7 @@ const HEARTBEAT_FRESH_MS = 24 * 60 * 60 * 1000;
 
 module.exports = {
   HOOK_FEATURES,
+  INVOCATION_LOG_PATH,
   SETTINGS_PATH,
   HOOKS_DIR,
   HOOKS_CONFIG_PATH,

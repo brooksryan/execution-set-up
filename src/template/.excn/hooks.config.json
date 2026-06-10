@@ -4,6 +4,8 @@
     "gate_reminders": true,
     "message_nudge": false,
     "load_reporting": false,
-    "viewer_server": false
-  }
+    "viewer_server": false,
+    "spawn_guard": false
+  },
+  "spawn_guard_persistent_types": ["scribe"]
 }

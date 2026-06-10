@@ -8,13 +8,19 @@
 // .excn/schemas/load-progress.schema.json) via atomic temp+rename, so the viewer can
 // render per-Teammate load. Bounded growth: the file keeps the newest MAX_RECORDS
 // records — older ones are dropped on append (a rolling window, not an archive; load
-// is a recency signal). FAIL SAFE: every path, including thrown errors, exits 0 with
-// no output (PRD-007).
+// is a recency signal). Every firing logs one invocation record via hook-lib
+// (CODE_STANDARDS ## Hooks). FAIL SAFE: every path, including thrown errors, exits 0
+// with no output (PRD-007).
 
 const path = require('path');
 const lib = require('./hook-lib');
 
 const FEATURE = 'load_reporting';
+
+// Identity and event name for the invocation log (CODE_STANDARDS ## Hooks); the
+// event matches this script's settings.json wiring.
+const SCRIPT_NAME = path.basename(__filename);
+const HOOK_EVENT = 'PostToolUse';
 
 // Where the load records live; in the *_progress.json ignore class (ADR-0005).
 const RECORD_RELATIVE_PATH = path.join('.excn', 'load_progress.json');
@@ -28,10 +34,11 @@ const MAX_RECORDS = 5000;
  * Append one load record for this tool event, trimming to the newest MAX_RECORDS.
  * @param {object} payload - the PostToolUse hook payload.
  * @param {string} projectRoot - the Instance root.
- * @returns {void}
+ * @returns {string} an invocation-log outcome: OUTCOME_OK when a record was
+ * appended, OUTCOME_NOOP when the payload carried no usable tool_name.
  */
 function appendRecord(payload, projectRoot) {
-  if (typeof payload.tool_name !== 'string' || payload.tool_name === '') return;
+  if (typeof payload.tool_name !== 'string' || payload.tool_name === '') return lib.OUTCOME_NOOP;
   const recordFile = path.join(projectRoot, RECORD_RELATIVE_PATH);
   const existing = lib.readJsonSafe(recordFile);
   const records = existing && Array.isArray(existing.records) ? existing.records : [];
@@ -49,24 +56,30 @@ function appendRecord(payload, projectRoot) {
     schema_version: RECORD_SCHEMA_VERSION,
     records: records.slice(-MAX_RECORDS),
   });
+  return lib.OUTCOME_OK;
 }
 
 /**
  * Entry point: on an enabled firing, append this tool event's load record. Every
- * path exits 0 (fail safe, ADR-0006).
+ * path logs exactly one invocation record (CODE_STANDARDS ## Hooks) and exits 0
+ * (fail safe, ADR-0006).
  * @returns {void}
  */
 function main() {
+  let projectRoot = process.cwd();
+  let outcome = lib.OUTCOME_ERROR;
   try {
     const payload = lib.readPayload();
-    if (!payload) process.exit(0);
-    const projectRoot = typeof payload.cwd === 'string' && payload.cwd !== '' ? payload.cwd : process.cwd();
-    if (!lib.featureEnabled(projectRoot, FEATURE)) process.exit(0);
-    appendRecord(payload, projectRoot);
-    process.exit(0);
+    if (payload) {
+      projectRoot = typeof payload.cwd === 'string' && payload.cwd !== '' ? payload.cwd : process.cwd();
+      if (!lib.featureEnabled(projectRoot, FEATURE)) outcome = lib.OUTCOME_DISABLED;
+      else outcome = appendRecord(payload, projectRoot);
+    }
   } catch {
-    process.exit(0); // fail safe: a broken hook never blocks work
+    outcome = lib.OUTCOME_ERROR; // fail safe: a broken hook never blocks work
   }
+  lib.logInvocation(projectRoot, SCRIPT_NAME, HOOK_EVENT, outcome);
+  process.exit(0);
 }
 
 main();

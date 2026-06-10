@@ -31,6 +31,7 @@ const {
 } = require('./stamp-policy');
 const {
   HOOK_FEATURES,
+  INVOCATION_LOG_PATH,
   SETTINGS_PATH,
   HOOKS_DIR,
   HOOKS_CONFIG_PATH,
@@ -312,24 +313,61 @@ function wiringProblems(target, feature) {
 }
 
 /**
- * Describe a feature's firing evidence: fresh heartbeat, stale, or none expected.
+ * Find a feature's latest heartbeat in the unified hook invocation log: the newest
+ * record (any outcome — disabled/noop/error firings are still firings) whose script
+ * is one of the feature's wired scripts.
  * @param {string} target - absolute path of the target project root.
  * @param {object} feature - a HOOK_FEATURES entry.
- * @returns {{ status: 'firing'|'stale'|'none', detail: string }}
+ * @returns {number|null} the latest record's epoch ms, or null when the log is
+ * missing/unreadable or carries no record for the feature's scripts.
+ */
+function latestInvocationMs(target, feature) {
+  let records;
+  try {
+    records = JSON.parse(fs.readFileSync(path.join(target, INVOCATION_LOG_PATH), 'utf8')).records;
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(records)) return null;
+  let latest = null;
+  for (const record of records) {
+    if (!record || !feature.scripts.includes(record.script)) continue;
+    const ms = Date.parse(record.ts);
+    if (!Number.isNaN(ms) && (latest === null || ms > latest)) latest = ms;
+  }
+  return latest;
+}
+
+/**
+ * Describe a feature's firing evidence: fresh heartbeat, stale, or no signal yet.
+ * Primary source is the unified invocation log (every wired hook appends a record
+ * per firing, CODE_STANDARDS ## Hooks); the feature's own state file mtime is the
+ * fallback for Instances whose hooks predate the log.
+ * @param {string} target - absolute path of the target project root.
+ * @param {object} feature - a HOOK_FEATURES entry.
+ * @returns {{ status: 'firing'|'stale', detail: string }}
  */
 function firingEvidence(target, feature) {
+  const invocationMs = latestInvocationMs(target, feature);
+  if (invocationMs !== null) {
+    const ageMs = Date.now() - invocationMs;
+    if (ageMs <= HEARTBEAT_FRESH_MS) {
+      return { status: 'firing', detail: `heartbeat ${Math.max(1, Math.round(ageMs / MS_PER_MINUTE))}m ago in ${INVOCATION_LOG_PATH}` };
+    }
+    return { status: 'stale', detail: `last invocation ${Math.round(ageMs / MS_PER_HOUR)}h ago in ${INVOCATION_LOG_PATH}` };
+  }
   if (feature.evidence === null) {
-    return { status: 'none', detail: 'no heartbeat signal for this feature — stateless hook' };
+    return { status: 'stale', detail: `no invocation records yet in ${INVOCATION_LOG_PATH} (appears at next firing)` };
   }
   let mtimeMs;
   try {
     mtimeMs = fs.statSync(path.join(target, feature.evidence)).mtimeMs;
   } catch {
-    return { status: 'stale', detail: `no firing evidence (${feature.evidence} absent)` };
+    return { status: 'stale', detail: `no firing evidence (no record in ${INVOCATION_LOG_PATH}, ${feature.evidence} absent)` };
   }
   const ageMs = Date.now() - mtimeMs;
   if (ageMs <= HEARTBEAT_FRESH_MS) {
-    return { status: 'firing', detail: `heartbeat ${Math.max(1, Math.round(ageMs / MS_PER_MINUTE))}m ago in ${feature.evidence}` };
+    return { status: 'firing', detail: `heartbeat ${Math.max(1, Math.round(ageMs / MS_PER_MINUTE))}m ago in ${feature.evidence} (legacy fallback — no invocation-log record)` };
   }
   return { status: 'stale', detail: `last firing evidence ${Math.round(ageMs / MS_PER_HOUR)}h ago in ${feature.evidence}` };
 }
@@ -404,9 +442,9 @@ async function livenessVerdict(target, feature) {
 /**
  * Run the `doctor` command: report per-feature hook health and outdated detection.
  * Per-feature verdicts: `broken` (wiring missing — a disarmed hook — or the toggle
- * config invalid), `disabled`, `firing` (enabled with fresh heartbeat), `stale`
- * (enabled, no recent evidence), or `enabled` (wired and on, but the feature leaves
- * no heartbeat to judge by). Liveness features (viewer_server) report `running` or
+ * config invalid), `disabled`, `firing` (enabled with a fresh heartbeat in the
+ * unified invocation log, or its legacy state-file fallback), or `stale` (enabled,
+ * no recent evidence). Liveness features (viewer_server) report `running` or
  * `stale record` from pid/port probing instead. A degraded Instance still exits 0 —
  * doctor's job is the report; only an unstamped target (no version marker) is a
  * non-zero failure.
@@ -462,8 +500,7 @@ async function doctor(args) {
     else {
       const evidence = firingEvidence(target, feature);
       if (evidence.status === 'firing') verdict = `firing (${evidence.detail})`;
-      else if (evidence.status === 'stale') verdict = `stale — enabled but ${evidence.detail}`;
-      else verdict = `enabled (wired; ${evidence.detail})`;
+      else verdict = `stale — enabled but ${evidence.detail}`;
     }
     lines.push(`feature ${feature.key}: ${verdict}`);
   }
@@ -494,9 +531,9 @@ function printUsage() {
       'init wires a pointer block into existing CLAUDE.md / AGENTS.md (append-only,',
       'even under --force; both created if neither exists).',
       'init never overwrites an existing manifest file unless --force.',
-      'doctor reports each hook feature as enabled, firing, stale, or broken (viewer_server:',
-      'running or stale record), names a broken toggle config, and flags an Instance stamped',
-      'at an older framework version.',
+      'doctor reports each hook feature as disabled, firing, stale, or broken (viewer_server:',
+      'running or stale record) — heartbeats read .excn/hook-invocations_progress.json — names',
+      'a broken toggle config, and flags an Instance stamped at an older framework version.',
       '',
     ].join('\n')
   );

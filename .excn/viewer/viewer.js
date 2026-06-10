@@ -20,9 +20,11 @@
 // Constants
 // ---------------------------------------------------------------------------
 
-// Path from the repo root to the work-tracking tree. The viewer is served from
-// the repo root (see README.md), so .excn/ is a sibling of viewer/.
-const EXCN_ROOT = '../.excn';
+// Root-absolute path to the work-tracking tree. The viewer lives at
+// .excn/viewer/ but the daemon also serves this page at the bare '/', so no
+// relative path resolves correctly from both bases; the serving root is always
+// the repo root (see README.md), so the absolute form holds everywhere.
+const EXCN_ROOT = '/.excn';
 
 const SPRINT_PATH = (n) => `${EXCN_ROOT}/sprints/sprint_${n}.json`;
 const BACKLOG_PATH = `${EXCN_ROOT}/issues/backlog.json`;

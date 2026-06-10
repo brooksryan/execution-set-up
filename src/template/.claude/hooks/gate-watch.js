@@ -7,7 +7,8 @@
 // (Stop) blocks ONCE — guarded by stop_hook_active — when gated paths were edited
 // this session but no gate verdict has been recorded, naming the gates due. It never
 // spawns an agent. Session state lives in .excn/gate-watch_progress.json (the
-// *_progress.json ignore class, ADR-0005). FAIL SAFE: any missing/malformed config,
+// *_progress.json ignore class, ADR-0005). Every firing logs one invocation record
+// via hook-lib (CODE_STANDARDS ## Hooks). FAIL SAFE: any missing/malformed config,
 // unexpected payload, or internal error exits 0 with no output (PRD-007) — this
 // intentionally inverts the fail-closed CLI rule; the health check surfaces decay.
 
@@ -25,6 +26,13 @@ const {
 const FEATURE = 'gate_reminders';
 const MODE_POST_TOOL = 'post-tool';
 const MODE_STOP = 'stop';
+
+// Identity and event names for the invocation log (CODE_STANDARDS ## Hooks). The
+// event derives from the argv mode — the wiring is the source of truth; an
+// unrecognized mode logs the fallback name with an `error` outcome.
+const SCRIPT_NAME = path.basename(__filename);
+const MODE_EVENTS = { [MODE_POST_TOOL]: 'PostToolUse', [MODE_STOP]: 'Stop' };
+const EVENT_UNKNOWN = 'unknown';
 
 // Per-session pending-gate state, keyed by session_id; in the *_progress.json
 // ignore class so it never lands in git.
@@ -103,14 +111,15 @@ function loadState(stateFile) {
  * write clears the session's pending gates (the verdict landed).
  * @param {object} payload - the PostToolUse hook payload.
  * @param {string} projectRoot - the Instance root.
- * @returns {void}
+ * @returns {string} an invocation-log outcome: OUTCOME_OK when the hook acted
+ * (reminder emitted or pending state mutated), OUTCOME_NOOP otherwise.
  */
 function handlePostTool(payload, projectRoot) {
-  if (!EDIT_TOOLS.has(payload.tool_name) || !payload.session_id) return;
+  if (!EDIT_TOOLS.has(payload.tool_name) || !payload.session_id) return lib.OUTCOME_NOOP;
   const filePath = payload.tool_input && payload.tool_input.file_path;
-  if (typeof filePath !== 'string' || filePath === '') return;
+  if (typeof filePath !== 'string' || filePath === '') return lib.OUTCOME_NOOP;
   const relativePath = rootRelative(projectRoot, filePath);
-  if (relativePath === null) return;
+  if (relativePath === null) return lib.OUTCOME_NOOP;
 
   const stateFile = path.join(projectRoot, STATE_RELATIVE_PATH);
   const gates = gatesFor(relativePath);
@@ -126,14 +135,14 @@ function handlePostTool(payload, projectRoot) {
     lib.atomicWriteJson(stateFile, state);
     lib.emit({
       hookSpecificOutput: {
-        hookEventName: 'PostToolUse',
+        hookEventName: MODE_EVENTS[MODE_POST_TOOL],
         additionalContext: REMINDER_TEMPLATE.replace('{path}', relativePath).replace(
           '{gates}',
           gates.join(' and ')
         ),
       },
     });
-    return;
+    return lib.OUTCOME_OK;
   }
 
   const verdictWrite =
@@ -146,8 +155,10 @@ function handlePostTool(payload, projectRoot) {
       // The verdict record landed — this session is square with the protocol.
       delete state.sessions[payload.session_id];
       lib.atomicWriteJson(stateFile, state);
+      return lib.OUTCOME_OK;
     }
   }
+  return lib.OUTCOME_NOOP;
 }
 
 /**
@@ -202,15 +213,16 @@ function verdictEvidenceSince(projectRoot, sinceMs) {
  * pending state is cleared and the agent stops freely (one reminder, never a wedge).
  * @param {object} payload - the Stop hook payload.
  * @param {string} projectRoot - the Instance root.
- * @returns {void}
+ * @returns {string} an invocation-log outcome: OUTCOME_OK when the hook acted
+ * (block emitted or pending state cleared), OUTCOME_NOOP when nothing was pending.
  */
 function handleStop(payload, projectRoot) {
-  if (!payload.session_id) return;
+  if (!payload.session_id) return lib.OUTCOME_NOOP;
   const stateFile = path.join(projectRoot, STATE_RELATIVE_PATH);
   const state = loadState(stateFile);
   const session = state.sessions[payload.session_id];
   const pendingGates = session ? Object.keys(session.pending) : [];
-  if (pendingGates.length === 0) return;
+  if (pendingGates.length === 0) return lib.OUTCOME_NOOP;
 
   const since =
     typeof session.first_pending_at === 'number' ? session.first_pending_at : session.updated_at;
@@ -219,14 +231,14 @@ function handleStop(payload, projectRoot) {
     // session) recorded its verdict; this session is square with the protocol.
     delete state.sessions[payload.session_id];
     lib.atomicWriteJson(stateFile, state);
-    return;
+    return lib.OUTCOME_OK;
   }
 
   if (payload.stop_hook_active === true) {
     // Second stop after our block: the reminder was delivered; clear and let go.
     delete state.sessions[payload.session_id];
     lib.atomicWriteJson(stateFile, state);
-    return;
+    return lib.OUTCOME_OK;
   }
 
   const editedPaths = Array.isArray(session.paths) ? session.paths : [];
@@ -237,27 +249,38 @@ function handleStop(payload, projectRoot) {
       pendingGates.join(' and ')
     ),
   });
+  return lib.OUTCOME_OK;
 }
 
 /**
  * Entry point: read the payload, check the feature toggle, dispatch on the argv
- * mode. Every path — including thrown errors — exits 0 (fail safe, ADR-0006).
+ * mode. Every path — including thrown errors — logs exactly one invocation record
+ * (CODE_STANDARDS ## Hooks) and exits 0 (fail safe, ADR-0006).
  * @returns {void}
  */
 function main() {
+  let projectRoot = process.cwd();
+  const event = MODE_EVENTS[process.argv[2]] || EVENT_UNKNOWN;
+  let outcome = lib.OUTCOME_ERROR;
   try {
     const mode = process.argv[2];
-    if (mode !== MODE_POST_TOOL && mode !== MODE_STOP) process.exit(0);
     const payload = lib.readPayload();
-    if (!payload) process.exit(0);
-    const projectRoot = typeof payload.cwd === 'string' && payload.cwd !== '' ? payload.cwd : process.cwd();
-    if (!lib.featureEnabled(projectRoot, FEATURE)) process.exit(0);
-    if (mode === MODE_POST_TOOL) handlePostTool(payload, projectRoot);
-    else handleStop(payload, projectRoot);
-    process.exit(0);
+    if (mode !== MODE_POST_TOOL && mode !== MODE_STOP) {
+      // Miswired argv: a swallowed failure, not a legitimate no-op.
+      outcome = lib.OUTCOME_ERROR;
+    } else if (!payload) {
+      outcome = lib.OUTCOME_ERROR;
+    } else {
+      projectRoot = typeof payload.cwd === 'string' && payload.cwd !== '' ? payload.cwd : process.cwd();
+      if (!lib.featureEnabled(projectRoot, FEATURE)) outcome = lib.OUTCOME_DISABLED;
+      else if (mode === MODE_POST_TOOL) outcome = handlePostTool(payload, projectRoot);
+      else outcome = handleStop(payload, projectRoot);
+    }
   } catch {
-    process.exit(0); // fail safe: a broken hook never blocks work
+    outcome = lib.OUTCOME_ERROR; // fail safe: a broken hook never blocks work
   }
+  lib.logInvocation(projectRoot, SCRIPT_NAME, event, outcome);
+  process.exit(0);
 }
 
 main();

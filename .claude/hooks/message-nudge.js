@@ -7,13 +7,20 @@
 // the SENDER's session. When the toggle is on, it scans the sent message's content for
 // the follow-through it implies (record update, issue, gate — nudge-rules.js) and
 // injects that as additionalContext back to the sender. Remind-only: it never blocks
-// and never watches recipients. FAIL SAFE: every path, including thrown errors, exits
+// and never watches recipients. Every firing logs one invocation record via hook-lib
+// (CODE_STANDARDS ## Hooks). FAIL SAFE: every path, including thrown errors, exits
 // 0 (PRD-007); injected phrasing must read as legitimate ops instruction (§3.1).
 
+const path = require('path');
 const lib = require('./hook-lib');
 const { FOLLOW_THROUGH_RULES, DEFAULT_ACTION, NUDGE_TEMPLATE } = require('./nudge-rules');
 
 const FEATURE = 'message_nudge';
+
+// Identity and event name for the invocation log (CODE_STANDARDS ## Hooks); the
+// event matches this script's settings.json wiring.
+const SCRIPT_NAME = path.basename(__filename);
+const HOOK_EVENT = 'PostToolUse';
 
 // SendMessage payload shapes vary by message type; these tool_input keys are the
 // candidate carriers of the human-readable message body and the recipient name.
@@ -49,32 +56,39 @@ function impliedActions(content) {
 
 /**
  * Entry point: on an enabled firing, inject the content-derived follow-through nudge
- * as PostToolUse additionalContext in the sender's session. Every path exits 0
- * (fail safe, ADR-0006).
+ * as PostToolUse additionalContext in the sender's session. Every path logs exactly
+ * one invocation record (CODE_STANDARDS ## Hooks) and exits 0 (fail safe, ADR-0006).
  * @returns {void}
  */
 function main() {
+  let projectRoot = process.cwd();
+  let outcome = lib.OUTCOME_ERROR;
   try {
     const payload = lib.readPayload();
-    if (!payload) process.exit(0);
-    const projectRoot = typeof payload.cwd === 'string' && payload.cwd !== '' ? payload.cwd : process.cwd();
-    if (!lib.featureEnabled(projectRoot, FEATURE)) process.exit(0);
-
-    const toolInput = payload.tool_input && typeof payload.tool_input === 'object' ? payload.tool_input : {};
-    const recipient = firstString(toolInput, RECIPIENT_KEYS) || DEFAULT_RECIPIENT;
-    lib.emit({
-      hookSpecificOutput: {
-        hookEventName: 'PostToolUse',
-        additionalContext: NUDGE_TEMPLATE.replace('{recipient}', recipient).replace(
-          '{actions}',
-          impliedActions(firstString(toolInput, CONTENT_KEYS))
-        ),
-      },
-    });
-    process.exit(0);
+    if (payload) {
+      projectRoot = typeof payload.cwd === 'string' && payload.cwd !== '' ? payload.cwd : process.cwd();
+      if (!lib.featureEnabled(projectRoot, FEATURE)) {
+        outcome = lib.OUTCOME_DISABLED;
+      } else {
+        const toolInput = payload.tool_input && typeof payload.tool_input === 'object' ? payload.tool_input : {};
+        const recipient = firstString(toolInput, RECIPIENT_KEYS) || DEFAULT_RECIPIENT;
+        lib.emit({
+          hookSpecificOutput: {
+            hookEventName: HOOK_EVENT,
+            additionalContext: NUDGE_TEMPLATE.replace('{recipient}', recipient).replace(
+              '{actions}',
+              impliedActions(firstString(toolInput, CONTENT_KEYS))
+            ),
+          },
+        });
+        outcome = lib.OUTCOME_OK;
+      }
+    }
   } catch {
-    process.exit(0); // fail safe: a broken hook never blocks work
+    outcome = lib.OUTCOME_ERROR; // fail safe: a broken hook never blocks work
   }
+  lib.logInvocation(projectRoot, SCRIPT_NAME, HOOK_EVENT, outcome);
+  process.exit(0);
 }
 
 main();

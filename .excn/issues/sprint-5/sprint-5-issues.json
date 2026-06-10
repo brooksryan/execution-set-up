@@ -13,7 +13,7 @@
       ],
       "classification": "macro",
       "actionable_now": true,
-      "description": "The status-page viewer fails closed under file:// and today requires manually starting an http server. Ship a really simple view server that starts automatically when a session opens in a repo with execution set up, so the web page is always available. Likely mechanism: the SessionStart hook (rides the EXEC-043 per-feature hook plumbing) starting/reusing a tiny static server over the .excn JSON + viewer assets. Hard requirements: as lightweight and fast-running as possible — no framework, no build step, negligible startup cost, no orphaned processes (idempotent start, detect an already-running instance). Src-First.",
+      "description": "The status-page viewer fails closed under file:// and today requires manually starting an http server. Ship a really simple view server that starts automatically when a session opens in a repo with execution set up, so the web page is always available. Likely mechanism: the SessionStart hook (rides the EXEC-043 per-feature hook plumbing) starting/reusing a tiny static server over the .excn JSON + viewer assets. Hard requirements: as lightweight and fast-running as possible \u2014 no framework, no build step, negligible startup cost, no orphaned processes (idempotent start, detect an already-running instance). Src-First.",
       "prd": "PRD-008",
       "acceptance_criteria": [
         "Opening a session in an execution repo makes the status page reachable in a browser with no manual step",
@@ -41,7 +41,7 @@
       ],
       "classification": "local",
       "actionable_now": true,
-      "description": "package-qa observation (sprint 4): hooks.config.json is invariant-classed in stamp-policy.js, so any Instance that flips toggles sees it reported as drifted on every update run — safe (never overwritten) but noisy. Decide variant-classing it (toggles are per-Instance state) or excluding it from drift reporting.",
+      "description": "package-qa observation (sprint 4): hooks.config.json is invariant-classed in stamp-policy.js, so any Instance that flips toggles sees it reported as drifted on every update run \u2014 safe (never overwritten) but noisy. Decide variant-classing it (toggles are per-Instance state) or excluding it from drift reporting.",
       "prd": "PRD-007",
       "acceptance_criteria": [
         "update on an Instance with flipped toggles reports no hooks.config.json drift",
@@ -67,7 +67,7 @@
       ],
       "classification": "local",
       "actionable_now": true,
-      "description": "Adherence Agents append gate verdicts to a step_log array in the active sprint JSON (established practice since sprint 4 planning), but sprint.schema.json sets additionalProperties:false and defines no step_log — every gated sprint file fails strict validation. Resolve by adding an optional step_log definition to the schema (Src-First: src/template/.excn/schemas first, root mirrors) or by relocating verdict logging; the gate-watch verdict-sensing retro note (sprint 4) bears on the same choice.",
+      "description": "Adherence Agents append gate verdicts to a step_log array in the active sprint JSON (established practice since sprint 4 planning), but sprint.schema.json sets additionalProperties:false and defines no step_log \u2014 every gated sprint file fails strict validation. Resolve by adding an optional step_log definition to the schema (Src-First: src/template/.excn/schemas first, root mirrors) or by relocating verdict logging; the gate-watch verdict-sensing retro note (sprint 4) bears on the same choice.",
       "prd": null,
       "acceptance_criteria": [
         "A gated sprint JSON validates strictly against sprint.schema.json",
@@ -93,7 +93,7 @@
       ],
       "classification": "local",
       "actionable_now": true,
-      "description": "The prior-art agent's definition forbids file writes (final message is the deliverable), so its digest evaporates unless a human persists it — Brooks hit this running it in another repo. Change the definition: the agent writes its digest to .excn/research/prior-art-<prd-id>.md (overwriting its own prior run for the same PRD) and returns the path + summary as its final message. Keep all other prohibitions (no verdicts, no other file writes, sourced-only). Chartered definition change: alignment gate + Team Lead approval; Src-First with root mirror.",
+      "description": "The prior-art agent's definition forbids file writes (final message is the deliverable), so its digest evaporates unless a human persists it \u2014 Brooks hit this running it in another repo. Change the definition: the agent writes its digest to .excn/research/prior-art-<prd-id>.md (overwriting its own prior run for the same PRD) and returns the path + summary as its final message. Keep all other prohibitions (no verdicts, no other file writes, sourced-only). Chartered definition change: alignment gate + Team Lead approval; Src-First with root mirror.",
       "prd": null,
       "acceptance_criteria": [
         "Invoked with a PRD, the agent leaves a sourced digest at .excn/research/prior-art-<prd-id>.md",
@@ -161,6 +161,94 @@
       "related_tickets": [],
       "assigned_sprint": 5,
       "closed_in_sprint": 5
+    },
+    {
+      "id": "EXEC-061",
+      "title": "Ship viewer/ in the Template so the stamped viewer-server has a page to serve",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/template",
+        "viewer"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "EXEC-054 stamps a viewer-server daemon whose whitelist serves viewer/* assets, but the viewer (built root-only in sprint 3, EXEC-036) is not in the Template \u2014 a fresh Instance's enabled viewer_server serves .excn JSON and 404s the page itself. Promote viewer/ (index.html, styles.css, viewer.js, README) into src/template/viewer/ as stamped invariant layout; the root Instance's copy becomes the mirror; update then keeps Instance viewers current. Brooks-directed at sprint-5 review.",
+      "prd": "PRD-008",
+      "acceptance_criteria": [
+        "viewer assets live at .excn/viewer/ (template and Instance) \u2014 nothing stamped at the host root beyond the pointer block (ADR-0002)",
+        "A fresh stamped Instance with viewer_server enabled serves the status page end-to-end",
+        "viewer/ files are invariant-classed (update refreshes them, drift reported not overwritten)",
+        "Root viewer/ is byte-identical to the template copy (Src-First)",
+        "package-qa passes"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": "viewer promoted into the Template at .excn/viewer/ per ADR-0002 ruling (root mirrored via git mv); daemon whitelist + index mapping repointed; root-absolute asset refs fix a pre-existing 404 at bare /; whitelist gains the issues/sprints JSON the board fetches. code-standards PASS, package-qa PASS.",
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 5,
+      "closed_in_sprint": 5,
+      "notes": "Filed 2026-06-10 (Brooks, sprint-5 review). Brooks ruling 2026-06-10: viewer relocates into .excn/viewer/ \u2014 the first delivery placed it at the Instance root."
+    },
+    {
+      "id": "EXEC-063",
+      "title": "Every hook logs its invocations; encode as a CODE_STANDARDS rule",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/template",
+        "hooks",
+        "standards"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "Hook firings are invisible today \u2014 only gate-watch leaves a heartbeat, so invocation frequency can't be observed (Brooks). Two parts: (1) architect extends CODE_STANDARDS.md ## Hooks with a checkable rule: every hook script appends an invocation record {ts, script, event, outcome} via the shared hook-lib helper to a single .excn hook-invocations progress file (*_progress.json class) before exiting, including no-op/disabled exits, never breaking the fail-safe contract; (2) builder implements the hook-lib helper, retrofits all stamped hook scripts, and doctor's firing/stale heartbeat reads the unified log. Standard change is chartered: alignment gate + Team Lead approval.",
+      "prd": null,
+      "acceptance_criteria": [
+        "CODE_STANDARDS.md carries the checkable hook-logging rule (alignment PASS)",
+        "All stamped hook scripts append invocation records via hook-lib, including disabled/no-op paths",
+        "doctor heartbeats read the unified invocation log",
+        "Fail-safe contract intact: logging failure never blocks or surfaces",
+        "package-qa + code-standards PASS"
+      ],
+      "slice_type": "HITL",
+      "root_cause": null,
+      "fix": "CODE_STANDARDS ## Hooks invocation-logging rule (alignment PASS) + hook-lib logInvocation (self-catching, rolling 5000) + every wired hook logs each exit path + doctor heartbeats read the unified hook-invocations_progress.json. code-standards PASS first-run, package-qa PASS.",
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 5,
+      "closed_in_sprint": 5,
+      "notes": "Filed 2026-06-10 (Brooks's directive)."
+    },
+    {
+      "id": "EXEC-064",
+      "title": "PreToolUse spawn guard: rostered persistent Teammates must not be spawned as one-shot background agents",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/template",
+        "hooks"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "Brooks's directive: the Team Lead keeps spawning rostered persistent Teammates (builder, scribe, viewer...) via the one-shot Agent tool as background agents, despite the TEAM_DIRECTIVE routing rule. Add a spawn_guard hook feature (on the existing toggle plumbing): PreToolUse on the Agent/Task spawn tool reads the requested agent type; if it matches a rostered persistent-Teammate type being spawned as a transient/background one-shot, deny with a reason naming the routing rule and the right mechanism. The persistent-types list is per-Instance config (hooks.config.json is already variant-classed \u2014 natural home). Invoked Agent types (gates, clerk, nothing-new) pass untouched. Default: off in template, on in this Instance (validation precedent). Fail-safe contract holds; subject to the new CODE_STANDARDS hook-logging rule.",
+      "prd": null,
+      "acceptance_criteria": [
+        "Spawning a configured persistent-Teammate type via the one-shot spawn tool is denied with a reason citing the TEAM_DIRECTIVE routing rule",
+        "Invoked Agent spawns are unaffected",
+        "Toggle off in template, on in this Instance; missing/malformed config no-ops",
+        "Invocations logged per the CODE_STANDARDS ## Hooks rule",
+        "Gates PASS"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": "spawn-guard PreToolUse hook denies one-shot spawns of configured persistent-Teammate types citing the TEAM_DIRECTIVE routing rule; per-Instance type list in variant hooks.config.json; off in template, on here. Gates PASS.",
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 5,
+      "closed_in_sprint": 5,
+      "notes": "Filed 2026-06-10 (Brooks's directive, sprint 5)."
     }
   ]
 }

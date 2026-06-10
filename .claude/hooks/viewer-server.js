@@ -7,7 +7,8 @@
 // for an already-running instance of our daemon (identified by the health endpoint
 // echoing the repo path — idempotent start), spawns viewer-server-daemon.js detached
 // when none answers, writes the {port, pid, repo, started} discovery record, and
-// surfaces the page URL as additionalContext. FAIL SAFE: any missing/malformed
+// surfaces the page URL as additionalContext. Every firing logs one invocation
+// record via hook-lib (CODE_STANDARDS ## Hooks). FAIL SAFE: any missing/malformed
 // config, busy port range, or internal error exits 0 with no output (ADR-0006) —
 // a viewer problem never blocks a session; doctor surfaces decay.
 
@@ -19,6 +20,11 @@ const rules = require('./viewer-server-rules');
 
 const FEATURE = 'viewer_server';
 const DAEMON_SCRIPT = path.join(__dirname, 'viewer-server-daemon.js');
+
+// Identity and event name for the invocation log (CODE_STANDARDS ## Hooks); the
+// event matches this script's settings.json wiring.
+const SCRIPT_NAME = path.basename(__filename);
+const HOOK_EVENT = 'SessionStart';
 
 /**
  * Hash a repo path into its home port in the quiet range. djb2 over the absolute
@@ -91,7 +97,7 @@ function announce(repoPath, port, pid) {
   const url = `http://${rules.BIND_HOST}:${port}/`;
   lib.emit({
     hookSpecificOutput: {
-      hookEventName: 'SessionStart',
+      hookEventName: HOOK_EVENT,
       additionalContext: rules.CONTEXT_TEMPLATE.replace(rules.CONTEXT_URL_PLACEHOLDER, url),
     },
   });
@@ -148,21 +154,36 @@ async function ensureServer(repoPath) {
 
 /**
  * Entry point: read the payload, check the toggle, ensure the server, announce it.
- * Every path — including thrown errors — exits 0 (fail safe, ADR-0006).
+ * Every path — including thrown errors — logs exactly one invocation record
+ * (CODE_STANDARDS ## Hooks) and exits 0 (fail safe, ADR-0006). An exhausted probe
+ * budget (no server ensured) logs `error`: the enabled feature failed to deliver,
+ * and it was swallowed.
  * @returns {Promise<void>}
  */
 async function main() {
+  let projectRoot = process.cwd();
+  let outcome = lib.OUTCOME_ERROR;
   try {
     const payload = lib.readPayload();
-    if (!payload) process.exit(0);
-    const projectRoot = typeof payload.cwd === 'string' && payload.cwd !== '' ? payload.cwd : process.cwd();
-    if (!lib.featureEnabled(projectRoot, FEATURE)) process.exit(0);
-    const server = await ensureServer(path.resolve(projectRoot));
-    if (server) announce(path.resolve(projectRoot), server.port, server.pid);
-    process.exit(0);
+    if (payload) {
+      projectRoot = typeof payload.cwd === 'string' && payload.cwd !== '' ? payload.cwd : process.cwd();
+      if (!lib.featureEnabled(projectRoot, FEATURE)) {
+        outcome = lib.OUTCOME_DISABLED;
+      } else {
+        const server = await ensureServer(path.resolve(projectRoot));
+        if (server) {
+          announce(path.resolve(projectRoot), server.port, server.pid);
+          outcome = lib.OUTCOME_OK;
+        } else {
+          outcome = lib.OUTCOME_ERROR; // probe budget exhausted — swallowed failure
+        }
+      }
+    }
   } catch {
-    process.exit(0); // fail safe: a viewer problem never blocks a session
+    outcome = lib.OUTCOME_ERROR; // fail safe: a viewer problem never blocks a session
   }
+  lib.logInvocation(projectRoot, SCRIPT_NAME, HOOK_EVENT, outcome);
+  process.exit(0);
 }
 
 main();

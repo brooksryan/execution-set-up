@@ -19,13 +19,13 @@ The viewer reads the JSON with `fetch()`, which browsers block under the
 Any trivial static server works:
 
 ```sh
-# from the repo root: /Users/brooks/dev-work/execution-set-up
+# from the repo root
 python3 -m http.server 8000
 # then open:
-#   http://localhost:8000/viewer/
+#   http://localhost:8000/.excn/viewer/
 ```
 
-Opening `viewer/index.html` directly from disk shows a banner explaining this
+Opening `.excn/viewer/index.html` directly from disk shows a banner explaining this
 and the one command above — it fails closed rather than rendering a blank board.
 
 ## Files
@@ -36,7 +36,8 @@ and the one command above — it fails closed rather than rendering a blank boar
 
 ## Notes
 
-- It expects to be served from the repo root, so `.excn/` resolves at `../.excn`
-  relative to `viewer/`.
+- It expects to be served from the repo root: asset refs and JSON fetches use
+  root-absolute paths (`/.excn/...`), so the page works both at the bare `/`
+  (where the viewer-server daemon maps it) and at `/.excn/viewer/`.
 - Sprint discovery probes `sprint_1.json`, `sprint_2.json`, … upward until a
   gap, since a browser cannot list the directory.
