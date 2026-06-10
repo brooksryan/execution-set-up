@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Teammate Load Records",
+  "description": "Hook-appended per-tool-event load telemetry (.excn/load_progress.json, EXEC-045/ADR-0006). The load-report hook appends one record per PostToolUse firing when load_reporting is enabled, keeping a rolling window of the newest records (bounded growth). In the *_progress.json ignore class (ADR-0005); the status-page viewer reads it to render per-Teammate load.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "records"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ts", "agent_type", "tool_name"],
+        "properties": {
+          "ts": { "type": "string", "format": "date-time", "description": "When the tool event fired (ISO 8601)." },
+          "agent_type": { "type": "string", "description": "Actor identity from the hook payload's agent_type ('unknown' when absent)." },
+          "agent_id": { "type": "string", "description": "Subagent instance id when the payload carries one; omitted otherwise." },
+          "tool_name": { "type": "string", "description": "The tool the event reports." }
+        }
+      }
+    }
+  }
+}

@@ -115,19 +115,52 @@
         "EXEC-049"
       ],
       "notes": "AFK."
-    }
-  ],
-  "in_progress": [
+    },
+    {
+      "id": "S4-8",
+      "type": "FEAT",
+      "title": "Health check command",
+      "owner": "builder",
+      "summary": "doctor verb: per-feature enabled/disabled/firing/stale/broken + config validation + outdated via version marker; health-policy.js data module; code-standards PASS (after one revise cycle: named time constants), package-qa PASS.",
+      "closes_issues": [
+        "EXEC-050"
+      ],
+      "notes": "AFK."
+    },
+    {
+      "id": "S4-9",
+      "type": "FEAT",
+      "title": "Sent-message follow-through nudge (ships off)",
+      "owner": "builder",
+      "summary": "message-nudge.js implemented (sent-side additionalContext follow-through nudge, rules in nudge-rules.js, ships off); payload field names probed not live-confirmed — confirm against a live SendMessage payload before enabling. Gates PASS.",
+      "closes_issues": [
+        "EXEC-044"
+      ],
+      "notes": "AFK."
+    },
     {
       "id": "S4-11",
       "type": "FEAT",
       "title": "nothing-new-under-the-sun prior-art Invoked Agent (stamped default)",
       "owner": "team-lead",
-      "summary": "EXEC-051 per PRD-007 amendment: scoping-time prior-art/gotcha research agent, invoked with a PRD + codebase pointers; alignment-gated chartered definition addition.",
+      "summary": "nothing-new-under-the-sun stamped; demo against PRD-007 produced a sourced prior-art digest (.excn/research/prior-art-prd-007.md); validated update-path design vs cruft/copier, flagged additionalContext version-sensitivity (claude-code#18427).",
       "closes_issues": [
         "EXEC-051"
       ],
       "notes": "AFK once approved; demo against PRD-007."
+    }
+  ],
+  "in_progress": [
+    {
+      "id": "S4-10",
+      "type": "FEAT",
+      "title": "Load-reporting hook + viewer lane (ships off)",
+      "owner": "builder",
+      "summary": "EXEC-045 hook side; viewer lane owned by viewer; depends on EXEC-046.",
+      "closes_issues": [
+        "EXEC-045"
+      ],
+      "notes": "AFK. hook side shipped+gated; viewer lane in flight."
     }
   ],
   "not_shipped": [
@@ -139,39 +172,6 @@
       "summary": "Sweep PROCESS.md, the CONTEXT.md seed, the CLAUDE.md stub, and the agent defs in src/template for explanatory prose that is not instruction. Src-First; alignment gate on persistent-doc edits.",
       "closes_issues": [
         "EXEC-002"
-      ],
-      "notes": "AFK."
-    },
-    {
-      "id": "S4-8",
-      "type": "FEAT",
-      "title": "Health check command",
-      "owner": "builder",
-      "summary": "EXEC-050; depends on EXEC-046/049.",
-      "closes_issues": [
-        "EXEC-050"
-      ],
-      "notes": "AFK."
-    },
-    {
-      "id": "S4-9",
-      "type": "FEAT",
-      "title": "Sent-message follow-through nudge (ships off)",
-      "owner": "builder",
-      "summary": "EXEC-044; depends on EXEC-046.",
-      "closes_issues": [
-        "EXEC-044"
-      ],
-      "notes": "AFK."
-    },
-    {
-      "id": "S4-10",
-      "type": "FEAT",
-      "title": "Load-reporting hook + viewer lane (ships off)",
-      "owner": "builder",
-      "summary": "EXEC-045 hook side; viewer lane owned by viewer; depends on EXEC-046.",
-      "closes_issues": [
-        "EXEC-045"
       ],
       "notes": "AFK."
     }
@@ -213,6 +213,14 @@
     {
       "title": "Relative-path forensics produced a false catastrophic reading",
       "body": "Every absolute-path check during the incident returned truth; every relative-path check returned the worktree. Candidate PROCESS edit (Trust-the-deployed-state section): verify any data-loss premise from a fresh shell at the repo root with absolute paths before any recovery or kill action."
+    },
+    {
+      "title": "gate-watch verdict sensing misses where verdicts actually land",
+      "body": "First live firings of the EXEC-047 gate reminder on the dogfood Instance: it correctly caught gate-relevant edits, but its verdict-clearing signal watches writes to .excn/*_progress.json while the Adherence Agents record verdicts in the sprint JSON step_log — so the Stop block fires even when gates are already running or logged. Candidate fix for the gate-watch rules: treat a step_log append to the active sprint JSON as verdict evidence (or move verdict logging to a *_progress.json record)."
+    },
+    {
+      "title": "step_log practice vs sprint schema",
+      "body": "Gates log verdicts to sprint_4.json step_log; sprint.schema.json (additionalProperties:false) does not define it, so the sprint record fails strict validation. EXEC-053 filed. Couples with the gate-watch verdict-sensing note: one decision should settle where verdicts live."
     }
   ],
   "step_log": [
@@ -263,6 +271,24 @@
       "at": "2026-06-10",
       "artifact": "src/template/.claude/agents/nothing-new-under-the-sun.md",
       "summary": "PASS, 0 violations — chartered slice EXEC-051 (PRD-007); research-only single responsibility, no edits/verdicts, non-prescriptive, sourced-or-omitted rule enforces minimalism"
+    },
+    {
+      "step": "code_standards_fail",
+      "at": "2026-06-10",
+      "artifact": "EXEC-050/044/045 doctor verb + message-nudge + load-report",
+      "summary": "FAIL, 1 violation: bare ms-conversion literals 60000/3600000 in cli.js firingEvidence (Named constants rule); mirrors byte-identical, earlier unused-destructuring flag resolved"
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-10",
+      "artifact": "sprint-4 combined: doctor verb + health-policy.js; message-nudge.js + nudge-rules.js; load-report.js + load-progress.schema.json; clerk/nothing-new-under-the-sun/scribe agents stamp",
+      "summary": "PASS — 0 violations. Full battery on npm-pack-extracted package: manifest parity (37 files, byte-identical, gitignore restored), idempotent re-init, JSON parse, check-ignore semantics, pack parity, skip-safety, fail-safe + enabled hook paths, update regression, doctor 5 scenarios."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "src/bin/cli.js (EXEC-050/044/045 re-gate)",
+      "summary": "PASS — prior named-constants violation resolved (MS_PER_MINUTE/MS_PER_HOUR); 0 violations"
     }
   ]
 }

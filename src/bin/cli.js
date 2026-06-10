@@ -9,9 +9,13 @@
 // plus stamped-form hashes in a version marker. `update [target]` re-stamps only
 // invariant files at the installed version: variant files and work-tracking state are
 // never touched, and an invariant file that drifted from its recorded stamped form is
-// reported and left in place. Diagnostics to stderr, results to stdout, non-zero exit
-// on any failure. Node builtins only; pointer-block content and the update file-policy
-// live in the sibling data modules.
+// reported and left in place. `doctor [target]` reports per-feature hook health
+// (enabled / firing / stale / broken), toggle-config validity, and outdated detection
+// (recorded vs installed framework version); it exits non-zero only on an unstamped
+// target — a degraded Instance is a report, not a failure. Diagnostics to stderr,
+// results to stdout, non-zero exit on any failure. Node builtins only; pointer-block
+// content, the update file-policy, and the health-check policy live in the sibling
+// data modules.
 
 const crypto = require('crypto');
 const fs = require('fs');
@@ -24,6 +28,14 @@ const {
   VERSION_MARKER_PATH,
   MARKER_SCHEMA_VERSION,
 } = require('./stamp-policy');
+const {
+  HOOK_FEATURES,
+  SETTINGS_PATH,
+  HOOKS_DIR,
+  HOOKS_CONFIG_PATH,
+  HOOKS_CONFIG_SCHEMA_PATH,
+  HEARTBEAT_FRESH_MS,
+} = require('./health-policy');
 
 // Package root is one level up from bin/; the template ships beside it.
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
@@ -33,6 +45,10 @@ const TEMPLATE_DIR = path.join(PACKAGE_ROOT, 'template');
 // template ships the file un-dotted as `gitignore`; stamping restores the real name.
 const SHIPPED_GITIGNORE_NAME = 'gitignore';
 const STAMPED_GITIGNORE_NAME = '.gitignore';
+
+// Unit conversions for doctor's human-readable heartbeat ages.
+const MS_PER_MINUTE = 60 * 1000;
+const MS_PER_HOUR = 60 * MS_PER_MINUTE;
 
 // First positional arg that is not a flag selects the target; this prefix marks a flag.
 const FLAG_PREFIX = '-';
@@ -171,6 +187,209 @@ function wirePointers(target) {
 }
 
 /**
+ * Validate a document against the subset of JSON Schema draft-07 the stamped
+ * hooks-config schema uses: object/boolean/string types, `const`, `required`,
+ * `properties`, and `additionalProperties: false`. A hand-rolled subset keeps the
+ * no-runtime-dependency rule; the schema file itself stays the source of truth for
+ * which feature keys must exist.
+ * @param {object} schema - the (sub)schema to check against.
+ * @param {*} data - the value under validation.
+ * @param {string} [where='config'] - human-readable location for error messages.
+ * @returns {string[]} violation messages (empty when the document conforms).
+ */
+function schemaViolations(schema, data, where = 'config') {
+  const violations = [];
+  if (schema.const !== undefined && data !== schema.const) {
+    violations.push(`${where} must be ${JSON.stringify(schema.const)}`);
+  }
+  if (schema.type === 'boolean' && typeof data !== 'boolean') {
+    violations.push(`${where} must be a boolean`);
+  } else if (schema.type === 'string' && typeof data !== 'string') {
+    violations.push(`${where} must be a string`);
+  } else if (schema.type === 'object') {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      violations.push(`${where} must be an object`);
+      return violations;
+    }
+    const properties = schema.properties || {};
+    for (const key of schema.required || []) {
+      if (!(key in data)) violations.push(`${where} is missing required key "${key}"`);
+    }
+    for (const [key, value] of Object.entries(data)) {
+      if (key in properties) violations.push(...schemaViolations(properties[key], value, `${where}.${key}`));
+      else if (schema.additionalProperties === false) violations.push(`${where} has unknown key "${key}"`);
+    }
+  }
+  return violations;
+}
+
+/**
+ * Check the toggle config at the target: present, parseable, and conformant to the
+ * stamped hooks-config schema.
+ * @param {string} target - absolute path of the target project root.
+ * @returns {{ valid: boolean, detail: string }} validity plus a named reason —
+ * "missing", "unparseable", or the first schema violations — or "valid".
+ */
+function checkHooksConfig(target) {
+  const configFile = path.join(target, HOOKS_CONFIG_PATH);
+  let raw;
+  try {
+    raw = fs.readFileSync(configFile, 'utf8');
+  } catch {
+    return { valid: false, detail: `missing (${HOOKS_CONFIG_PATH} not found)` };
+  }
+  let config;
+  try {
+    config = JSON.parse(raw);
+  } catch (cause) {
+    return { valid: false, detail: `unparseable JSON (${cause.message})` };
+  }
+  let schema;
+  try {
+    schema = JSON.parse(fs.readFileSync(path.join(target, HOOKS_CONFIG_SCHEMA_PATH), 'utf8'));
+  } catch {
+    // No schema to judge against: parseable config is the best claim available.
+    return { valid: true, detail: `parses (schema missing at ${HOOKS_CONFIG_SCHEMA_PATH} — conformance unverified)` };
+  }
+  const violations = schemaViolations(schema, config);
+  if (violations.length > 0) return { valid: false, detail: `schema-invalid: ${violations.join('; ')}` };
+  return { valid: true, detail: 'valid against its schema' };
+}
+
+/**
+ * Check one feature's wiring: every script it rides is both referenced by a hook
+ * command in the stamped settings and present on disk.
+ * @param {string} target - absolute path of the target project root.
+ * @param {object} feature - a HOOK_FEATURES entry.
+ * @returns {string[]} wiring problems (empty when fully wired).
+ */
+function wiringProblems(target, feature) {
+  const problems = [];
+  const settings = (() => {
+    try {
+      return JSON.parse(fs.readFileSync(path.join(target, SETTINGS_PATH), 'utf8'));
+    } catch {
+      return null;
+    }
+  })();
+  // Flatten every configured hook command; the entry shape is event → matcher
+  // groups → hooks, but for "is this script wired at all" the command strings are
+  // the only thing that matters.
+  const commands = [];
+  if (settings && settings.hooks && typeof settings.hooks === 'object') {
+    for (const groups of Object.values(settings.hooks)) {
+      if (!Array.isArray(groups)) continue;
+      for (const group of groups) {
+        for (const hook of (group && group.hooks) || []) {
+          if (hook && typeof hook.command === 'string') commands.push(hook.command);
+        }
+      }
+    }
+  }
+  for (const script of feature.scripts) {
+    if (settings === null) problems.push(`${SETTINGS_PATH} missing or unparseable`);
+    else if (!commands.some((command) => command.includes(script))) {
+      problems.push(`no hook entry in ${SETTINGS_PATH} invokes ${script}`);
+    }
+    if (!fs.existsSync(path.join(target, HOOKS_DIR, script))) {
+      problems.push(`hook script missing: ${HOOKS_DIR}/${script}`);
+    }
+  }
+  // settings-missing repeats per script when a feature rides several; report once.
+  return [...new Set(problems)];
+}
+
+/**
+ * Describe a feature's firing evidence: fresh heartbeat, stale, or none expected.
+ * @param {string} target - absolute path of the target project root.
+ * @param {object} feature - a HOOK_FEATURES entry.
+ * @returns {{ status: 'firing'|'stale'|'none', detail: string }}
+ */
+function firingEvidence(target, feature) {
+  if (feature.evidence === null) {
+    return { status: 'none', detail: 'no heartbeat signal for this feature — stateless hook' };
+  }
+  let mtimeMs;
+  try {
+    mtimeMs = fs.statSync(path.join(target, feature.evidence)).mtimeMs;
+  } catch {
+    return { status: 'stale', detail: `no firing evidence (${feature.evidence} absent)` };
+  }
+  const ageMs = Date.now() - mtimeMs;
+  if (ageMs <= HEARTBEAT_FRESH_MS) {
+    return { status: 'firing', detail: `heartbeat ${Math.max(1, Math.round(ageMs / MS_PER_MINUTE))}m ago in ${feature.evidence}` };
+  }
+  return { status: 'stale', detail: `last firing evidence ${Math.round(ageMs / MS_PER_HOUR)}h ago in ${feature.evidence}` };
+}
+
+/**
+ * Run the `doctor` command: report per-feature hook health and outdated detection.
+ * Per-feature verdicts: `broken` (wiring missing — a disarmed hook — or the toggle
+ * config invalid), `disabled`, `firing` (enabled with fresh heartbeat), `stale`
+ * (enabled, no recent evidence), or `enabled` (wired and on, but the feature leaves
+ * no heartbeat to judge by). A degraded Instance still exits 0 — doctor's job is the
+ * report; only an unstamped target (no version marker) is a non-zero failure.
+ * @param {string[]} args - args after the `doctor` command word (target only).
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) when the target is unstamped.
+ */
+function doctor(args) {
+  const target = path.resolve(args.find((arg) => !arg.startsWith(FLAG_PREFIX)) || '.');
+
+  const markerFile = path.join(target, VERSION_MARKER_PATH);
+  let marker;
+  try {
+    marker = JSON.parse(fs.readFileSync(markerFile, 'utf8'));
+  } catch (cause) {
+    process.stderr.write(
+      `error: not a stamped Instance — no readable version marker at ${markerFile} (${cause.message}); run \`to-execution init\` first\n`
+    );
+    process.exit(1);
+  }
+
+  const lines = [`to-execution doctor — ${target}`];
+
+  const recorded = typeof marker.framework_version === 'string' ? marker.framework_version : '(unrecorded)';
+  const installed = installedVersion();
+  lines.push(
+    recorded === installed
+      ? `framework: up to date (recorded ${recorded} = installed ${installed})`
+      : `framework: OUTDATED — stamped at ${recorded}, installed package is ${installed}; run \`to-execution update\``
+  );
+
+  const config = checkHooksConfig(target);
+  lines.push(`toggle config: ${config.valid ? config.detail : `BROKEN — ${config.detail}`}`);
+
+  // Toggles are read straight from the file even when schema-invalid: the hooks
+  // themselves fail safe to disabled in that case, and the per-feature verdict
+  // below carries the broken-config reason instead of guessing intent.
+  const toggles = (() => {
+    try {
+      return JSON.parse(fs.readFileSync(path.join(target, HOOKS_CONFIG_PATH), 'utf8')).features || {};
+    } catch {
+      return {};
+    }
+  })();
+
+  for (const feature of HOOK_FEATURES) {
+    const problems = wiringProblems(target, feature);
+    let verdict;
+    if (problems.length > 0) verdict = `broken — ${problems.join('; ')}`;
+    else if (!config.valid) verdict = `broken — toggle config ${config.detail} (hook fails safe to disabled)`;
+    else if (toggles[feature.key] !== true) verdict = 'disabled (wired; enable in .excn/hooks.config.json)';
+    else {
+      const evidence = firingEvidence(target, feature);
+      if (evidence.status === 'firing') verdict = `firing (${evidence.detail})`;
+      else if (evidence.status === 'stale') verdict = `stale — enabled but ${evidence.detail}`;
+      else verdict = `enabled (wired; ${evidence.detail})`;
+    }
+    lines.push(`feature ${feature.key}: ${verdict}`);
+  }
+
+  process.stdout.write(`${lines.join('\n')}\n`);
+}
+
+/**
  * Write the usage text to stdout. Used for --help / no command, and after an
  * unrecognized command (the caller owns the non-zero exit in that case).
  * @returns {void}
@@ -184,6 +403,7 @@ function printUsage() {
       '  npx to-execution init [target]   stamp template/ into target (default: cwd)',
       '  npx to-execution init --force    overwrite existing files',
       '  npx to-execution update [target] re-stamp invariant files at the installed version',
+      '  npx to-execution doctor [target] report per-feature hook health and outdated status',
       '',
       'init stamps the .excn/ namespace; .excn/.gitignore keeps per-session *_progress.json out of git.',
       'init records the framework version and stamped-form hashes in .excn/framework-version.json.',
@@ -192,6 +412,8 @@ function printUsage() {
       'init wires a pointer block into existing CLAUDE.md / AGENTS.md (append-only,',
       'even under --force; both created if neither exists).',
       'init never overwrites an existing manifest file unless --force.',
+      'doctor reports each hook feature as enabled, firing, stale, or broken, names a',
+      'broken toggle config, and flags an Instance stamped at an older framework version.',
       '',
     ].join('\n')
   );
@@ -358,7 +580,7 @@ function update(args) {
 
 /**
  * Entry point: dispatch on the first CLI argument. `init` stamps; `update`
- * re-stamps invariants; no command or
+ * re-stamps invariants; `doctor` reports hook health; no command or
  * -h/--help prints usage and exits zero; any other word fails non-zero with usage.
  * @returns {void}
  * @throws Exits non-zero (after usage on stderr+stdout) on an unrecognized command.
@@ -370,6 +592,8 @@ function main() {
       return init(args);
     case 'update':
       return update(args);
+    case 'doctor':
+      return doctor(args);
     case undefined:
     case '-h':
     case '--help':

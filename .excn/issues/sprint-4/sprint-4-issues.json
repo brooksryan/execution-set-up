@@ -77,7 +77,7 @@
     {
       "id": "EXEC-044",
       "title": "Scaffold a hook that nudges agents to follow through on messages they send teammates",
-      "status": "open",
+      "status": "closed",
       "severity": "P3",
       "scope": [
         "src/template",
@@ -95,19 +95,19 @@
       ],
       "slice_type": "AFK",
       "root_cause": null,
-      "fix": null,
+      "fix": "message-nudge.js implemented (sent-side additionalContext follow-through nudge, rules in nudge-rules.js, ships off); payload field names probed not live-confirmed — confirm against a live SendMessage payload before enabling. Gates PASS.",
       "depends_on": [
         "EXEC-046"
       ],
       "related_tickets": [],
       "assigned_sprint": 4,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 4,
       "notes": "Filed 2026-06-10 (Brooks). Exploratory; acceptance criteria set by the EXEC-043 grill/PRD."
     },
     {
       "id": "EXEC-045",
       "title": "Hook-based teammate load reporting, surfaced in the status-page viewer",
-      "status": "open",
+      "status": "in_progress",
       "severity": "P3",
       "scope": [
         "src/template",
@@ -133,7 +133,7 @@
       "related_tickets": [],
       "assigned_sprint": 4,
       "closed_in_sprint": null,
-      "notes": "Filed 2026-06-10 (Brooks). Exploratory; acceptance criteria set by the EXEC-043 grill/PRD."
+      "notes": "Filed 2026-06-10 (Brooks). Exploratory; acceptance criteria set by the EXEC-043 grill/PRD. Hook side shipped + gated 2026-06-10 (load-report.js + load-progress.schema.json, rolling 5000-record window); viewer lane remains — owned by viewer."
     },
     {
       "id": "EXEC-046",
@@ -242,7 +242,7 @@
     {
       "id": "EXEC-050",
       "title": "Health check: per-feature hook status (enabled/firing/stale/broken) + outdated via the version stamp",
-      "status": "open",
+      "status": "closed",
       "severity": "P2",
       "scope": [
         "src/bin",
@@ -260,20 +260,20 @@
       ],
       "slice_type": "AFK",
       "root_cause": null,
-      "fix": null,
+      "fix": "doctor verb: per-feature enabled/disabled/firing/stale/broken + config validation + outdated via version marker; health-policy.js data module; code-standards PASS (after one revise cycle: named time constants), package-qa PASS.",
       "depends_on": [
         "EXEC-046",
         "EXEC-049"
       ],
       "related_tickets": [],
       "assigned_sprint": 4,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 4,
       "notes": null
     },
     {
       "id": "EXEC-051",
       "title": "nothing-new-under-the-sun: stamped prior-art research Invoked Agent for scoping",
-      "status": "in_progress",
+      "status": "closed",
       "severity": "P2",
       "scope": [
         "src/template",
@@ -292,11 +292,11 @@
       ],
       "slice_type": "AFK",
       "root_cause": null,
-      "fix": null,
+      "fix": "Definition stamped + alignment PASS + TL approved; acceptance demo run against PRD-007, digest persisted to .excn/research/prior-art-prd-007.md; stamp contract package-qa PASS.",
       "depends_on": [],
       "related_tickets": [],
       "assigned_sprint": 4,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 4,
       "notes": "Filed 2026-06-10 (Brooks, added scope at execution kickoff). Chartered definition addition — alignment-gated, Team-Lead-approved (ADR-0004 path)."
     }
   ]
