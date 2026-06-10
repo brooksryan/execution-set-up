@@ -30,14 +30,16 @@ const REMINDER_TEMPLATE =
   'Ops reminder (QA-gate protocol, .excn/PROCESS.md): the edit to {path} touched a ' +
   'gate-relevant path. The {gates} gate(s) are due on this change before it lands. ' +
   'When this edit batch is complete, have the gate run and record its verdict in the ' +
-  'session progress record (.excn/*_progress.json). Do not spawn the gate mid-batch.';
+  "active sprint record's step_log (.excn/sprints/sprint_<N>.json) or the session " +
+  'progress record (.excn/*_progress.json). Do not spawn the gate mid-batch.';
 
 // Stop-block reason, with {paths} and {gates} placeholders.
 const BLOCK_REASON_TEMPLATE =
   'QA-gate protocol (.excn/PROCESS.md): this session edited gate-relevant paths ' +
   '({paths}) but no gate verdict has been recorded. The {gates} gate(s) are due — ' +
-  'run them (or hand off to the Team Lead) and record the verdict in the session ' +
-  'progress record (.excn/*_progress.json) before idling.';
+  'run them (or hand off to the Team Lead) and record the verdict in the active ' +
+  "sprint record's step_log (.excn/sprints/sprint_<N>.json) or the session progress " +
+  'record (.excn/*_progress.json) before idling.';
 
 module.exports = {
   GATE_PATH_RULES,

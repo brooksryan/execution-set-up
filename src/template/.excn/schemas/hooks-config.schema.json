@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Hook Feature Toggles",
-  "description": "Enable/disable switches for the stamped hook features (ADR-0006). One boolean per feature; the per-feature scripts in .claude/hooks/ read this at every firing and no-op when their toggle is off, missing, or malformed (fail safe). Defaults at stamp: gate_reminders on; message_nudge and load_reporting off.",
+  "description": "Enable/disable switches for the stamped hook features (ADR-0006). One boolean per feature; the per-feature scripts in .claude/hooks/ read this at every firing and no-op when their toggle is off, missing, or malformed (fail safe). Defaults at stamp: gate_reminders on; message_nudge, load_reporting, and viewer_server off.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "features"],
@@ -10,11 +10,12 @@
     "features": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["gate_reminders", "message_nudge", "load_reporting"],
+      "required": ["gate_reminders", "message_nudge", "load_reporting", "viewer_server"],
       "properties": {
         "gate_reminders": { "type": "boolean", "description": "PostToolUse reminder + Stop block when gate-relevant paths are edited without a recorded gate verdict." },
         "message_nudge": { "type": "boolean", "description": "Follow-through nudge in the sender's session after a teammate message (EXEC-044)." },
-        "load_reporting": { "type": "boolean", "description": "Per-tool-event load records appended to .excn/load_progress.json (EXEC-045)." }
+        "load_reporting": { "type": "boolean", "description": "Per-tool-event load records appended to .excn/load_progress.json (EXEC-045)." },
+        "viewer_server": { "type": "boolean", "description": "SessionStart auto-start of the localhost viewer server — idempotent start, idle self-exit, discovery record in .excn/viewer-server_progress.json (EXEC-054)." }
       }
     }
   }

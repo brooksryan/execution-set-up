@@ -63,8 +63,13 @@
       "classification": "macro",
       "actionable_now": true,
       "description": "Once EXEC-054 validates the in-repo auto-run server, extract it into its own package installed globally (separate from the to-execution Scaffolder package). Individual execution repos/sessions check whether the global server exists and connect to it instead of each running their own — one server, many Instances. Same hard requirements: lightweight, fast-running, zero/near-zero dependencies. Needs design decisions (port/discovery convention, multi-repo serving, version skew between server and Instances) — grill before implementation.",
-      "prd": null,
-      "acceptance_criteria": [],
+      "prd": "PRD-008",
+      "acceptance_criteria": [
+        "One globally-installed server on a well-known port serves every registered repo at a stable URL",
+        "SessionStart hooks register the repo instead of spawning a per-repo server when the global server is present",
+        "Viewer assets served from the repo, not the package (version-skew policy per ADR-0007)",
+        "Idle/orphan and lockdown guarantees of EXEC-054 hold"
+      ],
       "slice_type": "AFK",
       "root_cause": null,
       "fix": null,
@@ -87,8 +92,13 @@
       "classification": "macro",
       "actionable_now": true,
       "description": "Extend the status-page viewer from read-only to read-write for issues: add new issues and edit existing ones from the web page. Writes go through the server (EXEC-054/055) since a static page cannot write the .excn JSON; every write must remain schema-valid against issue.schema.json and respect the issue partitioning (backlog vs sprint partitions, scribe ownership of moves). Hard requirements: keep it as lightweight and fast as possible — no framework, minimal surface.",
-      "prd": null,
-      "acceptance_criteria": [],
+      "prd": "PRD-008",
+      "acceptance_criteria": [
+        "Issues can be added and edited from the status page; writes validate against issue.schema.json and land atomically",
+        "Ids are assigned by the server scanning all partitions (scribe-assigns-ids rule honored)",
+        "Schema-invalid payloads are rejected with a named error",
+        "Partition moves and lifecycle remain agent work"
+      ],
       "slice_type": "AFK",
       "root_cause": null,
       "fix": null,
@@ -99,6 +109,33 @@
       "assigned_sprint": null,
       "closed_in_sprint": null,
       "notes": "Filed 2026-06-10 (Brooks). Builds on the viewer-server track; interaction with scribe ownership of issue JSON to be resolved at grill time. Re-identified from EXEC-048 on 2026-06-10: the original id collided with a PRD-007 hook slice filed in a parallel session; sprint-4 close gate caught the lineage mismatch."
+    },
+    {
+      "id": "EXEC-058",
+      "title": "Ensure Team Leads spawn persistent Teammates as persistent, not as transient subagents",
+      "status": "open",
+      "severity": "P2",
+      "scope": [
+        "src/template",
+        "hooks"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "Observed (Brooks): Team Lead sessions sometimes spawn agents inappropriately — a persistent Teammate gets spawned as a transient Invoked Agent/subagent, losing membership, continuity, and messaging addressability. CONTEXT.md draws the Teammate-vs-Invoked-Agent line by lifecycle, and sprint 4 defect D4-1 already forced a persistent-Teammate-spawning rule mid-sprint, so the failure mode is real here too. Explore how to make correct spawning systematic rather than remembered: candidates include a TEAM_DIRECTIVE/agent-def instruction sweep (roster members spawn via make-teammate/teams, gates spawn via the Agent tool), a remind-only hook on the spawn tool that flags a roster-named agent being spawned transiently (rides the per-feature hook plumbing, ADR-0006), and a doctor/health check that compares the live team roster against the directive roster. Spike first: characterize when and why leads get it wrong, then pick the enforcement. Src-First.",
+      "prd": null,
+      "acceptance_criteria": [
+        "The failure mode is characterized: when a Team Lead spawns a roster Teammate transiently, what in the docs/tooling let it happen",
+        "A chosen mechanism (instruction, remind-only hook, or health check) makes the mismatch visible or prevented at spawn time",
+        "Spawning a roster-named Teammate persistently and an Invoked Agent transiently both pass without noise"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": null,
+      "closed_in_sprint": null,
+      "notes": "Filed 2026-06-10 (Brooks). Related context: sprint-4 defect D4-1 fix adopted persistent-Teammate spawning for the rest of that sprint."
     }
   ]
 }

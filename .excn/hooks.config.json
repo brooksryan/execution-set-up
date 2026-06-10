@@ -3,6 +3,7 @@
   "features": {
     "gate_reminders": true,
     "message_nudge": false,
-    "load_reporting": false
+    "load_reporting": false,
+    "viewer_server": true
   }
 }

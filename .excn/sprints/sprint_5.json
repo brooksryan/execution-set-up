@@ -45,17 +45,17 @@
     "EXEC-054",
     "EXEC-052",
     "EXEC-053",
-    "EXEC-057"
+    "EXEC-057",
+    "EXEC-059",
+    "EXEC-060"
   ],
-  "shipped": [],
-  "in_progress": [],
-  "not_shipped": [
+  "shipped": [
     {
       "id": "S5-1",
       "type": "DOCS",
-      "title": "Grill\u2192PRD: viewer-server track (auto-run server, global-package discovery, viewer read-write)",
+      "title": "Grill→PRD: viewer-server track (auto-run server, global-package discovery, viewer read-write)",
       "owner": "team-lead",
-      "summary": "Grill\u2192PRD: viewer-server track (auto-run server, global-package discovery, viewer read-write)",
+      "summary": "Viewer-server grill ran: ADR-0007 (one global server, repo registry, writes through the server) + PRD-008 published; EXEC-054 criteria extended, EXEC-055/056 criteria set in backlog. alignment PASS on the ADR.",
       "closes_issues": [],
       "notes": "HITL, grill-first; sets EXEC-055/056 criteria; EXEC-054 implementation follows the PRD."
     },
@@ -64,7 +64,7 @@
       "type": "FEAT",
       "title": "EXEC-054: session-start auto-run viewer server (validate on the dogfood Instance)",
       "owner": "builder",
-      "summary": "EXEC-054: session-start auto-run viewer server (validate on the dogfood Instance)",
+      "summary": "viewer_server hook feature: SessionStart hash-port auto-run, zero-dep GET-only whitelisted daemon with idle self-exit, discovery record, doctor liveness; off in template, on here. package-qa PASS incl. live smoke; code-standards PASS (two revise cycles: named constants x5, truthful comment x1).",
       "closes_issues": [
         "EXEC-054"
       ],
@@ -75,7 +75,7 @@
       "type": "INFRA",
       "title": "EXEC-052+053: settle where gate verdicts live; align gate-watch sensing + sprint schema",
       "owner": "builder",
-      "summary": "EXEC-052+053: settle where gate verdicts live; align gate-watch sensing + sprint schema",
+      "summary": "EXEC-052: hooks.config.json variant-classed in stamp-policy.js; flipped toggles no longer drift-reported; stale marker hash drops on next update. EXEC-053: optional step_log added to sprint.schema.json (template + root); sprint_4/5 validate strictly; gate-watch verdict sensing extended. Gates PASS (one revise cycle: named patterns).",
       "closes_issues": [
         "EXEC-052",
         "EXEC-053"
@@ -87,22 +87,114 @@
       "type": "DOCS",
       "title": "prior-art agent writes its digest to .excn/research/",
       "owner": "team-lead",
-      "summary": "prior-art agent writes its digest to .excn/research/",
+      "summary": "prior-art agent writes its digest to .excn/research/prior-art-<prd-id>.md; alignment PASS, Brooks approved.",
       "closes_issues": [
         "EXEC-057"
       ],
       "notes": "HITL: chartered def change, alignment-gated, Brooks approval."
+    },
+    {
+      "id": "S5-5",
+      "type": "DOCS",
+      "title": "Invoked Agents on lighter models",
+      "owner": "team-lead",
+      "summary": "model: sonnet on alignment/process-adherence/nothing-new (template+root) and code-standards/package-qa (root); clerk stays haiku; Teammates unpinned. alignment PASS, Brooks approved.",
+      "closes_issues": [
+        "EXEC-059"
+      ],
+      "notes": "HITL chartered def change"
+    },
+    {
+      "id": "S5-6",
+      "type": "DOCS",
+      "title": "Teammate colors",
+      "owner": "team-lead",
+      "summary": "color frontmatter on all five persistent Teammates (scribe blue templated) + _teammate.template.md color line. alignment PASS, Brooks approved.",
+      "closes_issues": [
+        "EXEC-060"
+      ],
+      "notes": "HITL chartered def change"
     }
   ],
+  "in_progress": [],
+  "not_shipped": [],
   "defects_discovered": [],
-  "decisions": [],
-  "retrospective_notes": [],
+  "decisions": [
+    {
+      "title": "Viewer-server grill resolved (ADR-0007, PRD-008)",
+      "summary": "Idle self-exit + idempotent start; hash-derived per-repo ports in a quiet range with a *_progress discovery record; viewer_server toggle off-in-template/on-here; one global server with repo registry at step 2; viewer writes validate + land via the server as scribe's instrument. EXEC-055/056 stay in backlog with criteria set; sprint 5 implements EXEC-054 only."
+    }
+  ],
+  "retrospective_notes": [
+    {
+      "title": "Grill ran context-loaded (third occurrence)",
+      "body": "The sprint-5 viewer-server grill ran in the working session; PROCESS pins Work Grills to a fresh session. Third consecutive caveat-accepted occurrence (sprints 3, 4, 5). The pin is either getting teeth or getting rewritten — carried again for the Retro Loop."
+    },
+    {
+      "title": "Named-constants is the only violation builders hit — three times running",
+      "body": "Every code-standards FAIL across sprints 4–5 (builder twice, viewer once, builder again) is the same Structure rule: a meaningful literal inline where the file already names equivalents. Candidate: one sentence in builder/viewer defs or the CODE_STANDARDS rule itself calling out the self-check before handoff (\"grep your diff for digit literals and string suffixes in logic\")."
+    }
+  ],
   "step_log": [
     {
       "step": "alignment_review_pass",
       "at": "2026-06-10",
       "artifact": "src/template/.claude/agents/nothing-new-under-the-sun.md",
-      "summary": "PASS, 0 violations \u2014 chartered EXEC-057 change (digest persists to .excn/research/prior-art-<prd-id>.md) conforms to Principles and Philosophy; namespaced file coexists with architect's research ownership."
+      "summary": "PASS, 0 violations — chartered EXEC-057 change (digest persists to .excn/research/prior-art-<prd-id>.md) conforms to Principles and Philosophy; namespaced file coexists with architect's research ownership."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": ".excn/adr/0007-single-global-viewer-server.md",
+      "summary": "PASS, 0 violations - ADR-0007 records the sprint-5 grill decisions (idle self-exit, hash-derived port + discovery record, off-in-template default, one global server with repo registry, server validates+writes as scribe's instrument); meets all three ADR offer criteria, Precise Minimalism holds, no next-steps beyond the decided path, consistent with ADR-0002/0005/0006."
+    },
+    {
+      "step": "code_standards_fail",
+      "at": "2026-06-10",
+      "artifact": "EXEC-052/053: sprint.schema.json (+mirror), src/bin/stamp-policy.js, gate-watch.js + gate-rules.js (+mirrors)",
+      "summary": "FAIL — 1 violation: Named constants in src/template/.claude/hooks/gate-watch.js verdictEvidenceSince (inline /^sprint_\\d+\\.json$/ and '_progress.json' literals duplicate SPRINT_FILE_PATTERN/PROGRESS_FILE_PATTERN semantics). All other rules hold; mirrors byte-identical; fail-safe exit-0 sanctioned by ADR-0006."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "gate-watch.js (src/template + root mirror)",
+      "summary": "PASS, 0 violations — verdictEvidenceSince now tests reconstructed root-relative paths against SPRINT_FILE_PATTERN/PROGRESS_FILE_PATTERN"
+    },
+    {
+      "step": "code_standards_fail",
+      "at": "2026-06-10",
+      "artifact": "EXEC-054 viewer_server batch",
+      "summary": "FAIL — 5 named-constants violations (bare 200 in viewer-server.js and cli.js, djb2 literals 5381/33, text/plain mime, {url} placeholder string)"
+    },
+    {
+      "step": "code_standards_fail",
+      "at": "2026-06-10",
+      "artifact": "EXEC-054 viewer_server batch re-gate",
+      "summary": "FAIL — 1 violation. All 5 prior named-constants violations resolved (DJB2_SEED/DJB2_MULTIPLIER, shared HTTP_OK, ERROR_CONTENT_TYPE, CONTEXT_URL_PLACEHOLDER, VIEWER_HEALTH_OK_STATUS); mirrors byte-identical. New: Truthful comments — viewer-server-rules.js documents ERROR_CONTENT_TYPE as 'the daemon's plain-text error bodies (404/405)' but viewer-server-daemon.js sets it only on the 404 response; the 405 response sets no Content-Type."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-10",
+      "artifact": "sprint-5 combined EXEC-052/053/054: viewer_server hook feature (3 template hook scripts + rules data module, SessionStart wiring), hooks.config.json variant-classing in stamp-policy, doctor async + viewer liveness, sprint.schema.json optional step_log",
+      "summary": "PASS — 0 violations. Manifest parity (43 stamped incl. 3 new viewer hooks, dotted .gitignore, marker, pointers), idempotent re-init, JSON parse, npm pack parity exact, viewer-server_progress.json ignored / marker not / root .gitignore untouched, skip-safety + --force host-byte preservation, all 4 hooks fail-safe on garbage+empty stdin, update idempotent with drift persisted, variant untouched, flipped hooks.config.json toggles not drift-reported and stale marker hash dropped (EXEC-052 fix), doctor healthy/broken-config/outdated/unstamped + viewer disabled state, live viewer smoke (health 200, whitelist 404, traversal 404, idempotent pid reuse, record written, daemon killed clean), sprint_4+sprint_5 strictly valid against new schema."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": ".claude/agents + src/template/.claude/agents (EXEC-059: model sonnet on Invoked Agent defs)",
+      "summary": "PASS — 0 violations. Frontmatter-only addition, minimal, no cognition coaching, single responsibility intact, Src-First honored (template mirrors updated; root-only defs are project-local), tied to chartered observation (Brooks directive 2026-06-10, ADR-0004)."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": ".claude/agents + src/template/.claude/agents (EXEC-060: color frontmatter on persistent Teammates + _teammate.template placeholder)",
+      "summary": "PASS — 0 violations. One-line color frontmatter per Teammate, unique colors, template shape extended with placeholder per Precise Minimalism, Src-First honored, tied to chartered observation (Brooks directive 2026-06-10, ADR-0004)."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-054 viewer-server-daemon.js (template + root mirror)",
+      "summary": "PASS, 0 violations: 405 writeHead now includes ERROR_CONTENT_TYPE so the rules.js line 73 comment is truthful; mirror byte-identical; no new violations in file scan."
     }
   ]
 }

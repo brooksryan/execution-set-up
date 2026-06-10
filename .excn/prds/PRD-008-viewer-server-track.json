@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "id": "PRD-008",
+  "title": "Viewer-server track: auto-run, global registry, read-write issues",
+  "status": "published",
+  "created": "2026-06-10",
+  "amended": null,
+  "problem_statement": "The status-page viewer fails closed under file:// and needs a manually started http server, so in practice nobody has the page open. With many execution repos active at once there is also no single place to see them, and the viewer is read-only — filing or editing an issue still requires an agent session even for trivial edits.",
+  "solution": "Three steps (ADR-0007). First, a per-repo auto-run server validated on the dogfood Instance: a viewer_server hook feature on the existing toggle plumbing starts a zero-dependency static server at SessionStart — idle self-exit, hash-derived per-repo port in a quiet range, discovery record in the *_progress.json class, localhost-only and whitelisted to viewer assets + .excn JSON. Second, one globally-installed server on a well-known port with a repo registry: hooks register their repo, the server serves any registered repo, viewer assets come from the repo to keep version skew shallow. Third, read-write issues from the page: the server validates against the issue schema, assigns ids as the mechanical arm of the scribe-assigns-ids rule, and writes atomically.",
+  "user_stories": [
+    {
+      "id": 1,
+      "actor": "Team Lead",
+      "want": "the status page reachable in a browser the moment a session opens, with no manual server step",
+      "benefit": "the live sprint state is actually looked at instead of theoretically available"
+    },
+    {
+      "id": 2,
+      "actor": "Team Lead",
+      "want": "one server and one bookmark covering all my active execution repos",
+      "benefit": "many concurrent Instances stay visible without juggling ports and processes"
+    },
+    {
+      "id": 3,
+      "actor": "Instance maintainer",
+      "want": "servers that never orphan: idempotent start, self-exit when idle",
+      "benefit": "auto-run costs nothing when I am not using it and survives crashed sessions"
+    },
+    {
+      "id": 4,
+      "actor": "Team Lead",
+      "want": "to add and edit issues from the status page",
+      "benefit": "trivial tracker changes stop requiring an agent session"
+    }
+  ],
+  "implementation_decisions": [
+    {
+      "title": "viewer_server is a hook feature on the existing plumbing, off in the template",
+      "summary": "SessionStart hook on the ADR-0006 toggle plumbing; ships present-but-disabled, enabled on the dogfood Instance to validate (EXEC-054) before any wider default. Fail-safe contract holds: server problems never block a session."
+    },
+    {
+      "title": "Orphan prevention is idle self-exit, never a shutdown hook",
+      "summary": "The server exits itself after a quiet period; the open page counts as activity. Nothing depends on a clean session end, so killed sessions cannot leak a process. Start is idempotent: the hook probes the repo's port and reuses a live server."
+    },
+    {
+      "title": "Hash-derived per-repo ports with a discovery record",
+      "summary": "Port derives from the repo path into a quiet range, probing upward on collision with foreign listeners. The hook records port/pid/repo/started in a *_progress.json-class discovery file and surfaces the URL into session context. The record is the discovery contract the global server and write path reuse."
+    },
+    {
+      "title": "Serving is locked down by default",
+      "summary": "Bind localhost only; GET-only until the write step; path whitelist of viewer assets and .excn JSON — repos can contain credentials, so no general file serving."
+    },
+    {
+      "title": "One global server with a repo registry replaces per-repo servers",
+      "summary": "A separate globally-installed package listens on one well-known port; SessionStart hooks register the repo instead of spawning. It serves any registered repo and a cross-Instance overview. Viewer assets are served from each repo, not bundled, keeping server-vs-Instance version skew shallow (ADR-0007). Port/registry conventions and skew policy are settled at implementation grill of that slice."
+    },
+    {
+      "title": "Viewer writes go through the server as scribe's instrument",
+      "summary": "Issue add/edit endpoints validate against issue.schema.json, assign ids by scanning all partitions (the mechanical arm of the scribe-assigns-ids Don't), and write atomically. scribe remains the owner of moves and lifecycle; the server, like clerk, executes mechanically and refuses judgment work."
+    }
+  ],
+  "testing_decisions": [
+    "Health-check extension over unit tests, per PRD-007's precedent: doctor gains a viewer_server line (enabled/disabled, running, port, stale record, orphan detection — record pid alive but unreachable).",
+    "Idle-exit and idempotent-start are verified behaviorally on the dogfood Instance: two sessions, one server; no process after the idle window.",
+    "Write endpoints are exercised against schema-invalid payloads (rejected, named error) and id-collision races (two concurrent adds get distinct ids).",
+    "package-qa covers stamped additions; the global-server package gets its own publish preflight when that slice lands."
+  ],
+  "out_of_scope": [
+    "Serving anything beyond viewer assets and .excn JSON.",
+    "Remote (non-localhost) access, auth, or multi-user concerns.",
+    "Editing PRDs, sprints, or persistent docs from the viewer — issues only.",
+    "Replacing scribe: partition moves at sprint boundaries stay agent work."
+  ],
+  "issues": [
+    "EXEC-054",
+    "EXEC-055",
+    "EXEC-056"
+  ],
+  "notes": [
+    "Synthesized from the sprint-5 viewer-server grill (2026-06-10); decisions recorded in ADR-0007. Grill caveat: run from the working session, not a fresh one — third consecutive occurrence, carried to retro.",
+    "EXEC-055/056 remain in backlog with criteria set by this PRD; sprint 5 implements EXEC-054 only."
+  ]
+}

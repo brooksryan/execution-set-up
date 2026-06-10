@@ -19,6 +19,7 @@
 
 const crypto = require('crypto');
 const fs = require('fs');
+const http = require('http');
 const path = require('path');
 const { POINTER_FILES, POINTER_SENTINEL, CODEX_CHAIN_CAP, POINTER_BLOCK } = require('./pointer-block');
 const {
@@ -35,6 +36,10 @@ const {
   HOOKS_CONFIG_PATH,
   HOOKS_CONFIG_SCHEMA_PATH,
   HEARTBEAT_FRESH_MS,
+  VIEWER_HEALTH_HOST,
+  VIEWER_HEALTH_PATH,
+  VIEWER_PROBE_TIMEOUT_MS,
+  VIEWER_HEALTH_OK_STATUS,
 } = require('./health-policy');
 
 // Package root is one level up from bin/; the template ships beside it.
@@ -295,6 +300,13 @@ function wiringProblems(target, feature) {
       problems.push(`hook script missing: ${HOOKS_DIR}/${script}`);
     }
   }
+  // Spawned scripts are launched by the feature's own hook, not by settings — disk
+  // presence is the only wiring claim to check.
+  for (const script of feature.spawnedScripts || []) {
+    if (!fs.existsSync(path.join(target, HOOKS_DIR, script))) {
+      problems.push(`hook script missing: ${HOOKS_DIR}/${script}`);
+    }
+  }
   // settings-missing repeats per script when a feature rides several; report once.
   return [...new Set(problems)];
 }
@@ -323,17 +335,86 @@ function firingEvidence(target, feature) {
 }
 
 /**
+ * Probe a viewer-server discovery record's health endpoint.
+ * @param {number} port - the recorded port, probed on the loopback host.
+ * @returns {Promise<object|null>} the daemon's health body ({repo, pid, version})
+ * when our server answers, or null when nothing ours answers (refused, timeout,
+ * non-JSON, or wrong shape).
+ */
+function probeViewerHealth(port) {
+  return new Promise((resolve) => {
+    const request = http.get(
+      { host: VIEWER_HEALTH_HOST, port, path: VIEWER_HEALTH_PATH, timeout: VIEWER_PROBE_TIMEOUT_MS },
+      (response) => {
+        let raw = '';
+        response.on('data', (chunk) => { raw += chunk; });
+        response.on('end', () => {
+          try {
+            const body = JSON.parse(raw);
+            resolve(response.statusCode === VIEWER_HEALTH_OK_STATUS && body && typeof body.repo === 'string' ? body : null);
+          } catch {
+            resolve(null); // a non-JSON answer is a foreign listener, not our server
+          }
+        });
+        response.on('error', () => resolve(null));
+      }
+    );
+    request.on('timeout', () => { request.destroy(); resolve(null); });
+    request.on('error', () => resolve(null));
+  });
+}
+
+/**
+ * Verdict for an enabled liveness feature (viewer_server): judge the discovery
+ * record by whether its pid is alive and its port answers our health endpoint, per
+ * PRD-008 — orphan/stale detection, not heartbeat age.
+ * @param {string} target - absolute path of the target project root.
+ * @param {object} feature - a HOOK_FEATURES entry with `liveness` set.
+ * @returns {Promise<string>} the doctor line's verdict text.
+ */
+async function livenessVerdict(target, feature) {
+  const record = (() => {
+    try {
+      return JSON.parse(fs.readFileSync(path.join(target, feature.evidence), 'utf8'));
+    } catch {
+      return null;
+    }
+  })();
+  if (!record || !Number.isInteger(record.pid) || !Number.isInteger(record.port)) {
+    return `stale — enabled but no usable discovery record at ${feature.evidence} (starts at next SessionStart)`;
+  }
+  const pidAlive = (() => {
+    try {
+      process.kill(record.pid, 0); // signal 0: existence check only, nothing is sent
+      return true;
+    } catch {
+      return false;
+    }
+  })();
+  if (!pidAlive) {
+    return `stale record — pid ${record.pid} not running (server idle-exited or died; next SessionStart restarts it)`;
+  }
+  const health = await probeViewerHealth(record.port);
+  if (health === null || health.repo !== target) {
+    return `stale record — pid ${record.pid} alive but port ${record.port} not answering as this repo's server (possible orphan; next SessionStart re-resolves)`;
+  }
+  return `running (http://${VIEWER_HEALTH_HOST}:${record.port}/ — pid ${record.pid})`;
+}
+
+/**
  * Run the `doctor` command: report per-feature hook health and outdated detection.
  * Per-feature verdicts: `broken` (wiring missing — a disarmed hook — or the toggle
  * config invalid), `disabled`, `firing` (enabled with fresh heartbeat), `stale`
  * (enabled, no recent evidence), or `enabled` (wired and on, but the feature leaves
- * no heartbeat to judge by). A degraded Instance still exits 0 — doctor's job is the
- * report; only an unstamped target (no version marker) is a non-zero failure.
+ * no heartbeat to judge by). Liveness features (viewer_server) report `running` or
+ * `stale record` from pid/port probing instead. A degraded Instance still exits 0 —
+ * doctor's job is the report; only an unstamped target (no version marker) is a
+ * non-zero failure.
  * @param {string[]} args - args after the `doctor` command word (target only).
- * @returns {void}
+ * @returns {Promise<void>}
  * @throws Exits non-zero (after a stderr message) when the target is unstamped.
  */
-function doctor(args) {
+async function doctor(args) {
   const target = path.resolve(args.find((arg) => !arg.startsWith(FLAG_PREFIX)) || '.');
 
   const markerFile = path.join(target, VERSION_MARKER_PATH);
@@ -377,6 +458,7 @@ function doctor(args) {
     if (problems.length > 0) verdict = `broken — ${problems.join('; ')}`;
     else if (!config.valid) verdict = `broken — toggle config ${config.detail} (hook fails safe to disabled)`;
     else if (toggles[feature.key] !== true) verdict = 'disabled (wired; enable in .excn/hooks.config.json)';
+    else if (feature.liveness === true) verdict = await livenessVerdict(target, feature);
     else {
       const evidence = firingEvidence(target, feature);
       if (evidence.status === 'firing') verdict = `firing (${evidence.detail})`;
@@ -412,8 +494,9 @@ function printUsage() {
       'init wires a pointer block into existing CLAUDE.md / AGENTS.md (append-only,',
       'even under --force; both created if neither exists).',
       'init never overwrites an existing manifest file unless --force.',
-      'doctor reports each hook feature as enabled, firing, stale, or broken, names a',
-      'broken toggle config, and flags an Instance stamped at an older framework version.',
+      'doctor reports each hook feature as enabled, firing, stale, or broken (viewer_server:',
+      'running or stale record), names a broken toggle config, and flags an Instance stamped',
+      'at an older framework version.',
       '',
     ].join('\n')
   );

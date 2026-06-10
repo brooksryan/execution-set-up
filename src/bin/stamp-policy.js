@@ -15,11 +15,16 @@
 // - VERSION_MARKER_PATH must stay outside every ignore rule in the stamped
 //   .excn/.gitignore so the marker survives being committed.
 
-// Grill-output / teammate-definition files: stamped once as seeds, never updated.
+// Grill-output / teammate-definition / per-Instance-state files: stamped once as
+// seeds, never updated. hooks.config.json is here because its toggles are
+// per-Instance state (EXEC-052): update neither overwrites nor drift-reports it.
+// A hash recorded for it by an older stamp simply drops out of the marker on the
+// next update — the marker rewrite carries forward invariant hashes only.
 const VARIANT_FILES = [
   '.excn/CONTEXT.md',
   '.excn/PHILOSOPHY.md',
   '.excn/TEAM_DIRECTIVE.md',
+  '.excn/hooks.config.json',
   '.claude/agents/scribe.md',
 ];
 

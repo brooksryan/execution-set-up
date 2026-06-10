@@ -14,6 +14,10 @@
 // - `evidence` is the *_progress.json heartbeat the feature writes when it fires,
 //   or null for stateless features that leave no firing trace (wired+enabled is the
 //   strongest claim doctor can make for those).
+// - `spawnedScripts` (optional) are scripts the feature's hook spawns itself rather
+//   than settings invoking them — checked for disk presence only, never for wiring.
+// - `liveness` (optional) marks a feature whose evidence is a live-process discovery
+//   record ({port, pid, repo}) judged by pid/port probing, not heartbeat age.
 
 // The stamped hook features, in report order.
 const HOOK_FEATURES = [
@@ -32,7 +36,24 @@ const HOOK_FEATURES = [
     scripts: ['load-report.js'],
     evidence: '.excn/load_progress.json',
   },
+  {
+    key: 'viewer_server',
+    scripts: ['viewer-server.js'],
+    spawnedScripts: ['viewer-server-daemon.js'],
+    evidence: '.excn/viewer-server_progress.json',
+    liveness: true,
+  },
 ];
+
+// How doctor probes a viewer_server discovery record: the daemon's loopback health
+// endpoint (it echoes {repo, pid, version}), with a short budget so a wedged
+// listener reads as unreachable instead of hanging the report.
+const VIEWER_HEALTH_HOST = '127.0.0.1';
+const VIEWER_HEALTH_PATH = '/__viewer-server';
+const VIEWER_PROBE_TIMEOUT_MS = 500;
+// The only status the daemon's health endpoint answers with on success — mirrors
+// HTTP_OK in the stamped viewer-server-rules.js (one contract, two packages).
+const VIEWER_HEALTH_OK_STATUS = 200;
 
 // Where the stamped hook wiring and toggle config live in an Instance.
 const SETTINGS_PATH = '.claude/settings.json';
@@ -52,4 +73,8 @@ module.exports = {
   HOOKS_CONFIG_PATH,
   HOOKS_CONFIG_SCHEMA_PATH,
   HEARTBEAT_FRESH_MS,
+  VIEWER_HEALTH_HOST,
+  VIEWER_HEALTH_PATH,
+  VIEWER_PROBE_TIMEOUT_MS,
+  VIEWER_HEALTH_OK_STATUS,
 };

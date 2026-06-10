@@ -1,5 +1,6 @@
 ---
 name: <kebab-name>
+color: <one of: blue|orange|green|purple|cyan|red|yellow — unique per Teammate>
 description: "<One line: this Teammate's role and the single domain it owns. Written so the Team Lead routes work to it correctly.>"
 ---
 
