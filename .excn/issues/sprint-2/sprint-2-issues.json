@@ -1,0 +1,391 @@
+{
+  "schema_version": "1.0",
+  "issues": [
+    {
+      "id": "EXEC-007",
+      "title": "Implement execution-grill-with-docs skill",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/template",
+        "skills"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "Stamp src/template/.claude/skills/execution-grill-with-docs/{SKILL.md, CONTEXT-FORMAT.md, ADR-FORMAT.md} as an .excn-native fork of grill-with-docs, and mirror into root .claude/skills/ (Src-First). The fork subsumes the design resolutions of EXEC-024, EXEC-026, EXEC-027, EXEC-028, EXEC-029: glossary writes to .excn/CONTEXT.md only, ADR scan/write targets .excn/adr/ continuing the existing numbering, the multi-context CONTEXT-MAP convention is dropped for the single-namespace stance, mid-grill philosophies are parked as retro observations, and the skill reads host pointer targets explicitly.",
+      "prd": "PRD-005",
+      "acceptance_criteria": [
+        "src/template/.claude/skills/execution-grill-with-docs/ carries SKILL.md, CONTEXT-FORMAT.md, ADR-FORMAT.md, all .excn-native",
+        "glossary writes target .excn/CONTEXT.md only — no second root glossary (resolves EXEC-024)",
+        "ADR scan/write targets .excn/adr/ and continues the existing 0001/0002 numbering (resolves EXEC-026)",
+        "the multi-context CONTEXT-MAP convention is dropped; the skill takes the single-namespace stance (resolves EXEC-027)",
+        "mid-grill philosophies are routed as retro observations, not dropped (resolves EXEC-028)",
+        "the skill reads host pointer targets explicitly rather than root-path defaults (resolves EXEC-029)",
+        "root .claude/skills/ mirror is byte-identical to src (Src-First)",
+        "a grill run writes all decision records to the framework .excn location with zero translation language",
+        "alignment gate PASS"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "Re-scoped from 'Resolve grill-with-docs: fork vs adapt' for sprint 2 (fork direction ruled by Brooks 2026-06-07; design grill closed under PRD-005). Subsumes the design resolutions of EXEC-024/026/027/028/029 — no closes_issues schema field exists, so the subsumption is recorded here ownership-style; those issues stay open and close when this ships. Skill name fixed to execution-grill-with-docs (Work Grill fork decision). Lands as 0.3.0. Shipped 2026-06-07 by team-lead (sprint_2 item S2-1): .excn-native execution-grill-with-docs (SKILL.md + CONTEXT-FORMAT.md + ADR-FORMAT.md); explicit-path discovery, single context, ADRs to .excn/adr/, mid-grill philosophy via PRD notes→retro, inline glossary writes; alignment PASS 0 violations; src+root mirrored. Subsumes EXEC-024/026/027/028/029 (cascade-closed)."
+    },
+    {
+      "id": "EXEC-008",
+      "title": "Implement execution-to-prd skill",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/template",
+        "skills"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "Stamp src/template/.claude/skills/execution-to-prd/SKILL.md (single file) as an .excn-native fork of to-prd, and mirror into root .claude/skills/ (Src-First). It publishes .excn/prds/PRD-NNN-<slug>.json with prd.schema.json as the contract; no label vocabulary and no external-tracker setup dependency.",
+      "prd": "PRD-005",
+      "acceptance_criteria": [
+        "src/template/.claude/skills/execution-to-prd/SKILL.md exists as a single file (no multi-doc set)",
+        "a run publishes .excn/prds/PRD-NNN-<slug>.json that validates against prd.schema.json",
+        "no label vocabulary and no external-tracker setup dependency",
+        "root .claude/skills/ mirror is byte-identical to src (Src-First)",
+        "alignment gate PASS"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "Re-scoped from 'Resolve to-prd: JSON publish target, no labels' for sprint 2 under PRD-005; fork direction ruled by Brooks 2026-06-07. Shipped 2026-06-07 by team-lead (sprint_2 item S2-3): execution-to-prd fork publishes schema-valid JSON PRDs to .excn/prds/PRD-<NNN>-<slug>.json, prd.schema.json sole authority, no markdown template/labels/tracker; alignment PASS; src+root mirrored."
+    },
+    {
+      "id": "EXEC-009",
+      "title": "Implement execution-to-issues skill",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/template",
+        "skills"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "Stamp src/template/.claude/skills/execution-to-issues/SKILL.md (single file) as an .excn-native fork of to-issues, and mirror into root .claude/skills/ (Src-First). It appends to the partitioned backlog target with issue.schema.json as the contract, and is invocable standalone (not only as a grill substep).",
+      "prd": "PRD-005",
+      "acceptance_criteria": [
+        "src/template/.claude/skills/execution-to-issues/SKILL.md exists as a single file",
+        "a run appends issues to the partitioned backlog target, each validating against issue.schema.json",
+        "the skill is invocable standalone, not only as a grill substep",
+        "root .claude/skills/ mirror is byte-identical to src (Src-First)",
+        "alignment gate PASS"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-030"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "Re-scoped from 'Resolve to-issues: schema-field output, no markdown body template' for sprint 2 under PRD-005; fork direction ruled by Brooks 2026-06-07. depends_on EXEC-030 — the partitioned backlog target must exist before the skill can append to it. Shipped 2026-06-07 by team-lead (sprint_2 item S2-4): execution-to-issues fork appends schema-valid issues to .excn/issues/backlog.json, issue.schema.json sole authority, globally-unique id scan across partitions, invocable standalone; alignment PASS; src+root mirrored."
+    },
+    {
+      "id": "EXEC-010",
+      "title": "Update Preflight manifest and Scaffolder template to the resolution outcome",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/SKILL.md",
+        "src/bin",
+        "src/template"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "Reflect EXEC-007/008/009 outcomes: Preflight's required-skill list matches what the framework actually uses; stamped template carries the forked skills and the .excn/adr location reference; schemas current.",
+      "prd": "PRD-005",
+      "acceptance_criteria": [
+        "Preflight's required-skill list matches the forked skill set (execution-grill-with-docs, execution-to-prd, execution-to-issues)",
+        "the Scaffolder manifest stamps the forked skills and the .excn/adr location reference",
+        "schemas current",
+        "package-qa PASS on the CLI/template change",
+        "a fresh init stamps the updated manifest"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-007",
+        "EXEC-008",
+        "EXEC-009"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "Kept from sprint 1, re-pointed to PRD-005 for sprint 2. package-qa gate mandatory. Shipped 2026-06-07 by team-lead (sprint_2 item S2-5): Setup Skill Preflight drops the three forked skills from required globals (keeps make-teammate, async-questions), Scaffolder stamps them; Setup Grill/Handoff/README/both PROCESS.md/principles.md reference the execution-* forks; src/SKILL.md sole-copy; alignment PASS."
+    },
+    {
+      "id": "EXEC-024",
+      "title": "Work Grill fork: root CONTEXT.md creation causes split-brain glossary",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src",
+        "skills"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "grill-with-docs CONTEXT-FORMAT.md says \"If neither exists, create a root CONTEXT.md lazily when the first term is resolved\" and \"One CONTEXT.md at the repo root.\" An .excn Instance has no root CONTEXT.md, so the skill creates a second glossary at root, blind to .excn/CONTEXT.md.",
+      "prd": "PRD-005",
+      "slice_type": null,
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "Catalog evidence from the EXEC-006 scratch run (npx to-execution@0.2.2, 2026-06-07); acceptance criteria deferred to the EXEC-007 design grill; direction ruled: fork, stamped per-Instance. Resolution implemented under EXEC-007; stays open, closes when EXEC-007 ships. Closed 2026-06-07 (sprint_2): resolution shipped inside execution-grill-with-docs (EXEC-007, item S2-1)."
+    },
+    {
+      "id": "EXEC-025",
+      "title": "Adopt grill-with-docs glossary format into the stamped CONTEXT.md seed",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/template",
+        "skills"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "The skill writes ## Language with **Term** + _Avoid_ aliases, Relationships, Example dialogue, Flagged ambiguities; our seed declares ## Glossary + ### Term + ## Team roster. RULED by Brooks: adopt their format, merged with our roster section. Implement: src/template/.excn/CONTEXT.md seed gains the Language format (Term + _Avoid_ aliases, Relationships, Example dialogue, Flagged ambiguities) merged with the roster section; root .excn/CONTEXT.md seed mirrors (Src-First).",
+      "prd": "PRD-005",
+      "acceptance_criteria": [
+        "src/template/.excn/CONTEXT.md seed uses the Language format: **Term** entries with _Avoid_ aliases, Relationships, Example dialogue, Flagged ambiguities",
+        "the Language format is merged with the existing team-roster section (roster preserved)",
+        "root .excn/CONTEXT.md seed mirrors src (Src-First)",
+        "alignment gate PASS"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "Re-scoped for sprint 2 from a catalog deviation to its own implementation slice (its resolution is this issue, not EXEC-007). Catalog evidence from the EXEC-006 scratch run (npx to-execution@0.2.2, 2026-06-07); format-adoption direction ruled by Brooks 2026-06-07. Shipped 2026-06-07 (sprint_2 item S2-2): root .excn/CONTEXT.md adopted the seed Language format (3 doc-level sections + 12 _Avoid_ lines, 17 terms preserved); seed + root both alignment PASS (.excn/prd-005_progress.json); bulk per-term restructure deferred (adopt-forward) by recorded sprint decision."
+    },
+    {
+      "id": "EXEC-026",
+      "title": "Work Grill fork: docs/adr hardcode and numbering scan miss .excn/adr",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src",
+        "skills"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "ADR-FORMAT.md says \"ADRs live in docs/adr/\", \"Create the docs/adr/ directory lazily\", \"Scan docs/adr/ for the highest existing number\" — creates a second ADR home and collides numbering with .excn/adr/0001-0002.",
+      "prd": "PRD-005",
+      "slice_type": null,
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "Catalog evidence from the EXEC-006 scratch run (npx to-execution@0.2.2, 2026-06-07); acceptance criteria deferred to the EXEC-007 design grill; direction ruled: fork, stamped per-Instance. Resolution implemented under EXEC-007; stays open, closes when EXEC-007 ships. Closed 2026-06-07 (sprint_2): resolution shipped inside execution-grill-with-docs (EXEC-007, item S2-1)."
+    },
+    {
+      "id": "EXEC-027",
+      "title": "Work Grill fork: CONTEXT-MAP multi-context convention foreign to the namespace",
+      "status": "closed",
+      "severity": "P3",
+      "scope": [
+        "src",
+        "skills"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "\"A CONTEXT-MAP.md at the repo root lists the contexts\" + per-directory CONTEXT.md/docs/adr scaffolds structure outside .excn; the framework has no multi-context stance — the fork must take one.",
+      "prd": "PRD-005",
+      "slice_type": null,
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "Catalog evidence from the EXEC-006 scratch run (npx to-execution@0.2.2, 2026-06-07); acceptance criteria deferred to the EXEC-007 design grill; direction ruled: fork, stamped per-Instance. Resolution implemented under EXEC-007; stays open, closes when EXEC-007 ships. Closed 2026-06-07 (sprint_2): resolution shipped inside execution-grill-with-docs (EXEC-007, item S2-1)."
+    },
+    {
+      "id": "EXEC-028",
+      "title": "Work Grill fork: no protocol for philosophies surfaced mid-grill",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src",
+        "skills"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "grill-with-docs updates CONTEXT.md and offers ADRs only; PHILOSOPHY.md changes are Retro-Loop-gated, so mid-grill philosophies have no route — fork needs one (e.g. park as retro observations).",
+      "prd": "PRD-005",
+      "slice_type": null,
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "Catalog evidence from the EXEC-006 scratch run (npx to-execution@0.2.2, 2026-06-07); acceptance criteria deferred to the EXEC-007 design grill; direction ruled: fork, stamped per-Instance. Resolution implemented under EXEC-007; stays open, closes when EXEC-007 ships. Closed 2026-06-07 (sprint_2): resolution shipped inside execution-grill-with-docs (EXEC-007, item S2-1)."
+    },
+    {
+      "id": "EXEC-029",
+      "title": "Work Grill fork: discovery blindness — skill never follows host pointer files",
+      "status": "closed",
+      "severity": "P3",
+      "scope": [
+        "src",
+        "skills"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "\"look for existing documentation\" but .excn is search-invisible by design and the skill text directs at root paths; only the session-loaded pointer block mitigates. Fork reads pointer targets explicitly.",
+      "prd": "PRD-005",
+      "slice_type": null,
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "Catalog evidence from the EXEC-006 scratch run (npx to-execution@0.2.2, 2026-06-07); acceptance criteria deferred to the EXEC-007 design grill; direction ruled: fork, stamped per-Instance. Resolution implemented under EXEC-007; stays open, closes when EXEC-007 ships. Closed 2026-06-07 (sprint_2): resolution shipped inside execution-grill-with-docs (EXEC-007, item S2-1)."
+    },
+    {
+      "id": "EXEC-030",
+      "title": "Partition schemas + template skeleton",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/template/schemas",
+        "src/template"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "Evolve issue.schema.json and sprint.schema.json to the partitioned shape (PRD-004), and make the template stamp .excn/issues/backlog.json plus a sprint-N skeleton instead of the single issues.json/sprint records. Src-First: schemas and template change in src/ first, root mirrors.",
+      "prd": "PRD-004",
+      "acceptance_criteria": [
+        "issue.schema.json and sprint.schema.json are updated to the partitioned shape",
+        "the template stamps .excn/issues/backlog.json and a sprint-N skeleton",
+        "schemas parse and a freshly stamped Instance validates against them",
+        "root schemas/ and template mirror src (Src-First)",
+        "alignment gate PASS"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "New for sprint 2 under PRD-004 (work-tracking partition). This slice introduces the partitioned shape; EXEC-009 (execution-to-issues) depends on it. Shipped 2026-06-07 by team-lead (sprint_2 item S2-6): issue/sprint schemas carry the partition contract (backlog.json + sprint-<N>/sprint-<N>-issues.json), template stamps empty backlog.json, .gitkeep removed, src+root mirrored; package-qa PASS 0 violations."
+    },
+    {
+      "id": "EXEC-031",
+      "title": "Cross-file validators + path-contract reference sweep",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src",
+        "skills"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "Make scribe's validators operate across the partitioned files, and sweep the path contract: PROCESS.md, the scribe definition, the process-adherence rubric, and the publish targets all reference the partitioned layout instead of single-file issues.json/sprint paths.",
+      "prd": "PRD-004",
+      "acceptance_criteria": [
+        "scribe's validators operate cross-file across the partitioned backlog and sprint records",
+        "PROCESS.md, the scribe definition, and the process-adherence rubric reference the partitioned paths",
+        "publish targets (execution-to-prd / execution-to-issues) point at the partitioned layout",
+        "no stale single-file issues.json or sprint path references remain in live docs",
+        "alignment gate PASS"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-030"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "New for sprint 2 under PRD-004. Shipped 2026-06-07 (sprint_2 item S2-7): scribe.md (+ src/template mirror, byte-identical) gained partition ownership + ## Partition mechanics + cross-file validation discipline. Landed mid-sprint as a chartered slice per ADR-0004; alignment PASS 0 violations over the partition doc set (.excn/prd-004_progress.json, step alignment_review_pass). PROCESS.md/process-adherence.md half authored by team-lead."
+    },
+    {
+      "id": "EXEC-032",
+      "title": "Live migration of root Instance to partitions",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "root"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "Split the root Instance's issues.json and sprint records into the partitioned layout with zero data loss; issue and sprint counts reconcile before and after. State migration is scribe's; the template/doc side is team-lead's, Src-First.",
+      "prd": "PRD-004",
+      "acceptance_criteria": [
+        "root .excn/issues/issues.json is split into the partitioned backlog + sprint records with zero data loss",
+        "issue and sprint counts reconcile before and after the migration",
+        "no orphaned pre-partition state files remain at root",
+        "alignment gate PASS"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-030",
+        "EXEC-031"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "New for sprint 2 under PRD-004. State migration is scribe-owned; template/doc changes are team-lead, Src-First. Shipped 2026-06-07 (sprint_2 item S2-8): live root-Instance migration to partitions; team-lead spot-checked on disk (tree, 33 unique, 0 dangling, gitignored, no orphans). Functional reconciliation is the gate (ephemeral work-tracking, no alignment needed)."
+    },
+    {
+      "id": "EXEC-033",
+      "title": "Publish to-execution@0.3.0",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src",
+        "npm"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "Publish the forked Work Grill (PRD-005) and the work-tracking partition (PRD-004) together as to-execution@0.3.0 behind the EXEC-015 guards. Registry acceptance is npx-vs-local byte-diff; package-qa runs from the published tarball.",
+      "prd": "PRD-005",
+      "acceptance_criteria": [
+        "to-execution@0.3.0 is published to the public registry behind the EXEC-015 guards",
+        "the fork (PRD-005) and the partition (PRD-004) ship together in the 0.3.0 tarball",
+        "npx-vs-local byte-diff registry acceptance passes",
+        "package-qa PASS run from the published tarball"
+      ],
+      "slice_type": "HITL",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-010",
+        "EXEC-032"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 2,
+      "closed_in_sprint": 2,
+      "notes": "New for sprint 2. HITL — publish gate, explicit Team Lead approval required. Carries both PRD-005 and PRD-004 outcomes in one release. Shipped 2026-06-07 by packager (sprint_2 item S2-9): to-execution@0.3.0 live on npm (shasum 2a2d5194f8cce193c34e459cfd1e47cb6c0c44c0; 31 files, 21.4 kB packed). Release commit 821cc06, tag v0.3.0, content commit 7ce56ea. Gates: package-qa PASS 0 violations from the pack tarball; prepublishOnly 6 identity guards held; registry acceptance npx-vs-local byte-diff IDENTICAL 27/27, three execution-* skills + .excn/issues/backlog.json confirmed in the scratch stamp."
+    }
+  ]
+}

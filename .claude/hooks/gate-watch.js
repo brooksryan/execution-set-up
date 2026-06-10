@@ -1,0 +1,191 @@
+#!/usr/bin/env node
+'use strict';
+
+// gate-watch — the gate-reminders hook feature (ADR-0006, remind-only; default ON).
+// Two modes, selected by argv: `post-tool` (PostToolUse on Write/Edit) watches
+// gate-relevant paths and injects a gate-due reminder as additionalContext; `stop`
+// (Stop) blocks ONCE — guarded by stop_hook_active — when gated paths were edited
+// this session but no gate verdict has been recorded, naming the gates due. It never
+// spawns an agent. Session state lives in .excn/gate-watch_progress.json (the
+// *_progress.json ignore class, ADR-0005). FAIL SAFE: any missing/malformed config,
+// unexpected payload, or internal error exits 0 with no output (PRD-007) — this
+// intentionally inverts the fail-closed CLI rule; the health check surfaces decay.
+
+const path = require('path');
+const lib = require('./hook-lib');
+const {
+  GATE_PATH_RULES,
+  GATED_DOC_FILES,
+  GATED_DOC_GATES,
+  REMINDER_TEMPLATE,
+  BLOCK_REASON_TEMPLATE,
+} = require('./gate-rules');
+
+const FEATURE = 'gate_reminders';
+const MODE_POST_TOOL = 'post-tool';
+const MODE_STOP = 'stop';
+
+// Per-session pending-gate state, keyed by session_id; in the *_progress.json
+// ignore class so it never lands in git.
+const STATE_RELATIVE_PATH = path.join('.excn', 'gate-watch_progress.json');
+const STATE_SCHEMA_VERSION = '1.0';
+
+// Sessions idle longer than this are pruned so the state file cannot grow unbounded
+// across many teammate sessions.
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+
+// The file-editing tools whose payloads carry a file_path worth classifying.
+const EDIT_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
+
+// A write to any progress record is where gate verdicts land (PROCESS.md), so it
+// clears this session's pending gates — except a write to this feature's own state.
+const PROGRESS_FILE_PATTERN = /^\.excn\/[^/]*_progress\.json$/;
+const OWN_STATE_BASENAME = 'gate-watch_progress.json';
+
+/**
+ * Normalize an edited file's path to Instance-root-relative, forward-slash form.
+ * @param {string} projectRoot - the Instance root (payload cwd).
+ * @param {string} filePath - the tool_input file path (absolute or relative).
+ * @returns {string|null} the root-relative path, or null when the file lies outside
+ * the Instance (never gate-relevant).
+ */
+function rootRelative(projectRoot, filePath) {
+  const relative = path.relative(projectRoot, path.resolve(projectRoot, filePath));
+  if (relative.startsWith('..') || path.isAbsolute(relative)) return null;
+  return relative.split(path.sep).join('/');
+}
+
+/**
+ * Name the QA gates an edit to a path puts on the hook.
+ * @param {string} relativePath - Instance-root-relative, forward-slash path.
+ * @returns {string[]} gate names due (empty when the path is not gate-relevant).
+ */
+function gatesFor(relativePath) {
+  for (const rule of GATE_PATH_RULES) {
+    if (relativePath.startsWith(rule.prefix)) return rule.gates;
+  }
+  if (GATED_DOC_FILES.includes(relativePath)) return GATED_DOC_GATES;
+  return [];
+}
+
+/**
+ * Load the pending-gate state, pruning sessions idle past the TTL.
+ * @param {string} stateFile - absolute path of the state file.
+ * @returns {object} `{ schema_version, sessions }` (fresh shape when missing/corrupt).
+ */
+function loadState(stateFile) {
+  const raw = lib.readJsonSafe(stateFile);
+  const sessions = raw && raw.sessions && typeof raw.sessions === 'object' ? raw.sessions : {};
+  const cutoff = Date.now() - SESSION_TTL_MS;
+  for (const [id, session] of Object.entries(sessions)) {
+    if (!session || typeof session.updated_at !== 'number' || session.updated_at < cutoff) {
+      delete sessions[id];
+    }
+  }
+  return { schema_version: STATE_SCHEMA_VERSION, sessions };
+}
+
+/**
+ * PostToolUse mode: classify the edited path. A gate-relevant edit records the gates
+ * as pending for this session and injects the gate-due reminder; a progress-record
+ * write clears the session's pending gates (the verdict landed).
+ * @param {object} payload - the PostToolUse hook payload.
+ * @param {string} projectRoot - the Instance root.
+ * @returns {void}
+ */
+function handlePostTool(payload, projectRoot) {
+  if (!EDIT_TOOLS.has(payload.tool_name) || !payload.session_id) return;
+  const filePath = payload.tool_input && payload.tool_input.file_path;
+  if (typeof filePath !== 'string' || filePath === '') return;
+  const relativePath = rootRelative(projectRoot, filePath);
+  if (relativePath === null) return;
+
+  const stateFile = path.join(projectRoot, STATE_RELATIVE_PATH);
+  const gates = gatesFor(relativePath);
+
+  if (gates.length > 0) {
+    const state = loadState(stateFile);
+    const session = state.sessions[payload.session_id] || { pending: {}, paths: [], updated_at: 0 };
+    for (const gate of gates) session.pending[gate] = true;
+    if (!session.paths.includes(relativePath)) session.paths.push(relativePath);
+    session.updated_at = Date.now();
+    state.sessions[payload.session_id] = session;
+    lib.atomicWriteJson(stateFile, state);
+    lib.emit({
+      hookSpecificOutput: {
+        hookEventName: 'PostToolUse',
+        additionalContext: REMINDER_TEMPLATE.replace('{path}', relativePath).replace(
+          '{gates}',
+          gates.join(' and ')
+        ),
+      },
+    });
+    return;
+  }
+
+  if (PROGRESS_FILE_PATTERN.test(relativePath) && path.basename(relativePath) !== OWN_STATE_BASENAME) {
+    const state = loadState(stateFile);
+    const session = state.sessions[payload.session_id];
+    if (session && Object.keys(session.pending).length > 0) {
+      // The verdict record landed — this session is square with the protocol.
+      delete state.sessions[payload.session_id];
+      lib.atomicWriteJson(stateFile, state);
+    }
+  }
+}
+
+/**
+ * Stop mode: block once when the session holds pending gates with no verdict
+ * recorded. stop_hook_active guards the loop — on the hook-induced continuation the
+ * pending state is cleared and the agent stops freely (one reminder, never a wedge).
+ * @param {object} payload - the Stop hook payload.
+ * @param {string} projectRoot - the Instance root.
+ * @returns {void}
+ */
+function handleStop(payload, projectRoot) {
+  if (!payload.session_id) return;
+  const stateFile = path.join(projectRoot, STATE_RELATIVE_PATH);
+  const state = loadState(stateFile);
+  const session = state.sessions[payload.session_id];
+  const pendingGates = session ? Object.keys(session.pending) : [];
+  if (pendingGates.length === 0) return;
+
+  if (payload.stop_hook_active === true) {
+    // Second stop after our block: the reminder was delivered; clear and let go.
+    delete state.sessions[payload.session_id];
+    lib.atomicWriteJson(stateFile, state);
+    return;
+  }
+
+  const editedPaths = Array.isArray(session.paths) ? session.paths : [];
+  lib.emit({
+    decision: 'block',
+    reason: BLOCK_REASON_TEMPLATE.replace('{paths}', editedPaths.join(', ')).replace(
+      '{gates}',
+      pendingGates.join(' and ')
+    ),
+  });
+}
+
+/**
+ * Entry point: read the payload, check the feature toggle, dispatch on the argv
+ * mode. Every path — including thrown errors — exits 0 (fail safe, ADR-0006).
+ * @returns {void}
+ */
+function main() {
+  try {
+    const mode = process.argv[2];
+    if (mode !== MODE_POST_TOOL && mode !== MODE_STOP) process.exit(0);
+    const payload = lib.readPayload();
+    if (!payload) process.exit(0);
+    const projectRoot = typeof payload.cwd === 'string' && payload.cwd !== '' ? payload.cwd : process.cwd();
+    if (!lib.featureEnabled(projectRoot, FEATURE)) process.exit(0);
+    if (mode === MODE_POST_TOOL) handlePostTool(payload, projectRoot);
+    else handleStop(payload, projectRoot);
+    process.exit(0);
+  } catch {
+    process.exit(0); // fail safe: a broken hook never blocks work
+  }
+}
+
+main();

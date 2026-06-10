@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": 3,
+  "name": "npm-auth hardening, status viewer, cleaner-CLI grill, 0.3.0 acceptance",
+  "status": "closed",
+  "dates": {
+    "start": "2026-06-08",
+    "end": "2026-06-09",
+    "duration_note": "2026-06-08 → 2026-06-09. Final: 8 shipped / 0 in_progress / 0 not_shipped. Shipped: the status-page viewer (EXEC-036), project-scoped npm auth (EXEC-034), and the cleaner-CLI grill (EXEC-035 → PRD-006), then PRD-006's four implementation slices — architect Teammate (EXEC-038), the researched CODE_STANDARDS extension (EXEC-039), the behavior-preserving Scaffolder CLI refactor (EXEC-040), and the release-tooling split out of the shipped product (EXEC-041) — plus the zero-glue 0.3.0 Work Grill acceptance (EXEC-011). EXEC-037 (2FA-bypass-on-write proof) filed to backlog as the deferred follow-up to EXEC-034. All 8 sprint issues closed_in_sprint 3; the companion partition sprint-3/sprint-3-issues.json is the archive. process-adherence PASS at close (0 violations)."
+  },
+  "team": [
+    {
+      "name": "team-lead",
+      "role": "arbitration, src/template, final approval",
+      "owns": "arbitration, src/template content, final approval"
+    },
+    {
+      "name": "scribe",
+      "role": "work-tracking JSON + Retro Loop",
+      "owns": "sprint/issue JSON, CONTEXT.md terms, the Retro Loop"
+    },
+    {
+      "name": "packager",
+      "role": "npm release",
+      "owns": "src/bin, src/package.json, versioning, publishing"
+    },
+    {
+      "name": "builder",
+      "role": "src/bin / CLI",
+      "owns": "src/bin, the Scaffolder CLI"
+    },
+    {
+      "name": "viewer",
+      "role": "status-page / UI",
+      "owns": "the status-page viewer / UI"
+    }
+  ],
+  "goal": "Harden the npm publish auth, ship the status-page viewer, run the cleaner-CLI design grill→PRD, and complete the zero-glue 0.3.0 Work Grill acceptance.",
+  "issues_addressed": [
+    "EXEC-034",
+    "EXEC-011",
+    "EXEC-036",
+    "EXEC-035"
+  ],
+  "shipped": [
+    {
+      "id": "S3-3",
+      "type": "FEAT",
+      "title": "Static HTML status pages over the .excn JSON for at-a-glance team status",
+      "owner": "viewer",
+      "summary": "viewer built a build-free vanilla HTML/CSS/JS status page at viewer/ (index.html, styles.css, viewer.js, README.md) that fetches the .excn work-tracking JSON client-side and renders the live sprint's shipped/in_progress/not_shipped lanes + the backlog; served over http (fails closed with a banner under file://); discovers the active sprint by probing sprint_<N>.json to a 404. code-standards PASS after one revise cycle (removed an orphaned constant + corrected the file header).",
+      "closes_issues": [
+        "EXEC-036"
+      ],
+      "notes": "AFK."
+    },
+    {
+      "id": "S3-1",
+      "type": "INFRA",
+      "title": "Project-scoped npm publish auth (no global dotfile dependency)",
+      "owner": "packager",
+      "summary": "Project-scoped npm publish auth: gitignored src/.npmrc env-var ref (//registry.npmjs.org/:_authToken=${TO_EXECUTION_NPM_TOKEN}) + src/.gitignore; token sourced from the macOS Keychain at publish time; global ~/.npmrc untouched. package-qa PASS (no leak across 4 tarball guards, stamp contract intact); auth proven (control E401 env-unset + global-neutralized, live whoami→brooksryan via the project .npmrc). Recipe in root RELEASE.md (alignment PASS). 2FA-bypass-on-write deferred to next real release (see the follow-up issue filed in Part A).",
+      "closes_issues": [
+        "EXEC-034"
+      ],
+      "notes": "HITL — token/Keychain were Brooks's manual steps. Re-scoped from ~/.npmrc-restore to project-scoped auth (EXEC-034). 2FA-bypass-on-write deferred to EXEC-037."
+    },
+    {
+      "id": "S3-4",
+      "type": "DOCS",
+      "title": "Evaluate a cleaner CLI implementation — language or structure",
+      "owner": "builder",
+      "summary": "EXEC-035 grill→PRD slice complete: PRD-006 published (schema-valid) resolving the cleaner-CLI direction — stay JS (the npx distribution contract kills a port for zero relief), behavior-preserving refactor of the Scaffolder CLI to the code standard (stamp/pointer/preflight intact, package-qa green), separate publish-time release tooling from the shipped product, and introduce an architect Teammate owning research + standards-authoring. Acceptance met: direction resolved with npx weighed; chosen approach preserves the contracts.",
+      "closes_issues": [
+        "EXEC-035"
+      ],
+      "notes": "HITL, grill-first — this slice produces a PRD, not code."
+    },
+    {
+      "id": "S3-5",
+      "type": "DOCS",
+      "title": "Create the architect Teammate (research + standards authoring)",
+      "owner": "team-lead",
+      "summary": "architect Teammate created: root-only agent def (.claude/agents/architect.md) in the _teammate.template shape + CONTEXT.md roster row & seam note + TEAM_DIRECTIVE.md roster row, Team-Lead-Owns carve, and routing row. Owns durable research + CODE_STANDARDS authoring; proposes, doesn't ratify. alignment PASS 0 violations; chartered per ADR-0004, TL-approved.",
+      "closes_issues": [
+        "EXEC-038"
+      ],
+      "notes": "HITL. Chartered definition change — alignment-gated, Team-Lead-approved. PRD-006."
+    },
+    {
+      "id": "S3-6",
+      "type": "DOCS",
+      "title": "architect: research Node/CLI best practices and author the extended code standard",
+      "owner": "architect",
+      "summary": "architect landed .excn/research/node-cli-standards.md (Node/CLI best practices grounded against cli.js, citing Node docs + lirantal/nodejs-cli-apps-best-practices) and extended CODE_STANDARDS.md — change-path line now carries chartered-vs-emergent (ADR-0004), plus a new ## CLI section of 5 checkable rules (Data out of logic, No new runtime dependency, Exit codes, Stream discipline, Actionable failures). alignment PASS 0 violations.",
+      "closes_issues": [
+        "EXEC-039"
+      ],
+      "notes": "HITL. Chartered persistent-doc change — alignment-gated, Team-Lead-approved. PRD-006."
+    },
+    {
+      "id": "S3-7",
+      "type": "REFACTOR",
+      "title": "builder: refactor the Scaffolder CLI to the code standard (behavior-preserving)",
+      "owner": "builder",
+      "summary": "Scaffolder CLI (src/bin/cli.js) refactored in place to CODE_STANDARDS.md — deterministic layout, descriptive names (walk→listFilesRecursive, etc.), JSDoc, and pointer-block content extracted to the shipping data module src/bin/pointer-block.js (Data-out-of-logic; no logic module tree, no build step — PRD-006 ceiling held). Behavior byte-identical across all init paths; code-standards PASS + package-qa PASS.",
+      "closes_issues": [
+        "EXEC-040"
+      ],
+      "notes": "AFK. PRD-006. Acceptance criterion 'src→root mirrored per Src-First' was N/A: cli.js + pointer-block.js are package source (src/bin only), not stamped template files, so there is no root mirror — the criterion does not apply rather than being unmet."
+    },
+    {
+      "id": "S3-8",
+      "type": "INFRA",
+      "title": "builder: separate publish-time release tooling from the shipped product",
+      "owner": "builder",
+      "summary": "Publish-time preflight relocated out of the shipped product to repo-root scripts/preflight.js (cleaned to CODE_STANDARDS.md); src/package.json prepublishOnly repointed to `node ../scripts/preflight.js`; version-read fixed. Tarball now product-only (preflight absent, pointer-block.js present) — package-qa PASS. Stale preflight-path references updated across builder.md / CONTEXT.md / TEAM_DIRECTIVE.md / RELEASE.md — alignment PASS.",
+      "closes_issues": [
+        "EXEC-041"
+      ],
+      "notes": "AFK. PRD-006."
+    },
+    {
+      "id": "S3-2",
+      "type": "TEST",
+      "title": "Acceptance: zero-glue Work Grill end-to-end on a scratch 0.3.0 Instance",
+      "owner": "team-lead",
+      "summary": "Zero-glue 0.3.0 Work Grill acceptance PASSED. Scaffolded a scratch Instance via `npx to-execution@0.3.0` (25 files + 2 pointers, full structure), then ran the full Work Grill on it: the grill produced Book/Reading glossary terms in CONTEXT.md (CONTEXT-FORMAT-conformant), execution-to-prd produced PRD-001 (schema-valid), execution-to-issues produced RT-001/002/003 (schema-valid, dependency-chained, forward-linked to PRD-001). Every artifact conformant to the scratch Instance's own schemas; zero translation language. Caveat (Brooks accepted): run from a context-loaded session, not a pristine fresh one.",
+      "closes_issues": [
+        "EXEC-011"
+      ],
+      "notes": "HITL — the grill requires the user. depends_on EXEC-033, which closed in sprint 2 (resolved cross-partition dep)."
+    }
+  ],
+  "in_progress": [],
+  "not_shipped": [],
+  "defects_discovered": [],
+  "decisions": [
+    {
+      "title": "EXEC-034 re-scoped to project-scoped npm auth",
+      "summary": "From restoring the global ~/.npmrc to a gitignored src/.npmrc env-var ref reading a Keychain token (service npm-personal-token) at publish time; global dotfile untouched; the publish recipe lives in root RELEASE.md (alignment PASS). 2FA-bypass-on-write deferred to the next real release — follow-up EXEC-037."
+    },
+    {
+      "title": "architect Teammate introduced (chartered roster expansion)",
+      "summary": "A fifth persistent Teammate owning durable research + authoring the engineering standard (CODE_STANDARDS.md); proposes, doesn't ratify; TL keeps final approval + Adherence-agent authoring; rides alignment-gated change paths. Brooks-directed; created under ADR-0004's chartered carve-out (EXEC-038, alignment PASS)."
+    },
+    {
+      "title": "Cleaner-CLI: stay JS, separate release tooling from product (PRD-006)",
+      "summary": "The friction was organization, not language; the npx distribution contract kills a port. Resolution: behavior-preserving refactor of the Scaffolder CLI to an extended CODE_STANDARDS (new ## CLI rules from architect's Node/CLI research), and relocation of the publish-time preflight out of src to repo-root scripts/ so the tarball is product-only. All gated (code-standards + package-qa + alignment)."
+    },
+    {
+      "title": "Zero-glue 0.3.0 Work Grill acceptance passed (EXEC-011)",
+      "summary": "Full grill→PRD→issues ran on a scratch npx-stamped 0.3.0 Instance; every artifact conformant to the Instance's own schemas, zero translation glue. Caveat: run from a context-loaded session, not a pristine fresh one — accepted as passing. The pristine fresh-session run was not exercised this sprint."
+    }
+  ],
+  "retrospective_notes": [
+    {
+      "title": "Minimalism-vs-best-practices ceiling for engineering standards",
+      "body": "The PRD-006 cleaner-CLI grill surfaced tension between Precise Minimalism and 'best practices'; it resolved toward minimal-but-clean — architect kept non-mechanizable items in .excn/research/node-cli-standards.md, and CODE_STANDARDS gained only five terse checkable CLI rules. This is the philosophy candidate routed via PRD-006 notes — a candidate PHILOSOPHY.md refinement naming where the minimalism ceiling sits for engineering standards — carried into this close's Retro Loop."
+    },
+    {
+      "title": "Acceptance grill ran from a context-loaded session",
+      "body": "EXEC-011's zero-glue acceptance passed but was driven from this framework-loaded session, not a pristine fresh one; the skills' output was conformant and glue-free, which is what the criteria test, while the gold-standard naive-lead run in a brand-new session went unexercised. PROCESS already pins Work Grills to a fresh session; whether acceptance tests specifically carry the same pin is an open question carried into the Retro Loop."
+    },
+    {
+      "title": "ADR-0004's chartered carve-out carried real load this sprint",
+      "body": "Three persistent-doc/def changes landed mid-sprint as chartered slices (architect creation EXEC-038, CODE_STANDARDS extension EXEC-039, preflight-path doc updates under EXEC-041) — all alignment-gated + TL-approved, none via the Retro Loop. Sprint 3 is the first heavy exercise of ADR-0004; it held."
+    }
+  ]
+}

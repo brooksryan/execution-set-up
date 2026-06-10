@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "id": "PRD-006",
+  "title": "Cleaner Scaffolder CLI and an architect role for engineering standards",
+  "status": "published",
+  "created": "2026-06-09",
+  "problem_statement": "The Scaffolder CLI works but reads as disorganized — config-shaped values inlined as incidental constants, terse names, thin comments, and a general-purpose helper dropped among the domain functions — so it is harder to maintain and extend than its small size warrants. Two deeper issues compound it. First, the CLI predates the project code standard, so 'clean' has no agreed, enforceable definition for it. Second, the publish-time identity guard is release tooling rather than product, yet it currently ships to every consumer inside the published package. And no one owns researching engineering best practices and turning them into the standard — that authoring has had no home.",
+  "solution": "Keep the Scaffolder CLI in JavaScript: the friction is organization, not the language, and the npx distribution contract — the consumer-facing `npx to-execution init`, with the npm name bound to the personal account (ADR-0001) — makes a port pure cost for no relief. Refactor the CLI in place to the project code standard (deterministic layout, descriptive names, doc comments, the pointer-block content separated from the wiring logic), behavior-preserving so every stamp / pointer / preflight contract holds and package-qa stays green — with no new module tree, build step, or test suite. Separate publish-time release tooling from the shipped product so the published package carries only product. Stand up a new architect Teammate that owns durable research and authors the engineering standard from it, proposing changes that ride the existing alignment-gated change paths rather than landing ad hoc.",
+  "user_stories": [
+    {
+      "id": 1,
+      "actor": "framework maintainer",
+      "want": "the Scaffolder CLI organized to an agreed, enforceable standard",
+      "benefit": "it is clear to maintain and extend without guessing what 'clean' means"
+    },
+    {
+      "id": 2,
+      "actor": "consumer of the package",
+      "want": "the published package to contain only product",
+      "benefit": "I never receive publish-time tooling I do not run"
+    },
+    {
+      "id": 3,
+      "actor": "Team",
+      "want": "a dedicated owner for researching best practices and authoring the engineering standard",
+      "benefit": "the standard is grounded in research rather than improvised, while final approval and the change paths stay intact"
+    },
+    {
+      "id": 4,
+      "actor": "builder",
+      "want": "a researched, enforceable code standard to refactor against",
+      "benefit": "the code-standards gate has a concrete rubric and the refactor's 'done' is unambiguous"
+    },
+    {
+      "id": 5,
+      "actor": "framework maintainer",
+      "want": "the CLI refactor to change structure without changing behavior",
+      "benefit": "the stamp / pointer / preflight contracts and package-qa remain the safety net through the change"
+    }
+  ],
+  "implementation_decisions": [
+    {
+      "title": "Stay JavaScript — no port",
+      "summary": "The friction is organization, not the language. The npx distribution contract — the consumer-facing `npx to-execution init` with the npm name bound to the personal account (ADR-0001) — makes a port to another language pure cost (a precompiled-binary-over-npm dance, or abandoning npx and breaking the consumer invocation) for zero relief. The Scaffolder CLI stays JavaScript."
+    },
+    {
+      "title": "Behavior-preserving structural refactor to the code standard",
+      "summary": "Refactor the Scaffolder CLI in place to conform to the project code standard: deterministic layout (header, imports, constants, helpers, public surface), descriptive names, doc comments, and the pointer-block content separated from the wiring logic. No module tree, no build step. Behavior is preserved, so the stamp, pointer, and preflight contracts are untouched and package-qa stays green. The ceiling is held at minimal-but-clean — Precise Minimalism over enterprise structure."
+    },
+    {
+      "title": "Separate publish-time release tooling from the shipped product",
+      "summary": "The publish-time identity guard is release tooling, not product, yet it currently ships to consumers because the published file set sweeps in more than the product entrypoint. Relocate it out of the shipped package into repo-root release tooling alongside the release runbook, repointing the publish hook and its version read, so the published package becomes product-only. This is the same product-vs-release-tooling boundary already drawn for the release runbook."
+    },
+    {
+      "title": "Introduce the architect Teammate",
+      "summary": "A new persistent Teammate, architect, owns durable research and authors the engineering standard from it. It proposes; it does not ratify — the Team Lead keeps final approval, and every standard edit rides the alignment gate, landing chartered (a planned slice, per ADR-0004) or via the Retro Loop, never ad hoc. Ownership seam: the Team Lead keeps arbitration, final approval, template content, and Adherence-agent authoring (architect authors the rubric; the Team Lead authors the gate that enforces it); scribe keeps stewarding the Retro Loop; builder and viewer keep implementation code. architect writes no product or implementation code."
+    },
+    {
+      "title": "Ground the standard in researched best practices",
+      "summary": "Before the refactor, architect produces a durable research artifact on Node and CLI best practices and extends the project code standard from it, so 'clean' becomes a researched, enforceable rubric the code-standards gate applies. The standard's change-path wording gains the chartered-vs-emergent distinction (ADR-0004), since architect-authored standards are chartered rather than only Retro-Loop-emergent."
+    }
+  ],
+  "testing_decisions": [
+    "No new test suite. package-qa already exercises the Scaffolder stamp / pointer / preflight contract end-to-end in a temp dir; the CLI refactor is behavior-preserving, so package-qa staying green is the regression guard.",
+    "The code-standards gate is the quality gate for the refactor — it judges builder's change against the newly extended project code standard.",
+    "A unit suite is declined as a Precise Minimalism violation for a small, behavior-preserved CLI already covered end-to-end."
+  ],
+  "out_of_scope": [
+    "Any language port of the Scaffolder CLI — rejected by the npx distribution contract.",
+    "New CLI capabilities or behavior changes — this is a behavior-preserving refactor.",
+    "A module tree, build step, or bundler for the CLI.",
+    "Changes to the stamp / pointer / preflight contracts, or to the published file set beyond dropping the relocated release tooling.",
+    "Code this slice — EXEC-035 is grill to PRD only; implementation lands in the issues broken out of this PRD."
+  ],
+  "issues": [
+    "EXEC-038",
+    "EXEC-039",
+    "EXEC-040",
+    "EXEC-041"
+  ],
+  "notes": [
+    "Grill provenance: synthesized from the EXEC-035 cleaner-CLI Work Grill, 2026-06-09 (sprint 3, work item S3-4).",
+    "Philosophy candidate (routes to the next sprint's retrospective_notes, never written to PHILOSOPHY.md here): the Precise-Minimalism-vs-best-practices tension was resolved toward minimal-but-clean; if it recurs, consider a PHILOSOPHY.md refinement naming where the minimalism ceiling sits for engineering standards.",
+    "Intended execution shape for the issues step (dependency-ordered, not PRD scope): (a) create the architect Teammate [chartered definition change, alignment-gated]; (b) architect researches Node/CLI best practices then authors the CODE_STANDARDS additions [alignment-gated]; (c) builder refactors the Scaffolder CLI to the standard and relocates the publish-time release tooling [code-standards + package-qa]."
+  ]
+}

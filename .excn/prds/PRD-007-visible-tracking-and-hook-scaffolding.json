@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "id": "PRD-007",
+  "title": "Visible work-tracking and remind-only hook scaffolding",
+  "status": "published",
+  "created": "2026-06-10",
+  "amended": "2026-06-10",
+  "problem_statement": "Two visibility gaps. First, the stamped .excn/.gitignore hides the entire work-tracking set, so the backlog, sprint records, PRDs, and retros cannot be seen, reviewed, or shared from the repo — the tracker is not the record. Second, the QA-gate protocol depends on the Team Lead remembering to spawn the Adherence Agents: nothing senses that gated work happened, gates run at full weight even for mechanical checks, and scribe burns a large model on secretary work (partition moves, status flips, verdict appends).",
+  "solution": "Make the work-tracking set version-controlled except per-session progress state, so the backlog and sprint history are the in-repo record (ADR-0005). Ship remind-only hook scaffolding in the Template: per-feature hook scripts, each toggled by a schema-validated config in .excn, that sense gate-relevant edits and nudge the responsible agent — never spawning gates themselves (ADR-0006). Offload scribe's mechanical JSON moves to a small-model clerk Invoked Agent. End users learn the hooks are broken or outdated through health checks, not by silent failure.",
+  "user_stories": [
+    {
+      "id": 1,
+      "actor": "Team Lead",
+      "want": "the backlog, sprint records, PRDs, and retros visible and reviewable in the repo",
+      "benefit": "the tracker is the record — work history and direction are readable without a second tracker"
+    },
+    {
+      "id": 2,
+      "actor": "Teammate",
+      "want": "a reminder when my edits put a QA gate on the hook (and a block if I try to idle without the gate verdict landing)",
+      "benefit": "forgetting a mandatory gate becomes impossible without making gate invocation automatic"
+    },
+    {
+      "id": 3,
+      "actor": "Teammate",
+      "want": "a nudge after I message another Teammate, pointing at the follow-through the message implies",
+      "benefit": "records, issues, and gates stay consistent with what I just reported"
+    },
+    {
+      "id": 4,
+      "actor": "Team Lead",
+      "want": "per-Teammate load visible in the status-page viewer",
+      "benefit": "I can see which Teammates bear the most load and rebalance ownership"
+    },
+    {
+      "id": 5,
+      "actor": "scribe",
+      "want": "mechanical JSON moves delegated to a small-model clerk",
+      "benefit": "secretary work stops consuming large-model capacity while judgment work keeps it"
+    },
+    {
+      "id": 6,
+      "actor": "Instance maintainer",
+      "want": "a health check that tells me when the hook scaffolding is broken, disabled unexpectedly, or outdated",
+      "benefit": "I learn maintenance is due from the system, not from silent failure"
+    },
+    {
+      "id": 7,
+      "actor": "Instance maintainer",
+      "want": "a one-command path that updates my Instance's invariant layout to the latest framework version",
+      "benefit": "Instances stamped earlier keep receiving framework improvements without re-scaffolding or hand-merging"
+    },
+    {
+      "id": 8,
+      "actor": "Team Lead",
+      "want": "a lightweight prior-art research agent I can invoke at scoping time with a PRD and pointers to the relevant codebase areas",
+      "benefit": "implementation paths start from existing solutions and known gotchas instead of rediscovering them"
+    }
+  ],
+  "implementation_decisions": [
+    {
+      "title": "Work-tracking is version-controlled; only per-session progress state is ignored",
+      "summary": "The stamped work-tracking ignore list shrinks to the *_progress.json class. The root Instance mirrors the template ignore file exactly (Src-First); the root-local drafts ignore line and its one stale draft file are removed — drafts never became a framework concept. backlog.json is the single issue tracker for an Instance. Recorded as ADR-0005, amending ADR-0002's gitignored-work-tracking consequence."
+    },
+    {
+      "title": "Hooks are remind-only; gates are never hook-spawned",
+      "summary": "Hook scripts sense and nudge: a post-tool watch on gate-relevant paths injects a gate-due reminder as additional context, and a stop-time block catches an agent idling with gated edits but no gate verdict. The Team Lead or Teammate still spawns the gate. Auto-spawning was rejected: agent runs inside hooks are slow, burn tokens per edit burst, can wedge a session, and judgment-timed gates (process-adherence, alignment) have no mechanically detectable firing moment. Recorded as ADR-0006."
+    },
+    {
+      "title": "Per-feature scripts toggled by a schema-validated .excn config",
+      "summary": "One script per hook feature, each wired in the stamped project settings and reading an enable/disable config that lives in .excn with its own schema. A missing or malformed config fails safe to no-op. Defaults at stamp: gate reminders on; message nudge and load reporting present but off until proven on the dogfood Instance."
+    },
+    {
+      "title": "Message follow-through nudge triggers on sent messages",
+      "summary": "The nudge fires in the sender's session on the messaging tool's post-tool event and injects the follow-through prompt as additional context. The sender holds the obligations and the context to act on them; inbound watching was rejected as polling-heavy and aimed at the wrong party. Injected guidance must read as legitimate ops instruction — the injection channel is model-judged, not trusted (research caveat)."
+    },
+    {
+      "title": "Load record is hook-appended progress JSON read by the viewer",
+      "summary": "Per-tool-event load records append to a load progress file in .excn named within the *_progress.json ignore class — churny telemetry stays out of git per ADR-0005. Its schema joins the Instance schemas; the status-page viewer gains a lane that fetches and renders per-Teammate load. Identity comes from the hook payload's agent_type/agent_id."
+    },
+    {
+      "title": "clerk: a small-model Invoked Agent for mechanical record moves",
+      "summary": "Partition moves, status flips, and verdict appends route to a clerk Invoked Agent pinned to a small model. scribe's definition delegates those steps and keeps judgment work (Retro Loop drafting, glossary stewardship) on its current model; scribe remains the owner of the work-tracking artifacts."
+    },
+    {
+      "title": "Update path: the Scaffolder records its stamp version and can re-stamp invariants in place",
+      "summary": "Stamping records the framework version in the Instance. An update command re-stamps only the invariant layout at the latest version, never touching variant files (the grill's project-specific outputs) or work-tracking state; files that drifted locally from their stamped form are reported, not overwritten. The health check reads the recorded version against the installed package to report outdated. Amendment 2026-06-10 (Brooks's added scope)."
+    },
+    {
+      "title": "The Scaffolder stamps the hook scaffolding as invariant layout",
+      "summary": "Hook scripts, the settings wiring, the toggle config seed, and the load-record schema become part of the stamped invariant layout, landing Src-First and holding the existing stamp contract (package-qa gate)."
+    },
+    {
+      "title": "nothing-new-under-the-sun: a stamped prior-art Invoked Agent run at scoping",
+      "summary": "A lightweight Invoked Agent included by default in the stamped layout. Input contract: a PRD plus pointers to the relevant parts of the codebase. It web-searches for prior art on the problem — YouTube videos, Stack Overflow threads, Medium/blog articles, reference implementations — and returns a digest of existing approaches and common gotchas in the candidate implementation paths. Remind-the-team-of-prior-art only: it does not decide, edit, or gate. Runs during scoping (between PRD and issue breakdown). Amendment 2026-06-10 (Brooks's added scope)."
+    }
+  ],
+  "testing_decisions": [
+    "Health checks over unit tests: the risk is not ship-broken code but undetected decay — a health check verifies the hook wiring is present, the toggle config parses against its schema, enabled hooks have fired recently (heartbeat evidence in the load/progress records), and the stamped scaffolding version matches the installed package.",
+    "The health check is runnable by an end user on any Instance and reports per-feature status (enabled, firing, stale, broken) rather than pass/fail alone.",
+    "Hook scripts fail safe: on any internal error or unparseable config they no-op rather than block work; the health check is what surfaces the failure.",
+    "The existing package-qa gate covers the Scaffolder stamp contract for the new stamped files."
+  ],
+  "out_of_scope": [
+    "Hook-spawned gate runs of any kind (rejected by ADR-0006).",
+    "Auto-firing process-adherence or alignment at heuristic workflow moments.",
+    "Inbound (recipient-side) message nudges.",
+    "Migrating existing downstream Instances' git history; the gitignore change applies at stamp time and to this root Instance.",
+    "A general telemetry pipeline beyond per-Teammate load counts."
+  ],
+  "issues": [
+    "EXEC-042",
+    "EXEC-044",
+    "EXEC-045",
+    "EXEC-046",
+    "EXEC-047",
+    "EXEC-048",
+    "EXEC-049",
+    "EXEC-050",
+    "EXEC-051"
+  ],
+  "notes": [
+    "Synthesized from the sprint-4 Work Grill (2026-06-10) covering EXEC-042 and EXEC-043, resolving the leaf decisions for EXEC-044 (sent-message nudge) and EXEC-045 (load record location). ADR-0005 and ADR-0006 record the hard-to-reverse choices.",
+    "Grill caveat: run from a context-loaded session rather than a fresh one (accepted by Brooks; same caveat as sprint 3's acceptance grill) — carries to the sprint retro."
+  ]
+}

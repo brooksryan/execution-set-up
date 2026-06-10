@@ -1,0 +1,303 @@
+{
+  "schema_version": "1.0",
+  "issues": [
+    {
+      "id": "EXEC-002",
+      "title": "Precise-minimalism pass over remaining template artifacts",
+      "status": "open",
+      "severity": "P3",
+      "scope": [
+        "src/template"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "PHILOSOPHY.md and TEAM_DIRECTIVE.md seeds were trimmed to instruction-only. Sweep PROCESS.md, the CONTEXT.md seed, the CLAUDE.md stub, and the agent defs for explanatory prose that is not instruction.",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 4,
+      "closed_in_sprint": null,
+      "notes": null
+    },
+    {
+      "id": "EXEC-042",
+      "title": "Decide whether the .excn work-tracking set stays gitignored (issues should be visible in-repo)",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/template",
+        "src/bin"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "The Scaffolder stamps .excn/.gitignore (src/template/.excn/gitignore, restored at stamp time) ignoring sprints/, issues/, prds/, retros/, *_progress.json. A gitignored backlog can't be seen, reviewed, or shared from the repo. Decide (HITL, Brooks): version-control the full set, keep status quo, or a middle path tracking issues/ (maybe prds/, sprints/) while keeping *_progress.json and retros/ ignored. Changes the Scaffolder's invariant layout and brushes the JSON-for-progress Principle, so record the decision as an ADR; a Principle-level change also routes through the alignment gate. Src-First: src/template/.excn/gitignore changes first, root Instance mirrors. Fix while here: root .excn/.gitignore also ignores drafts/, which the shipped template does not.",
+      "prd": "PRD-007",
+      "acceptance_criteria": [
+        "An ADR records the decision with the trade-off (visible/reviewable backlog vs. ephemeral-state noise)",
+        "src/template/.excn/gitignore implements the decision and the root .excn/.gitignore mirrors it",
+        "Root-vs-template drift (drafts/) is resolved",
+        "package-qa passes on the stamp contract"
+      ],
+      "slice_type": "HITL",
+      "root_cause": null,
+      "fix": "ADR-0005; template gitignore = *_progress.json only, root mirrors, drafts/ removed; package-qa PASS.",
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 4,
+      "closed_in_sprint": 4,
+      "notes": "Filed 2026-06-10 (Brooks). Owner: builder; ADR + alignment gate for the Principle brush."
+    },
+    {
+      "id": "EXEC-043",
+      "title": "Spike/grill: hook-invoked lightweight reviewers; offload secretary work to smaller models",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/template",
+        "hooks"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "Today the Team Lead manually spawns the Adherence/adversarial agents, and they run at full weight even for mechanical checks. Explore scaffolding Claude Code hooks into the Template so reviewers auto-invoke at the right workflow moments, and route routine secretary work (scribe's structured-JSON updates, progress-record maintenance) to a smaller model. Grounding: .excn/research/teammate-hook-triggers.md §3.1/§6 (Stop block+reason as file-update reminder; PostToolUse additionalContext for status-based instruction injection), §0 (actor identity in the hook payload). Caveat §3.1: additionalContext is model-judged — injected guidance must read as legitimate ops instruction. Exploratory: first step is a spike/grill deciding which reviewers are safe to auto-fire and which secretary tasks are mechanical enough for a smaller model. The Template ships no hook wiring today; this spike also designs the shared hook-scaffolding plumbing EXEC-044/EXEC-045 ride on. Src-First.",
+      "prd": "PRD-007",
+      "acceptance_criteria": [
+        "A grill→PRD (or recorded spike outcome) names which reviewers auto-fire, at which hook events, and which secretary tasks move to a smaller model",
+        "The shared Template hook-scaffolding plumbing for EXEC-044/EXEC-045 is designed"
+      ],
+      "slice_type": "HITL",
+      "root_cause": null,
+      "fix": "Sprint-4 grill resolved the design; PRD-007 names the remind-only reviewers/hook events and the clerk offload; ADR-0006 records the plumbing EXEC-044/EXEC-045 ride on (EXEC-046).",
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 4,
+      "closed_in_sprint": 4,
+      "notes": "Filed 2026-06-10 (Brooks). Grill-first per the Lifecycle — this slice produces a PRD/spike record, not code."
+    },
+    {
+      "id": "EXEC-044",
+      "title": "Scaffold a hook that nudges agents to follow through on messages they send teammates",
+      "status": "open",
+      "severity": "P3",
+      "scope": [
+        "src/template",
+        "hooks"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "When a Teammate messages another, a hook senses it and reminds the sender to do the related follow-through (update a record, file an issue, pass a gate) driven off message content. Grounding: teammate-hook-triggers.md §4.3 (inbox store ~/.claude/teams/<team>/inboxes/<agent>.json as sense signal and async nudge channel), §3 (PostToolUse → additionalContext as the in-session nudge path), §0 (sender identity). Resolved at the sprint-4 grill: trigger on SENT messages, in the sender's session (ADR-0006). Rides the EXEC-046 plumbing; ships disabled by default. Src-First.",
+      "prd": "PRD-007",
+      "acceptance_criteria": [
+        "Sending a teammate message triggers a follow-through nudge in the sender's session via additionalContext",
+        "The nudge names the follow-through implied by the message (record update, issue, gate)",
+        "Ships disabled by default; enabling via the toggle config activates it",
+        "No recipient-side watching"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-046"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 4,
+      "closed_in_sprint": null,
+      "notes": "Filed 2026-06-10 (Brooks). Exploratory; acceptance criteria set by the EXEC-043 grill/PRD."
+    },
+    {
+      "id": "EXEC-045",
+      "title": "Hook-based teammate load reporting, surfaced in the status-page viewer",
+      "status": "open",
+      "severity": "P3",
+      "scope": [
+        "src/template",
+        "hooks",
+        "viewer"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "A hook logs per-teammate activity so we can see which Teammates bear the most load, surfaced in the status-page viewer. Grounding: teammate-hook-triggers.md §0 (every tool event carries agent_type/agent_id; the §0 probe is a per-tool JSONL append — the telemetry mechanism), §1 (PostToolUse/PostToolBatch as the 'agent did X' signal), §2.3 (identity disambiguation). Spans two owners: hook wiring → builder (Template), reporting UI → viewer. Resolved at the sprint-4 grill: the record is hook-appended .excn/load_progress.json (the *_progress.json ignore class, ADR-0005), viewer-fetchable. Rides the EXEC-046 plumbing; ships disabled by default. Src-First.",
+      "prd": "PRD-007",
+      "acceptance_criteria": [
+        "The hook appends per-tool-event load records to .excn/load_progress.json with identity from agent_type/agent_id",
+        "load_progress.json has a schema in .excn/schemas/ and stays in the *_progress.json ignore class",
+        "The status-page viewer renders a per-Teammate load lane from it",
+        "Ships disabled by default; enabling via the toggle config activates it"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-046"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 4,
+      "closed_in_sprint": null,
+      "notes": "Filed 2026-06-10 (Brooks). Exploratory; acceptance criteria set by the EXEC-043 grill/PRD."
+    },
+    {
+      "id": "EXEC-046",
+      "title": "Auto-run a lightweight viewer server when an execution session starts",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "viewer",
+        "src/template",
+        "hooks"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "The status-page viewer fails closed under file:// and today requires manually starting an http server. Ship a really simple view server that starts automatically when a session opens in a repo with execution set up, so the web page is always available. Likely mechanism: the SessionStart hook (rides the EXEC-043 per-feature hook plumbing) starting/reusing a tiny static server over the .excn JSON + viewer assets. Hard requirements: as lightweight and fast-running as possible — no framework, no build step, negligible startup cost, no orphaned processes (idempotent start, detect an already-running instance). Src-First.",
+      "prd": null,
+      "acceptance_criteria": [
+        "Opening a session in an execution repo makes the status page reachable in a browser with no manual step",
+        "Starting twice does not spawn a second server; no orphaned process after sessions end",
+        "Startup overhead is negligible and the server has zero runtime dependencies"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": "Stamped hooks.config.json + hooks-config.schema.json + .claude/settings.json wiring + 5 fail-safe hook scripts; package-qa PASS, code-standards PASS.",
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 4,
+      "closed_in_sprint": 4,
+      "notes": "Filed 2026-06-10 (Brooks). Step 1 of the viewer-server track; validate here on the dogfood Instance before EXEC-047 generalizes it."
+    },
+    {
+      "id": "EXEC-047",
+      "title": "Ship the viewer server as a separate globally-installed package; sessions detect or connect to it",
+      "status": "closed",
+      "severity": "P3",
+      "scope": [
+        "viewer",
+        "packaging"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "Once EXEC-046 validates the in-repo auto-run server, extract it into its own package installed globally (separate from the to-execution Scaffolder package). Individual execution repos/sessions check whether the global server exists and connect to it instead of each running their own — one server, many Instances. Same hard requirements: lightweight, fast-running, zero/near-zero dependencies. Needs design decisions (port/discovery convention, multi-repo serving, version skew between server and Instances) — grill before implementation.",
+      "prd": null,
+      "acceptance_criteria": [],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": "gate-watch.js: PostToolUse path-watch reminder + Stop block-once with stop_hook_active guard + verdict sensing; ships enabled; code-standards PASS.",
+      "depends_on": [
+        "EXEC-046"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 4,
+      "closed_in_sprint": 4,
+      "notes": "Filed 2026-06-10 (Brooks). Step 2 of the viewer-server track; acceptance criteria set after EXEC-046 validates and a grill resolves discovery/packaging."
+    },
+    {
+      "id": "EXEC-048",
+      "title": "Edit and add issues from the status-page viewer",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "viewer"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "Extend the status-page viewer from read-only to read-write for issues: add new issues and edit existing ones from the web page. Writes go through the server (EXEC-046/047) since a static page cannot write the .excn JSON; every write must remain schema-valid against issue.schema.json and respect the issue partitioning (backlog vs sprint partitions, scribe ownership of moves). Hard requirements: keep it as lightweight and fast as possible — no framework, minimal surface.",
+      "prd": null,
+      "acceptance_criteria": [],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": "clerk.md (haiku-pinned) + scribe delegation bullet; alignment PASS, Team Lead approved.",
+      "depends_on": [
+        "EXEC-046"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 4,
+      "closed_in_sprint": 4,
+      "notes": "Filed 2026-06-10 (Brooks). Builds on the viewer-server track; interaction with scribe ownership of issue JSON to be resolved at grill time."
+    },
+    {
+      "id": "EXEC-049",
+      "title": "Update path: stamp records framework version; update command re-stamps invariants and reports drift",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/bin"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "Stamping records the framework version in the Instance. An update command (the Scaffolder's second verb) re-stamps only the invariant layout at the installed package's version: variant files (the grill's project-specific outputs) and work-tracking state are never touched; invariant files that drifted locally from their stamped form are reported, not overwritten. Demoable: stamp a scratch Instance at the previous version, run update, observe invariants refreshed, variants intact, drift reported.",
+      "prd": "PRD-007",
+      "acceptance_criteria": [
+        "A stamped Instance records the framework version that stamped it",
+        "The update command refreshes invariant files to the installed version and never modifies variant files or work-tracking state",
+        "Locally drifted invariant files are reported and left in place",
+        "package-qa passes on the stamp contract"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": "framework-version.json marker on init + update verb (re-stamps invariants, drift persists via template-hash anchor, restores missing); stamp-policy.js data module; code-standards PASS, package-qa PASS.",
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 4,
+      "closed_in_sprint": 4,
+      "notes": null
+    },
+    {
+      "id": "EXEC-050",
+      "title": "Health check: per-feature hook status (enabled/firing/stale/broken) + outdated via the version stamp",
+      "status": "open",
+      "severity": "P2",
+      "scope": [
+        "src/bin",
+        "hooks"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "A user-runnable health check reporting per-feature status rather than pass/fail: wiring present, toggle config parses against its schema, enabled hooks show recent firing evidence (heartbeat in the progress records), and the Instance's recorded stamp version matches the installed package (outdated detection, via EXEC-049's version stamp). The check is how hook decay surfaces — hooks themselves fail safe to no-op (PRD-007 testing decisions).",
+      "prd": "PRD-007",
+      "acceptance_criteria": [
+        "One command reports per-feature status: enabled, firing, stale, or broken",
+        "An out-of-date Instance is reported as outdated with the recorded vs installed versions",
+        "A deliberately broken config and a disarmed hook are each detected and named",
+        "Runnable by an end user on any Instance"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-046",
+        "EXEC-049"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 4,
+      "closed_in_sprint": null,
+      "notes": null
+    },
+    {
+      "id": "EXEC-051",
+      "title": "nothing-new-under-the-sun: stamped prior-art research Invoked Agent for scoping",
+      "status": "in_progress",
+      "severity": "P2",
+      "scope": [
+        "src/template",
+        "agents"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "Author a lightweight Invoked Agent, stamped by default in the Template, that runs during scoping (between PRD and issue breakdown). Invocation contract: a PRD id/path plus pointers to the relevant parts of the codebase. Behavior: web-search for prior art on the problem the PRD solves — YouTube videos, Stack Overflow threads, Medium/blog articles, reference implementations — and return a digest of existing approaches and common gotchas in the candidate implementation paths, each with its source. It informs scoping only: it does not decide, edit files, or gate work. Authored from the framework's agent-def shape; stamped as invariant layout (Scaffolder copies it; package-qa contract). Src-First; root Instance mirrors so this team can use it immediately.",
+      "prd": "PRD-007",
+      "acceptance_criteria": [
+        "The agent definition ships in the Template and is stamped into a fresh Instance",
+        "Invoked with a PRD and codebase pointers, it returns a sourced digest of prior art and implementation gotchas",
+        "It performs no file edits and issues no verdicts",
+        "alignment PASS on the definition; package-qa passes on the stamp contract",
+        "Demonstrated once against PRD-007 itself on this Instance"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 4,
+      "closed_in_sprint": null,
+      "notes": "Filed 2026-06-10 (Brooks, added scope at execution kickoff). Chartered definition addition — alignment-gated, Team-Lead-approved (ADR-0004 path)."
+    }
+  ]
+}

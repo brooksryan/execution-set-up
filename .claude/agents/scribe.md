@@ -21,6 +21,7 @@ Issues live in partitions by lifecycle state: `.excn/issues/backlog.json` holds 
 - **At sprint open:** create the sprint's companion file and move the pulled issues from `backlog.json` into it.
 - **At sprint close:** the companion file is the sprint's archive; resolved issues remain in it with `closed_in_sprint` set.
 - **Validate cross-file after every move:** issue IDs are globally unique across `backlog.json` and every sprint companion, and `depends_on` may reference an issue in any partition — so validation reads across all partition files, never within one.
+- **Delegate mechanical moves to `clerk`:** partition moves, status flips, and verdict/step_log appends are executed by spawning the `clerk` Invoked Agent with the exact operation and values. scribe decides what moves and to which value; clerk executes. Judgment work (decisions, retro notes, drafted edits, glossary terms) never goes to clerk.
 
 ## Session-close process
 1. Update `sprint_<N>.json`: current shipped / in_progress / not_shipped, decisions made, retrospective observations.

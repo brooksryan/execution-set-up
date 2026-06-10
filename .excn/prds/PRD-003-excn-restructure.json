@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "id": "PRD-003",
+  "title": "Restructure all framework artifacts into the .excn/ namespace",
+  "status": "published",
+  "created": "2026-06-07",
+  "amended": "2026-06-07",
+  "problem_statement": "A scaffolded Instance spreads framework files across the host repo's root — four methodology docs, a schemas directory, and tmp/exec work-tracking. Host projects experience this as clutter and collision risk against their own files and their existing agent-instruction surfaces. Research confirmed the deeper issue: nothing about the root spread is needed for agents to find the docs, because no harness ingests folders without a pointer — while root files ARE swept into default search and editor indexes, violating the principle that agents get only what they need when they need it.",
+  "solution": "Move everything the framework owns into one root dotfolder, .excn/ (ADR-0002): the four methodology docs, schemas, ADRs, durable research, and ephemeral work-tracking. The host root keeps exactly one touch — a small explicit-path plain-text pointer block in its existing agent-instruction file, appended non-destructively. Ships as to-execution 0.2.0; the root Instance migrates by hand.",
+  "user_stories": [
+    { "id": 1, "actor": "Team Lead setting up a new project", "want": "the framework to land in a single dotfolder", "benefit": "the host root stays clean and deleting .excn/ removes the framework entirely" },
+    { "id": 2, "actor": "host-project maintainer", "want": "the scaffolder to never overwrite, rename, or bloat my existing agent-instruction files", "benefit": "my tools' live instruction surfaces keep working (research assumption A)" },
+    { "id": 3, "actor": "agent in any harness", "want": "a root pointer with full explicit paths into .excn/", "benefit": "I load framework docs only when I need them — dotfolder content never surfaces by accident" },
+    { "id": 4, "actor": "Codex CLI user", "want": "the pointer block to stay tiny", "benefit": "my 32 KiB instruction chain is not truncated by the framework" },
+    { "id": 5, "actor": "framework maintainer", "want": "the template and every Instance to share the .excn shape", "benefit": "Src-First mirroring stays a mechanical copy" },
+    { "id": 6, "actor": "scribe", "want": "work-tracking at .excn/tmp/", "benefit": "one namespace owns ephemeral state too, and the CLI guarantees the gitignore" },
+    { "id": 7, "actor": "future contributor", "want": "ADRs and research reports colocated in .excn/", "benefit": "the project's durable memory lives in one place" },
+    { "id": 8, "actor": "Team Lead", "want": "0.2.0 published behind the existing guards", "benefit": "consumers get the new layout from npx with identity protections intact" }
+  ],
+  "implementation_decisions": [
+    { "title": "Namespace per ADR-0002", "summary": ".excn/ at the Instance root holds CONTEXT.md, PHILOSOPHY.md, PROCESS.md, TEAM_DIRECTIVE.md, adr/, schemas/, research/, and tmp/ (work-tracking, gitignored). No file inside .excn/ is named CLAUDE.md or AGENTS.md — those filenames trigger per-directory auto-ingestion." },
+    { "title": "Template restructure", "summary": "The Scaffolder template adopts the identical .excn layout; tmp/exec/ disappears in favor of .excn/tmp/{sprints,issues,prds,retros}. The template carries NO root instruction file — a template-stamped CLAUDE.md would be skipped by skip-safety on exactly the hosts that already have one, stranding them unwired." },
+    { "title": "Pointer wiring", "summary": "A small plain-text block with full explicit paths, CLI-owned (embedded asset, applied outside the manifest walk). Appended non-destructively and idempotently to EVERY existing file among {CLAUDE.md, AGENTS.md} — Claude Code reads only the former, Codex/Cursor/Copilot/Devin the latter; if neither exists, BOTH are created as minimal pointer files. The idempotency sentinel is visible text, never an HTML comment (Claude Code strips comments before injection). Pointer files are append-only under every flag including --force. Claude @import is banned (inlines at launch); the CLI warns without failing when a post-append AGENTS.md exceeds Codex's hard 32 KiB chain cap." },
+    { "title": "CLI changes", "summary": "init stamps the .excn layout and stamps .excn/.gitignore (containing tmp/) so the framework owns its ignore rule inside its own namespace — the host's root .gitignore is never touched and ensureGitignore() is deleted. Skip-safety and idempotency semantics unchanged for manifest files; pointer append is governed by the wiring decision above." },
+    { "title": "Cross-reference sweep", "summary": "Every path reference in the skill, agent definitions, principles, authoring guide, process doc, and README moves to .excn paths — Src-First, then root mirrors." },
+    { "title": "Root Instance migrates by hand", "summary": "Root methodology docs move into .excn/, tmp/exec state moves to .excn/tmp/ preserving all sprint, issue, PRD, and progress history. ADR-0001 (personal ownership) is finalized from packager's draft into .excn/adr/." },
+    { "title": "EXEC-001 disposition", "summary": "EXEC-001's decision half is resolved by ADR-0002; its implementation half is superseded by this PRD's issue set. EXEC-001 closes citing both." },
+    { "title": "Version", "summary": "Lands as 0.2.0 — pre-1.0 layout change, no migration tooling for stamped Instances (the root is the only Instance; it migrates by hand)." }
+  ],
+  "testing_decisions": [
+    "package-qa gates every CLI/template change; its rubric is Team-Lead-authored and updates in the same window as the contract it asserts (slice 1: .excn manifest + nested gitignore; slice 3: pointer-append checks) so no slice is gated on stale rules.",
+    "Pointer-append inversion tests: existing host content preserved byte-for-byte with the block appended exactly once; second run appends nothing; --force run also preserves host content byte-for-byte; host file without trailing newline; both files existing; user-deleted block is re-appended; neither file existing produces both minimal pointer files.",
+    "Acceptance: npx to-execution@0.2.0 init in a scratch dir is byte-identical to a local stamp; one scratch host with a pre-existing CLAUDE.md and one with a pre-existing AGENTS.md both show non-destructive wiring; 32 KiB post-append warning fires on an oversized AGENTS.md.",
+    "Known HITL step at publish: npm 2FA requires Brooks's OTP run or a fresh one-time granular token — planned, not a surprise."
+  ],
+  "out_of_scope": [
+    "The skill fork-vs-adapt resolutions (EXEC-006 catalog, EXEC-007/008/009) — EXEC-006 runs against the post-restructure shape.",
+    "Per-tool enhancements (path-scoped .claude/rules, .cursor rule files) — pointer block only for 0.2.0.",
+    "The benchmark harness (EXEC-017).",
+    "Migration tooling for third-party Instances stamped at 0.1.0."
+  ],
+  "issues": ["EXEC-018", "EXEC-019", "EXEC-020", "EXEC-021", "EXEC-022"],
+  "notes": [
+    "Decided by ADR-0002 (.excn/adr/0002-excn-namespace.md), grounded in .excn/research/agent-context-loading.md (six harnesses, fetched 2026-06-07).",
+    "Authored natively as schema-validated JSON — first PRD with no markdown stopgap; the to-prd friction list in PRD-001 notes applies to this run too (tracker/label assumptions), logged as further EXEC-008 evidence.",
+    "Amended 2026-06-07 after packager review: nested .excn/.gitignore replaces host-root gitignore append (R1); dual-file pointer coverage CLAUDE.md+AGENTS.md (R2); visible-text sentinel (R3); pointer files force-exempt (R4); 32KiB warn (R5); pointer block CLI-owned, never template-stamped (M1); package-qa rubric co-updates (M2). All accepted by Team Lead."
+  ]
+}

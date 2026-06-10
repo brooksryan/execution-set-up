@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": 2,
+  "name": "Work Grill fork + work-tracking partition → 0.3.0",
+  "status": "closed",
+  "dates": {
+    "start": "2026-06-07",
+    "end": "2026-06-08",
+    "duration_note": "2026-06-07 → 2026-06-08 (single working session across the date boundary). Final: 9 shipped / 0 in_progress / 1 not_shipped (S2-10/EXEC-011 deferred to backlog, never started). 14 issues closed_in_sprint 2 (the 9 worked sprint-2 slice issues + the 5 cascade deviations EXEC-024/026/027/028/029). ADR-0003 (Lifecycle skills fork) + ADR-0004 (chartered carve-out) recorded; to-execution@0.3.0 published. Retro Loop landed the chartered-vs-emergent wording refinement across principles.md + PROCESS.md + process-adherence.md (src+root), both gates PASS."
+  },
+  "team": [
+    {
+      "name": "team-lead",
+      "role": "main session",
+      "owns": "arbitration, src/template content, one-off authoring, final approval"
+    },
+    {
+      "name": "scribe",
+      "role": "structured artifacts",
+      "owns": "sprint/issue JSON, CONTEXT.md terms, the Retro Loop"
+    },
+    {
+      "name": "packager",
+      "role": "scripts + npm",
+      "owns": "src/bin, src/package.json, versioning, publishing"
+    }
+  ],
+  "goal": "Fork the three Lifecycle skills into .excn-native execution-* skills and partition work-tracking per PRD-004, shipping both as to-execution@0.3.0.",
+  "issues_addressed": [
+    "EXEC-007",
+    "EXEC-008",
+    "EXEC-009",
+    "EXEC-010",
+    "EXEC-011",
+    "EXEC-025",
+    "EXEC-030",
+    "EXEC-031",
+    "EXEC-032",
+    "EXEC-033",
+    "EXEC-024",
+    "EXEC-026",
+    "EXEC-027",
+    "EXEC-028",
+    "EXEC-029"
+  ],
+  "shipped": [
+    {
+      "id": "S2-1",
+      "type": "FEAT",
+      "title": "Implement execution-grill-with-docs skill",
+      "owner": "team-lead",
+      "summary": ".excn-native Work Grill skill: explicit-path discovery, single context (no root CONTEXT.md/CONTEXT-MAP), ADRs to .excn/adr/, mid-grill philosophy candidates route through PRD notes→retro (never a direct PHILOSOPHY.md write), inline glossary writes by the grilling session; 3 files, alignment PASS; src+root mirrored.",
+      "closes_issues": [
+        "EXEC-007"
+      ],
+      "notes": "Shipped 2026-06-07 by team-lead. alignment PASS 0 violations on the three-skill set (.excn/prd-005_progress.json); src→root byte-identical; stamp manifest covered by package-qa under EXEC-030. Cascade-closes the subsumed catalog deviations EXEC-024, EXEC-026, EXEC-027, EXEC-028, EXEC-029 (their resolutions ship inside this skill)."
+    },
+    {
+      "id": "S2-2",
+      "type": "DOCS",
+      "title": "Adopt glossary format into the CONTEXT.md seed",
+      "owner": "team-lead",
+      "summary": "Glossary format adopted: src/template seed reformatted to the Language format (### Term + _Avoid_, Relationships / Example dialogue / Flagged ambiguities, roster) and the root live .excn/CONTEXT.md adopted to match — 17 terms preserved, 12 _Avoid_ lines, 3 doc-level sections, adopt-forward (bulk per-term restructure deferred by recorded decision); seed + root both alignment PASS.",
+      "closes_issues": [
+        "EXEC-025"
+      ],
+      "notes": "Shipped 2026-06-07. Seed half (team-lead) + root half (scribe) both alignment PASS (.excn/prd-005_progress.json). Bulk per-term restructure deferred — see sprint decision 'Glossary-format adoption'."
+    },
+    {
+      "id": "S2-3",
+      "type": "FEAT",
+      "title": "Implement execution-to-prd skill",
+      "owner": "team-lead",
+      "summary": "Fork publishes schema-valid JSON PRDs to .excn/prds/PRD-<NNN>-<slug>.json; prd.schema.json is the sole format authority (no markdown template); no labels/tracker/triage; synthesizes from grill context, no interview; philosophy candidates routed via notes; alignment PASS; src+root mirrored.",
+      "closes_issues": [
+        "EXEC-008"
+      ],
+      "notes": "Shipped 2026-06-07 by team-lead. alignment PASS 0 violations (.excn/prd-005_progress.json); src→root byte-identical."
+    },
+    {
+      "id": "S2-4",
+      "type": "FEAT",
+      "title": "Implement execution-to-issues skill",
+      "owner": "team-lead",
+      "summary": "Fork appends schema-valid issues to .excn/issues/backlog.json (the partition target); issue.schema.json is the sole authority (no markdown body template); globally-unique id scan across all partition files; HITL user-quiz preserved; dependency-ordered; forward-links the source PRD; invocable standalone; alignment PASS; src+root mirrored.",
+      "closes_issues": [
+        "EXEC-009"
+      ],
+      "notes": "Shipped 2026-06-07 by team-lead. alignment PASS 0 violations (.excn/prd-005_progress.json); src→root byte-identical; targets backlog.json per the EXEC-030 partition contract."
+    },
+    {
+      "id": "S2-5",
+      "type": "INFRA",
+      "title": "Preflight required-skill list + Scaffolder manifest",
+      "owner": "packager",
+      "summary": "Lifecycle made self-contained: Setup Skill Preflight drops the three forked skills from required globals (keeps make-teammate, async-questions) and notes the Scaffolder stamps them; Setup Grill + Handoff + README + both PROCESS.md + principles.md reference the execution-* forks (principles genericized to 'a grill'); src/SKILL.md sole-copy, no mirror; alignment PASS.",
+      "closes_issues": [
+        "EXEC-010"
+      ],
+      "notes": "Shipped 2026-06-07 by team-lead. alignment PASS 0 violations (with the EXEC-025 seed; .excn/prd-005_progress.json). src/SKILL.md sole-copy (no mirror)."
+    },
+    {
+      "id": "S2-6",
+      "type": "REFACTOR",
+      "title": "Partition schemas + template skeleton",
+      "owner": "team-lead",
+      "summary": "Partition schemas + template skeleton: issue/sprint schemas carry the partition contract (backlog.json + sprint-<N>/sprint-<N>-issues.json, one shape, globally-unique ids, cross-file depends_on); template stamps empty backlog.json; .gitkeep removed; src+root mirrored; package-qa PASS.",
+      "closes_issues": [
+        "EXEC-030"
+      ],
+      "notes": "Shipped 2026-06-07 by team-lead. package-qa PASS 0 violations (manifest match, pack parity, stamped backlog gitignored in host, host root .gitignore untouched); evidence in .excn/prd-004_progress.json (step package_qa_pass). Unblocks EXEC-031 (S2-7)."
+    },
+    {
+      "id": "S2-7",
+      "type": "REFACTOR",
+      "title": "Cross-file validators + path-contract sweep",
+      "owner": "scribe",
+      "summary": "scribe's half: scribe.md (+ src/template mirror) gains partition ownership and the cross-file validation discipline — owns backlog.json + each sprint's companion sprint-<N>/sprint-<N>-issues.json, moves issues across files at sprint boundaries, validates cross-file (globally-unique ids, depends_on across partitions) after every move. PROCESS.md §Sprint tracking + process-adherence.md companion-file read are team-lead's half. PRD-004.",
+      "closes_issues": [
+        "EXEC-031"
+      ],
+      "notes": "Shipped 2026-06-07. Landed mid-sprint as a chartered slice per ADR-0004. alignment PASS 0 violations over the full partition doc set (PROCESS.md + scribe.md + process-adherence.md, three src↔root pairs byte-identical) — verdict in .excn/prd-004_progress.json (step alignment_review_pass). PROCESS.md/process-adherence.md half authored by team-lead. Validation discipline also recorded operative-now in prd-004_progress.json for EXEC-032."
+    },
+    {
+      "id": "S2-8",
+      "type": "REFACTOR",
+      "title": "Live root-Instance migration to partitions",
+      "owner": "scribe",
+      "summary": "Live root-Instance migration: issues.json(33) split atomically into backlog.json(2: EXEC-002/017) + sprint-1(16) + sprint-2(15) by each sprint's issues_addressed; old file removed; 33 reconciles, ids unique, 0 dangling depends_on, all partitions schema-valid.",
+      "closes_issues": [
+        "EXEC-032"
+      ],
+      "notes": "Shipped 2026-06-07. Functional reconciliation is the gate (ephemeral work-tracking data, no alignment gate per team-lead). Team-lead spot-checked the partitions on disk: all green. Evidence in .excn/prd-004_progress.json (step exec_032_migration_applied)."
+    },
+    {
+      "id": "S2-9",
+      "type": "INFRA",
+      "title": "Publish to-execution@0.3.0",
+      "owner": "packager",
+      "summary": "to-execution@0.3.0 published to the public npm registry (Work Grill fork PRD-005 + work-tracking partition PRD-004 together) behind the EXEC-015 identity guards; registry npx-vs-local byte-diff IDENTICAL (27/27 stamped files); package-qa PASS from the tarball.",
+      "closes_issues": [
+        "EXEC-033"
+      ],
+      "notes": "Shipped 2026-06-07 by packager. registry 0.3.0 (dist-tag latest 0.3.0); shasum 2a2d5194f8cce193c34e459cfd1e47cb6c0c44c0; integrity sha512-h8mvGgQy6RZWv04yMjTkpdwmnVVBkq4Uvb8cfILn25IrAhRHq0in5vPFNkt3YkK64E6V6pJ4LFccRZ65IphRyw==; 31 files, 21.4 kB packed / 64.6 kB unpacked. Release commit 821cc06, tag v0.3.0 (origin), content commit 7ce56ea. Gates: package-qa PASS (0 violations, from tarball); prepublishOnly 6 identity guards held; registry-tarball shasum matched published."
+    }
+  ],
+  "in_progress": [],
+  "not_shipped": [
+    {
+      "id": "S2-10",
+      "type": "TEST",
+      "title": "Zero-glue Work Grill end-to-end on a scratch 0.3.0 Instance",
+      "owner": "team-lead",
+      "summary": "Run the full Work Grill (grill -> PRD -> issues) on a scratch 0.3.0 Instance; every artifact lands conformant to schema with zero translation language. PRD-005's acceptance test. Depends on EXEC-033.",
+      "closes_issues": [
+        "EXEC-011"
+      ],
+      "notes": "HITL — the grill requires the user."
+    }
+  ],
+  "defects_discovered": [],
+  "decisions": [
+    {
+      "title": "Chartered carve-out for mid-sprint definition changes (ADR-0004)",
+      "summary": "Brooks ruled, recorded as ADR-0004: a definition change that is a chartered deliverable (PRD→issue→sprint slice, alignment-gated, Team-Lead-approved) lands mid-sprint as its slice; the Retro Loop remains the sole path for retro-emergent changes. The carve-out's test is chartered-vs-ad-hoc, not which file — so scribe.md (a Teammate constitution) lands under it just like PROCESS.md/process-adherence.md. Matches sprint-1 EXEC-003. The alignment agent independently concurred. At sprint-2 close, the close-time process-adherence run is given ADR-0004 as governing context so the chartered mid-sprint def changes read as conformant."
+    },
+    {
+      "title": "Glossary-format adoption: doc-level adopted, bulk per-term restructure deferred (EXEC-025)",
+      "summary": "Root .excn/CONTEXT.md adopted the seed's Language format at the doc level — 3 net-new sections (Relationships, Example dialogue, Flagged ambiguities) + _Avoid_ lines on 12 high-signal terms — with all 17 mature ### Term entries preserved verbatim. Bulk per-term restructuring (forcing _Avoid_/sub-sections on every term) was deferred as adopt-forward: new grilled terms get the full format; mature prose entries keep their form. Precise-Minimalism call; seed + root both alignment PASS."
+    }
+  ],
+  "retrospective_notes": [
+    {
+      "title": "Chartered-vs-emergent change-path wants explicit wording in the governance docs",
+      "body": "ADR-0004 charters a definition change that is a PRD→issue→sprint slice (alignment-gated, TL-approved) to land mid-sprint as its slice, reserving the Retro Loop for retro-emergent changes. principles.md ('Retro-loop-as-sole-change-path'), PROCESS.md §Retro Loop, and process-adherence.md's Retro-Loop check ('came through the Retro Loop') still state the Retro Loop as the sole path without naming the chartered-vs-emergent distinction. Refining that wording across all three is itself retro-emergent, so it rides this sprint's Retro Loop at close."
+    },
+    {
+      "title": "Change-path ambiguity surfaced as a blocker before any edit",
+      "body": "scribe halted EXEC-031 on recognizing its deliverables land in Retro-Loop-guarded docs and escalated rather than editing through the ambiguity; that escalation is what prompted the carve-out ruling recorded as ADR-0004."
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "id": "PRD-001",
+  "title": "Work Grill skill compatibility with the framework structure",
+  "status": "published",
+  "created": "2026-06-07",
+  "amended": "2026-06-07",
+  "problem_statement": "The framework's Lifecycle depends on three global skills — grill-with-docs, to-prd, to-issues — that assume a different methodology: an external issue tracker with a triage-label vocabulary, docs/adr/ decision records, and file layouts our Instances don't have. Every invocation forces the agent to translate (\"publish to the tracker\" → we mean issues.json), and the framework's no-ADR rule swims upstream against tooling that assumes ADRs exist. The Setup Grill also starts its philosophy question from a blank page even when the target codebase already practices philosophies it could propose.",
+  "solution": "Make the Work Grill native to the framework. Restore ADRs as design-time decision records mapped to the framework's own structure. Catalog every deviation between the three skills and the framework empirically — by invoking them against a real Instance — then resolve each skill (fork into the framework, or adapt our structure) until a full Work Grill runs with zero translation glue. Add a philosophy-scan so the Setup Grill proposes philosophies discovered in the codebase instead of asking cold.",
+  "user_stories": [
+    { "id": 1, "actor": "Team Lead setting up a new project", "want": "the Setup Grill to scan my codebase for existing philosophy signals before asking", "benefit": "the grill proposes rather than starts blank" },
+    { "id": 2, "actor": "Team Lead", "want": "philosophy candidates presented as confirmable proposals", "benefit": "grilling is fast and grounded in what the codebase already practices" },
+    { "id": 3, "actor": "Team Lead", "want": "hard-to-reverse decisions recorded at grill time as ADRs", "benefit": "design rationale is not deferred to sprint close" },
+    { "id": 4, "actor": "future contributor", "want": "ADRs colocated with the methodology docs", "benefit": "one namespace holds the project's durable memory" },
+    { "id": 5, "actor": "scribe", "want": "the decision-record split defined — ADR at design time, retro at sprint close", "benefit": "I log decisions in the right place without judgment calls" },
+    { "id": 6, "actor": "alignment agent", "want": "Principles and PROCESS updated to the restored-ADR policy", "benefit": "my rubric does not fail valid ADR work" },
+    { "id": 7, "actor": "main-session agent running the Work Grill", "want": "grill-with-docs to write decision records to the framework's location", "benefit": "I never translate between two structures" },
+    { "id": 8, "actor": "main-session agent running to-prd", "want": "the publish target defined by the framework", "benefit": "\"publish to the tracker\" needs no interpretation" },
+    { "id": 9, "actor": "main-session agent running to-issues", "want": "issues written to the framework's issues.json in schema", "benefit": "the backlog stays machine-checkable" },
+    { "id": 10, "actor": "framework maintainer", "want": "each skill's deviations cataloged as issues before changing anything", "benefit": "fixes are evidence-driven" },
+    { "id": 11, "actor": "framework maintainer", "want": "a per-skill fork-vs-adapt decision", "benefit": "we do not blanket-fork generic skills that mostly work" },
+    { "id": 12, "actor": "Team Lead", "want": "Preflight to hard-gate on the final skill manifest", "benefit": "setup reflects what the framework actually uses" },
+    { "id": 13, "actor": "new-project user", "want": "the Work Grill to run end-to-end with zero translation glue", "benefit": "the framework feels native rather than bolted on" },
+    { "id": 14, "actor": "Team Lead", "want": "every \"no ADRs\" statement removed in one sweep", "benefit": "the docs never contradict the policy" }
+  ],
+  "implementation_decisions": [
+    { "title": "ADRs are restored", "summary": "Design-time decision records; the retro remains the sprint-time record. Offer criteria stay grill-with-docs's three: hard to reverse, surprising without context, result of a real trade-off." },
+    { "title": "ADRs map to the framework's structure, not docs/adr/", "summary": "They live in the methodology namespace; the exact location resolves together with EXEC-001. ADRs are committed prose, one decision per numbered file." },
+    { "title": "Philosophy-scan", "summary": "The Setup Grill spawns a read-only subagent to sweep the target codebase (readmes, contributor docs, configs, prior documentation) and return philosophy candidates. Candidates are proposals the user confirms; the scan never writes PHILOSOPHY.md itself." },
+    { "title": "Deviation catalog precedes any skill change", "summary": "Each mismatch found while invoking a skill becomes one backlog issue. The catalog from this PRD's own production run seeds it." },
+    { "title": "Per-skill resolution", "summary": "Decided from the catalog: fork the skill into the framework, or adapt the framework's structure. The acceptance bar for either: zero translation language at point of use." },
+    { "title": "Preflight and the Scaffolder template update last", "summary": "To match the resolution outcome: manifest of required skills, stamped references to the ADR location." },
+    { "title": "All \"no ADRs\" statements are removed", "summary": "From the Principles, PROCESS, Lifecycle glossary entry, and Team Directive as part of ADR restoration — Src-First, alignment-gated." },
+    { "title": "Tracker mapping for this framework", "summary": "PRDs and issues are schema-validated JSON in the work-tracking area (prds/, issues.json) — the adherence-vs-understanding line: artifacts agents execute against are JSON; documents humans read for context (including ADRs) are markdown. No label vocabulary — backlog entry plus actionable_now is the triage signal." }
+  ],
+  "testing_decisions": [
+    "A good test observes external behavior: invoke the skill, inspect the artifacts it produces. Never assert on prompt internals.",
+    "package-qa continues to gate every Scaffolder change (stamp manifest, idempotency, JSON parse, gitignore, skip-safety).",
+    "Acceptance test for the whole PRD: one clean end-to-end Work Grill (grill → PRD → issues) on a scratch Instance with zero translation language. Prior art: this PRD's own production run, which is the first deviation data point."
+  ],
+  "out_of_scope": [
+    "Executing EXEC-001 (the namespace move itself) — the ADR location depends on its outcome, but the move is its own issue.",
+    "EXEC-002's minimalism sweep.",
+    "Review of make-teammate and async-questions (not Work Grill skills).",
+    "npm publishing and global skill installation mechanics (PRD-002's domain)."
+  ],
+  "issues": ["EXEC-003", "EXEC-004", "EXEC-005", "EXEC-006", "EXEC-007", "EXEC-008", "EXEC-009", "EXEC-010", "EXEC-011"],
+  "notes": [
+    "Deviation catalog seeded by the to-prd run (2026-06-07): (1) to-prd expects an issue tracker + triage-label vocabulary provided by /setup-matt-pocock-skills — the framework has neither. (2) to-prd applies a needs-triage label — the framework has no labels; triage is the Team Lead pulling backlog issues into a sprint. (3) to-prd says 'respect any ADRs' — second skill to assume ADRs; evidence used in the restore decision. (4) to-prd's module/testing framing assumes a code feature — framework deliverables are mostly prompt artifacts, testable only by invocation. (5) grill-with-docs hardcodes docs/adr/ and a CONTEXT-MAP.md convention the framework does not use. (6) to-prd's template forbids file paths in Implementation Decisions — framework artifacts are files; resolved by naming artifacts, not paths.",
+    "Deviation catalog, to-issues run (2026-06-07): (7) same tracker/label/setup-skill assumption. (8) third 'respect ADRs' occurrence. (9) vertical-slice rules assume code layers (schema/API/UI/tests). (10) issue-template fields (Parent, Acceptance criteria, slice type) had no schema home — closed by this PRD's EXEC-004.",
+    "Amendment 2026-06-07: first published as markdown; converted to this JSON form under EXEC-004 the same day. Original tracker-mapping decision said 'PRDs are prose markdown' — corrected by Team Lead ruling: PRDs and issues are JSON (adherence-vs-understanding line)."
+  ]
+}

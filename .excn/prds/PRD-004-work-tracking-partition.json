@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "id": "PRD-004",
+  "title": "Partition work-tracking: backlog, current sprint, archived sprints",
+  "status": "published",
+  "created": "2026-06-07",
+  "amended": "2026-06-08",
+  "problem_statement": "A single issues.json carries every issue ever filed — 23 after one sprint, more the moment the in-flight catalog files — and grows without bound. Agents that need only the open backlog or only the active sprint must load and parse the whole history, and the file becomes a merge hotspot since every state change for any issue touches one document.",
+  "solution": "Partition issues by lifecycle location, per Brooks's rulings: .excn/issues/backlog.json holds open unpulled issues; each sprint's pulled issues live in .excn/issues/sprint-N/sprint-N-issues.json, which becomes that sprint's archive by construction when the sprint closes. Sprint records stay at .excn/sprints/. An issue's location IS its state: filed → backlog, pulled → the sprint's issues file, closed → stays there. scribe moves issues at sprint boundaries. Every file stays small and conforms to the same issue schema.",
+  "user_stories": [
+    { "id": 1, "actor": "agent grabbing work", "want": "a backlog file containing only open, unpulled issues", "benefit": "I load candidates without parsing history" },
+    { "id": 2, "actor": "Teammate executing sprint work", "want": "the active sprint's pulled issues in one small sprint-issues file", "benefit": "the in-flight issue set is one read, separate from history and backlog" },
+    { "id": 3, "actor": "scribe", "want": "issue movement to be file movement (backlog → sprint → archive)", "benefit": "location encodes state and the long-file merge hotspot disappears" },
+    { "id": 4, "actor": "future contributor", "want": "each past sprint's issues archived in their own file beside its sprint record", "benefit": "a sprint's history is two small named files, not rows buried in an unbounded log" },
+    { "id": 5, "actor": "process-adherence agent", "want": "sprint-completion checks reading the sprint record plus its sprint-issues file", "benefit": "my rubric reads two small documents instead of the full issue history" },
+    { "id": 6, "actor": "to-issues (or its fork)", "want": "a stable publish target for new issues", "benefit": "publishing appends to the backlog regardless of sprint state" },
+    { "id": 7, "actor": "framework consumer", "want": "the partitioned layout stamped by the template with matching schemas", "benefit": "new Instances start partitioned instead of migrating later" }
+  ],
+  "implementation_decisions": [
+    { "title": "Partition topology (ruled)", "summary": ".excn/issues/backlog.json holds open unpulled issues; .excn/issues/sprint-N/sprint-N-issues.json holds each sprint's pulled issues — the active sprint's file is simply the latest N whose sprint record is active; past files are the archive by construction. Sprint records stay at .excn/sprints/. No special current-vs-archive file shapes." },
+    { "title": "One schema everywhere (ruled)", "summary": "An issue is an issue — the data does not change with location. Every partition file conforms to the same issue collection schema; assigned_sprint and closed_in_sprint survive as record fields (location organizes, fields record). No backlog- or archive-specific schemas." },
+    { "title": "scribe moves files at sprint boundaries (ruled)", "summary": "At sprint start scribe moves pulled issues backlog.json → sprint-N-issues.json; at sprint close, issues that didn't resolve return to backlog.json and closed issues stay in the sprint's file as its archive." },
+    { "title": "Cross-file invariants", "summary": "Issue ids stay globally unique across all partitions; depends_on may reference issues in any partition; validation (scribe's field-by-field checks, the schemas) must check across files, not within one." },
+    { "title": "Schema changes ride the partition", "summary": "issue.schema and sprint.schema evolve to the partitioned shape; the template stamps the partition skeleton; every path/contract reference (scribe definition, process-adherence rubric, PROCESS.md, to-issues publish target) updates in the same change window." },
+    { "title": "Live migration", "summary": "The root Instance's issues.json and sprint_1.json split into the new partitions with zero data loss — scribe owns the state migration, Team Lead owns template/doc changes, Src-First order throughout." },
+    { "title": "Ships with the 0.3.x line", "summary": "Lands alongside or immediately after the Work Grill fork (EXEC-007 set) to avoid two consecutive stamped-layout migrations for consumers." }
+  ],
+  "testing_decisions": [
+    "Migration acceptance: every issue id present exactly once across partitions post-split; counts reconcile (filed = backlog + current + archived); all cross-file depends_on resolve.",
+    "package-qa gates the template/CLI ride-along; registry acceptance stays the npx-vs-local byte-diff pattern.",
+    "scribe's validators extend to cross-file checks and run after every partition move."
+  ],
+  "out_of_scope": [
+    "The Work Grill fork itself (EXEC-007 set) — separate PRD-001 lineage.",
+    "Retros/PRDs/progress files — partition covers issues and sprints only; the rest of the work-tracking set is untouched.",
+    "Issue-tracker integrations beyond the file layout."
+  ],
+  "issues": ["EXEC-030", "EXEC-031", "EXEC-032"],
+  "notes": [
+    "Shape stated by Brooks 2026-06-07; detail rulings landed 2026-06-08 in the breakdown review: uniform schema ('an issue is an issue, the data in the issues doesn't change, just the location'), topology issues/backlog.json + issues/sprint-#/sprint-#-issues.json, scribe owns the boundary moves. The planned design-grill slice was dropped — nothing material remained open.",
+    "Sprint-2 candidate set; filed during sprint 1's close ceremony."
+  ]
+}

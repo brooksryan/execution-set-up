@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "id": "PRD-005",
+  "title": "Work Grill fork: the execution-* Lifecycle skills",
+  "status": "published",
+  "created": "2026-06-07",
+  "amended": null,
+  "problem_statement": "Running the Work Grill in an Instance depends on three globally-installed skills (grill-with-docs, to-prd, to-issues) whose conventions deviate from the framework in six cataloged ways: they create a root CONTEXT.md blind to .excn/CONTEXT.md, write ADRs to docs/adr/ with colliding numbering, carry a foreign multi-context convention, have no route for philosophy candidates, publish to external trackers with label vocabulary, and cannot discover the .excn namespace. Every Instance run requires translation glue, and the mission requires a working Instance without touching anything outside it.",
+  "solution": "The framework ships its own forks of all three skills, stamped per-Instance by the Scaffolder into .claude/skills/: execution-grill-with-docs, execution-to-prd, execution-to-issues. Each is .excn-native by construction — explicit paths, stamped schemas as output contracts, the Retro Loop preserved as the sole path into PHILOSOPHY.md. A lead in a fresh Instance runs the full grill → PRD → issues entry with zero translation language and zero global-skill dependencies. Decision record: ADR-0003.",
+  "user_stories": [
+    { "id": 1, "actor": "Instance lead", "want": "the Work Grill runnable from skills stamped inside my own repo", "benefit": "I depend on no globally-installed skills and never touch the framework repo" },
+    { "id": 2, "actor": "grilling session", "want": "the grill skill to read and write .excn/CONTEXT.md and .excn/adr/ by explicit path", "benefit": "no split-brain glossary and no second ADR home appears" },
+    { "id": 3, "actor": "grilling session", "want": "a defined route for philosophy candidates surfaced mid-grill", "benefit": "candidates survive into the retro without breaking Retro-loop-as-sole-change-path" },
+    { "id": 4, "actor": "Instance lead", "want": "execution-to-prd to publish schema-valid PRD JSON to .excn/prds/", "benefit": "agents execute against validated artifacts with no label vocabulary or external tracker" },
+    { "id": 5, "actor": "Instance lead", "want": "execution-to-issues to append schema-valid issues to the stamped backlog target", "benefit": "breakdowns land as data conforming to issue.schema.json, not markdown bodies" },
+    { "id": 6, "actor": "bug-fixing session", "want": "execution-to-issues invocable standalone", "benefit": "grill-skipping fixes still file conformant issues" },
+    { "id": 7, "actor": "framework consumer", "want": "the three skills stamped by the Scaffolder as part of the 0.3.0 layout", "benefit": "new Instances start native instead of migrating" },
+    { "id": 8, "actor": "scribe", "want": "grill-time glossary writes done inline by the session, with my stewardship between grills", "benefit": "CONTEXT.md ownership is unambiguous and grills never block on a teammate that doesn't exist yet" },
+    { "id": 9, "actor": "grilling session", "want": "the glossary seed and the adopted Language format (terms with Avoid aliases, Relationships, Example dialogue, Flagged ambiguities) merged with the roster section", "benefit": "the grill and the seed speak one format" },
+    { "id": 10, "actor": "future contributor", "want": "the fork-and-naming decision recorded with its rejected alternatives", "benefit": "nobody 'fixes' the distinct names back into shadowing that the precedence rules silently break" }
+  ],
+  "implementation_decisions": [
+    { "title": "Fork, not adapt — three skills (EXEC-007/008/009 ruled)", "summary": "All three Lifecycle skills fork as separate Instance-stamped skills. Adapt fails the zero-glue acceptance; one combined skill loses the standalone issue path and single responsibility." },
+    { "title": "Distinct execution-* names", "summary": "execution-grill-with-docs, execution-to-prd, execution-to-issues. Same-name shadowing is dead on arrival: Claude Code resolves skill-name collisions personal-over-project, so a stamped to-prd would be silently ignored wherever the global exists. CONTEXT.md's Work Grill entry links the term to the skills." },
+    { "title": "Skill anatomy", "summary": "execution-grill-with-docs carries SKILL.md + CONTEXT-FORMAT.md + ADR-FORMAT.md rewritten .excn-native; execution-to-prd and execution-to-issues are single SKILL.md each — the stamped prd.schema.json and issue.schema.json are their output contracts, carried nowhere else." },
+    { "title": "Single context (EXEC-027 ruled)", "summary": "One .excn/CONTEXT.md per Instance; CONTEXT-MAP dropped. Natural clusters become subheadings inside the one glossary." },
+    { "title": "Philosophy route (EXEC-028 ruled)", "summary": "The grill records philosophy candidates in the PRD's notes field; scribe seeds them into the new sprint's retrospective_notes at open; the Retro Loop proposes the PHILOSOPHY.md edit at close." },
+    { "title": "Glossary writes during grills (split-brain EXEC-024 + ownership ruled)", "summary": "The grilling session updates .excn/CONTEXT.md inline as terms resolve; scribe stewards the file between grills and ratifies grill-time additions at sprint open. The seed's ownership line amends to match." },
+    { "title": "ADR home (EXEC-026 ruled)", "summary": "ADRs live in .excn/adr/ with numbering scanned there; the fork never creates docs/adr/." },
+    { "title": "Discovery by explicit path (EXEC-029 ruled)", "summary": "The forks are .excn-native: every read and write names its path. No documentation search, no pointer-following heuristics." },
+    { "title": "Publish targets coordinate with PRD-004", "summary": "execution-to-prd publishes .excn/prds/PRD-NNN-<slug>.json; execution-to-issues appends to the PRD-004 partition's backlog file from birth — the fork never stamps a publish target the same release breaks." },
+    { "title": "Preflight shrinks (EXEC-010)", "summary": "The Setup Skill's required-global-skills gate drops the three forked skills; the stamped template carries them instead. package-qa verifies the 0.3.0 stamp from the pack tarball per the pack-parity rubric item." },
+    { "title": "No CLI walk change", "summary": "The manifest walk already stamps .claude/* paths with no dotfile filtering (proven by template/.claude/agents). Constraint honored: no nested .gitignore/.npmignore inside skill dirs — npm pack consumes them." },
+    { "title": "Dogfood mirror", "summary": "Src-First: skills land in src/template/.claude/skills/ first; the root Instance mirrors them into its own .claude/skills/ in the same change window." }
+  ],
+  "testing_decisions": [
+    "Zero-glue acceptance (EXEC-011): a full Work Grill (grill → PRD → issues) on a scratch 0.3.0 Instance lands every artifact in the framework structure, schema-valid, with zero translation language anywhere in the run.",
+    "Glossary and ADR paths exercised live: the scratch grill must write a term into .excn/CONTEXT.md and an ADR into .excn/adr/ with correct numbering against pre-existing ADRs.",
+    "package-qa gates every src/bin and src/package.json change, verifying the stamp from the npm pack tarball, not the working tree.",
+    "Registry acceptance stays the npx-vs-local byte-diff pattern from EXEC-022."
+  ],
+  "out_of_scope": [
+    "EXEC-002 precise-minimalism pass — backlog.",
+    "EXEC-017 benchmark harness — needs its own grill → PRD.",
+    "Multi-context support — single context only until a real Instance outgrows it.",
+    "Any change to the upstream global skills.",
+    "The PRD-004 partition design itself — already ruled and published; only its issue breakdown rides this sprint."
+  ],
+  "issues": ["EXEC-007", "EXEC-008", "EXEC-009", "EXEC-010", "EXEC-011", "EXEC-025", "EXEC-033"],
+  "notes": [
+    "Produced by the sprint-2 Work Grill (2026-06-07), this project's second dogfood grill. PRD authored directly as schema-conformant JSON rather than via the global to-prd — the global skill carries the deviations this PRD eliminates.",
+    "EXEC-024…029 carried prd: PRD-001 as catalog evidence; their design resolutions live here. Re-point their prd fields to PRD-005 at issue-breakdown time.",
+    "No philosophy candidates surfaced during this grill."
+  ]
+}

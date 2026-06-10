@@ -1,0 +1,228 @@
+{
+  "schema_version": "1.0",
+  "issues": [
+    {
+      "id": "EXEC-034",
+      "title": "Project-scoped npm publish auth (no global dotfile dependency)",
+      "status": "closed",
+      "severity": "P3",
+      "scope": [
+        "ops"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "Publish auth scoped to this project via a gitignored src/.npmrc env-var ref (//registry.npmjs.org/:_authToken=${TO_EXECUTION_NPM_TOKEN}); token sourced from the macOS Keychain (service npm-personal-token, account $USER) at publish time; neither depends on nor clobbers the global ~/.npmrc; recipe documented in root RELEASE.md.",
+      "prd": null,
+      "acceptance_criteria": [
+        "src/.npmrc exists with exactly the env-var-ref line (no literal token) and is gitignored (git check-ignore matches)",
+        "~/.npmrc unmodified",
+        "token authenticates as brooksryan via the PROJECT src/.npmrc (proven: control E401 with env unset + global neutralized; live whoami → brooksryan)",
+        "no secret committed; .npmrc absent from the published tarball (package-qa: 4 guards confirmed)",
+        "prepublishOnly identity guards still pass",
+        "[DEFERRED] 2FA-bypass on publish verified on the next real release — see follow-up issue"
+      ],
+      "slice_type": "HITL",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 3,
+      "closed_in_sprint": 3,
+      "notes": "Intended for next sprint (Brooks, 2026-06-08). Surfaced by packager during EXEC-033. Re-scoped 2026-06-09 from ~/.npmrc-restore to project-scoped auth (Brooks). Mechanism built + package-qa-clean + auth-proven; 2FA-bypass-on-write deferred to next real publish (follow-up issue). Recipe in root RELEASE.md."
+    },
+    {
+      "id": "EXEC-035",
+      "title": "Evaluate a cleaner CLI implementation — language or structure",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/bin"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "cli.js is messy and JS is friction. Consider a cleaner language or at least a cleaner implementation/structure for the Scaffolder CLI. Requires its own design grill → PRD before any rewrite (decision: stay-JS-cleaner vs port; weigh the npm/npx distribution constraint, the stamp/pointer/preflight contracts, and package-qa).",
+      "prd": null,
+      "acceptance_criteria": [
+        "a grill resolves language/structure direction with the npx-distribution constraint weighed",
+        "the chosen approach preserves the stamp + pointer + preflight contracts (package-qa still passes)"
+      ],
+      "slice_type": "HITL",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 3,
+      "closed_in_sprint": 3,
+      "notes": "Brooks directive 2026-06-08. Grill-first — macro, needs its own grill → PRD like EXEC-017."
+    },
+    {
+      "id": "EXEC-036",
+      "title": "Static HTML status pages over the .excn JSON for at-a-glance team status",
+      "status": "closed",
+      "severity": "P3",
+      "scope": [
+        "viewer"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "minimalist static HTML page(s) that read the .excn work-tracking JSON (sprints/, issues/ partitions, prds/, *_progress.json) and render current state — what's shipped / in-flight / backlog — so an end-user can glance at status without interrupting the team. Basic, minimalist; ideally no build step (read JSON client-side).",
+      "prd": null,
+      "acceptance_criteria": [
+        "opening the page shows the live sprint's shipped/in_progress/not_shipped and the backlog from the JSON with no manual data entry",
+        "no build step required to view",
+        "minimalist — no framework heft"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 3,
+      "closed_in_sprint": 3,
+      "notes": "Brooks directive 2026-06-08."
+    },
+    {
+      "id": "EXEC-011",
+      "title": "Acceptance: zero-glue Work Grill end-to-end on a scratch 0.3.0 Instance",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "investigation"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "Run the full Work Grill (grill -> PRD -> issues) on a scratch 0.3.0 Instance after EXEC-033. Every artifact lands in the framework structure conformant to schema, with zero translation language anywhere in the run. This is PRD-005's acceptance test.",
+      "prd": "PRD-005",
+      "acceptance_criteria": [
+        "the full Work Grill (grill -> PRD -> issues) runs end-to-end on a scratch 0.3.0 Instance",
+        "every artifact lands in the framework structure conformant to schema",
+        "zero translation language anywhere in the run"
+      ],
+      "slice_type": "HITL",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-033"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 3,
+      "closed_in_sprint": 3,
+      "notes": "Kept from sprint 1, re-pointed to PRD-005 for sprint 2. HITL — the grill requires the user. Deferred from sprint 2 (Brooks, 2026-06-08): never started; returned to backlog.json with the acceptance flag preserved. S2-10 remains in sprint_2.json not_shipped as the planned-but-deferred record."
+    },
+    {
+      "id": "EXEC-038",
+      "title": "Create the architect Teammate (research + standards authoring)",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "roster"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "Stand up architect as a persistent Teammate: author its agent definition (the _teammate.template shape — Owns / Does-not-own / Process / Constraints) and add its roster rows to CONTEXT.md and TEAM_DIRECTIVE.md (roster, routing, gates). architect owns durable research (.excn/research/) and authoring engineering standards (CODE_STANDARDS.md) from researched best practices; proposes, does not ratify (Team Lead keeps final approval); writes no product/implementation code; every standard edit it authors rides the alignment gate, landing chartered (ADR-0004) or via the Retro Loop. Seam: Team Lead keeps arbitration/final-approval/template/Adherence-agent authoring (architect authors the rubric, TL authors the gate); scribe keeps the Retro Loop; builder/viewer keep implementation code.",
+      "prd": "PRD-006",
+      "acceptance_criteria": [
+        "architect agent def exists in the _teammate.template shape",
+        "CONTEXT.md roster + TEAM_DIRECTIVE.md roster/routing/gates list architect with the seam above and no overlap with existing Teammates",
+        "the def change passes alignment and is Team-Lead-approved",
+        "no product/implementation code authored in this slice"
+      ],
+      "slice_type": "HITL",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 3,
+      "closed_in_sprint": 3,
+      "notes": null
+    },
+    {
+      "id": "EXEC-039",
+      "title": "architect: research Node/CLI best practices and author the extended code standard",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "standards"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "architect produces a durable research artifact in .excn/research/ on Node + CLI best practices, then extends CODE_STANDARDS.md from it so 'clean' is a researched, enforceable rubric the code-standards gate applies. Includes the chartered-vs-emergent wording fix to CODE_STANDARDS.md's change-path line (currently 'raised only through the Retro Loop'), since architect-authored standards are chartered (ADR-0004) — mirroring sprint 2's Retro-Loop-docs refinement. Alignment-gated persistent-doc change, Team-Lead-approved.",
+      "prd": "PRD-006",
+      "acceptance_criteria": [
+        "a durable Node/CLI best-practices research artifact exists in .excn/research/",
+        "CODE_STANDARDS.md extended from that research with checkable pass/fail rules, no prose padding (Precise Minimalism)",
+        "CODE_STANDARDS.md's change-path line carries the chartered-vs-emergent distinction (ADR-0004)",
+        "the change passes alignment and is Team-Lead-approved"
+      ],
+      "slice_type": "HITL",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-038"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 3,
+      "closed_in_sprint": 3,
+      "notes": null
+    },
+    {
+      "id": "EXEC-040",
+      "title": "builder: refactor the Scaffolder CLI to the code standard (behavior-preserving)",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/bin"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "builder refactors the Scaffolder CLI in place to the extended code standard: deterministic layout (header -> imports -> constants -> helpers -> public surface), descriptive names, doc comments, pointer-block content separated from the wiring logic. Behavior-preserving — init stamp/pointer behavior and the stamp/pointer/preflight contracts unchanged. Gates: code-standards + package-qa both PASS.",
+      "prd": "PRD-006",
+      "acceptance_criteria": [
+        "the Scaffolder CLI conforms to CODE_STANDARDS.md (code-standards PASS)",
+        "behavior unchanged — package-qa PASS (contracts intact, stamp manifest unchanged)",
+        "no new module tree, build step, or test suite",
+        "src->root mirrored per Src-First"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-039"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 3,
+      "closed_in_sprint": 3,
+      "notes": "Acceptance criterion 'src->root mirrored per Src-First' recorded N/A at ship: cli.js + pointer-block.js are package source (src/bin only), not stamped template files, so there is no root mirror."
+    },
+    {
+      "id": "EXEC-041",
+      "title": "builder: separate publish-time release tooling from the shipped product",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src/bin",
+        "release"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "builder relocates the publish-time identity guard out of the shipped product to repo-root release tooling, repointing the publish hook (prepublishOnly) and the guard's version-read, so the published package becomes product-only (the guard no longer ships to consumers). Cleans the guard to the code standard as it moves. Gates: package-qa (manifest re-baselines to product-only; the guard still runs at our publish) + code-standards both PASS.",
+      "prd": "PRD-006",
+      "acceptance_criteria": [
+        "the publish-time guard no longer ships in the package tarball (package-qa manifest re-baseline PASS)",
+        "the publish hook + version-read repointed; the guard still fires at our publish via prepublishOnly",
+        "the relocated guard conforms to CODE_STANDARDS.md (code-standards PASS)",
+        "no secret committed; global npm config untouched"
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-039"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": 3,
+      "closed_in_sprint": 3,
+      "notes": null
+    }
+  ]
+}

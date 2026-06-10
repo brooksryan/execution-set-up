@@ -1,0 +1,268 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": 4,
+  "name": "Work-tracking visibility decision, hooks grill, template minimalism sweep",
+  "status": "active",
+  "dates": {
+    "start": "2026-06-10",
+    "end": null,
+    "duration_note": null
+  },
+  "team": [
+    {
+      "name": "team-lead",
+      "role": "arbitration, src/template, final approval",
+      "owns": "arbitration, src/template content, final approval"
+    },
+    {
+      "name": "scribe",
+      "role": "work-tracking JSON + Retro Loop",
+      "owns": "sprint/issue JSON, CONTEXT.md terms, the Retro Loop"
+    },
+    {
+      "name": "builder",
+      "role": "src/bin / CLI + template hook wiring",
+      "owns": "src/bin, the Scaffolder CLI, src/template/.excn/gitignore"
+    },
+    {
+      "name": "architect",
+      "role": "durable research + standards authoring",
+      "owns": "durable research, CODE_STANDARDS.md proposals"
+    },
+    {
+      "name": "viewer",
+      "role": "status-page / UI",
+      "owns": "the status-page viewer / UI"
+    }
+  ],
+  "goal": "Decide and implement the work-tracking visibility question (ADR), run the hooks grill→PRD that unblocks the three hook ideas, and finish the template precise-minimalism sweep.",
+  "issues_addressed": [
+    "EXEC-042",
+    "EXEC-043",
+    "EXEC-002",
+    "EXEC-044",
+    "EXEC-045",
+    "EXEC-046",
+    "EXEC-047",
+    "EXEC-048",
+    "EXEC-049",
+    "EXEC-050",
+    "EXEC-051"
+  ],
+  "shipped": [
+    {
+      "id": "S4-2",
+      "type": "DOCS",
+      "title": "Grill→PRD: hook-invoked lightweight reviewers + smaller-model secretary work",
+      "owner": "team-lead",
+      "summary": "Grill ran 2026-06-10 (context-loaded session, caveat accepted): remind-only hooks (ADR-0006), per-feature opt-in scripts via a schema-validated .excn toggle config, sent-message nudge, load_progress.json record, clerk small-model offload. PRD-007 published and amended same day with the Instance update path (Brooks's added scope); broken into EXEC-046..050 + re-scoped EXEC-044/045.",
+      "closes_issues": [
+        "EXEC-043"
+      ],
+      "notes": "HITL, grill-first per the Lifecycle. EXEC-044/EXEC-045 stay in backlog pending this PRD."
+    },
+    {
+      "id": "S4-1",
+      "type": "INFRA",
+      "title": "Decide the gitignored work-tracking set; record the ADR; implement in the template",
+      "owner": "builder",
+      "summary": "ADR-0005 recorded; template gitignore reduced to *_progress.json only, root mirrors it, drafts/ drift removed; package-qa PASS.",
+      "closes_issues": [
+        "EXEC-042"
+      ],
+      "notes": "HITL."
+    },
+    {
+      "id": "S4-4",
+      "type": "INFRA",
+      "title": "Hook plumbing: toggle config + schema + stamped settings wiring",
+      "owner": "builder",
+      "summary": "Stamped hooks.config.json + hooks-config.schema.json + .claude/settings.json wiring + 5 fail-safe hook scripts; package-qa PASS, code-standards PASS.",
+      "closes_issues": [
+        "EXEC-046"
+      ],
+      "notes": "AFK."
+    },
+    {
+      "id": "S4-5",
+      "type": "FEAT",
+      "title": "Gate-reminder hook (default on)",
+      "owner": "builder",
+      "summary": "gate-watch.js: PostToolUse path-watch reminder + Stop block-once with stop_hook_active guard + verdict sensing; ships enabled; code-standards PASS.",
+      "closes_issues": [
+        "EXEC-047"
+      ],
+      "notes": "AFK."
+    },
+    {
+      "id": "S4-6",
+      "type": "DOCS",
+      "title": "clerk Invoked Agent + scribe delegation",
+      "owner": "team-lead",
+      "summary": "clerk.md (haiku-pinned) authored + scribe delegation bullet added; alignment PASS, Team Lead approved.",
+      "closes_issues": [
+        "EXEC-048"
+      ],
+      "notes": "HITL."
+    },
+    {
+      "id": "S4-7",
+      "type": "FEAT",
+      "title": "Update path: version stamp + update command",
+      "owner": "builder",
+      "summary": "framework-version.json marker on init + update verb (re-stamps invariants, drift persists via template-hash anchor, restores missing); stamp-policy.js data module; code-standards PASS, package-qa PASS.",
+      "closes_issues": [
+        "EXEC-049"
+      ],
+      "notes": "AFK."
+    }
+  ],
+  "in_progress": [
+    {
+      "id": "S4-11",
+      "type": "FEAT",
+      "title": "nothing-new-under-the-sun prior-art Invoked Agent (stamped default)",
+      "owner": "team-lead",
+      "summary": "EXEC-051 per PRD-007 amendment: scoping-time prior-art/gotcha research agent, invoked with a PRD + codebase pointers; alignment-gated chartered definition addition.",
+      "closes_issues": [
+        "EXEC-051"
+      ],
+      "notes": "AFK once approved; demo against PRD-007."
+    }
+  ],
+  "not_shipped": [
+    {
+      "id": "S4-3",
+      "type": "DOCS",
+      "title": "Precise-minimalism pass over remaining template artifacts",
+      "owner": "team-lead",
+      "summary": "Sweep PROCESS.md, the CONTEXT.md seed, the CLAUDE.md stub, and the agent defs in src/template for explanatory prose that is not instruction. Src-First; alignment gate on persistent-doc edits.",
+      "closes_issues": [
+        "EXEC-002"
+      ],
+      "notes": "AFK."
+    },
+    {
+      "id": "S4-8",
+      "type": "FEAT",
+      "title": "Health check command",
+      "owner": "builder",
+      "summary": "EXEC-050; depends on EXEC-046/049.",
+      "closes_issues": [
+        "EXEC-050"
+      ],
+      "notes": "AFK."
+    },
+    {
+      "id": "S4-9",
+      "type": "FEAT",
+      "title": "Sent-message follow-through nudge (ships off)",
+      "owner": "builder",
+      "summary": "EXEC-044; depends on EXEC-046.",
+      "closes_issues": [
+        "EXEC-044"
+      ],
+      "notes": "AFK."
+    },
+    {
+      "id": "S4-10",
+      "type": "FEAT",
+      "title": "Load-reporting hook + viewer lane (ships off)",
+      "owner": "builder",
+      "summary": "EXEC-045 hook side; viewer lane owned by viewer; depends on EXEC-046.",
+      "closes_issues": [
+        "EXEC-045"
+      ],
+      "notes": "AFK."
+    }
+  ],
+  "defects_discovered": [
+    {
+      "id": "D4-1",
+      "severity": "P2",
+      "discovered_by": "team-lead",
+      "discovered_at": "2026-06-10",
+      "summary": "Phantom work-tracking wipe: Team Lead misread builder-B's git worktree as the main repo via relative-path checks after a stray cd, diagnosed a full deletion of .excn work-tracking, killed two gates mid-run and launched a recovery agent against a non-incident. No data was ever lost; no damage resulted.",
+      "root_cause": "Shell cwd left in the worktree; relative-path forensics; destructive premise acted on before verification from a fresh repo-root shell.",
+      "fix": "Post-mortem at .excn/retros/2026-06-10-postmortem-phantom-wipe.md; absolute-path forensics rule and persistent-Teammate spawning adopted for the rest of the sprint."
+    }
+  ],
+  "decisions": [
+    {
+      "title": "Work-tracking is version-controlled; only *_progress.json ignored",
+      "summary": "ADR-0005. backlog.json is the single tracker; root mirrors template gitignore exactly; drafts/ drift dropped."
+    },
+    {
+      "title": "Hooks are remind-only with per-feature .excn toggles",
+      "summary": "ADR-0006. Gate reminders default on; message nudge (sent-side) and load reporting (load_progress.json) ship off; mechanical record moves route to a small-model clerk Invoked Agent."
+    },
+    {
+      "title": "PRD-007 amended with the Instance update path",
+      "summary": "Stamp records framework version; an update command re-stamps invariants only, reports drift; health check reports outdated. Brooks's added scope at issue breakdown."
+    }
+  ],
+  "retrospective_notes": [
+    {
+      "title": "Grill ran context-loaded again",
+      "body": "The sprint-4 Work Grill (EXEC-042/043) ran in the planning session rather than a fresh one — second consecutive occurrence of the caveat sprint 3 recorded for acceptance runs. Carried for the Retro Loop: whether the fresh-session pin needs teeth or relaxation."
+    },
+    {
+      "title": "Sprint work ran on transient background agents, not persistent Teammates",
+      "body": "builder slices, gates, and the recovery attempt were spawned as anonymous background Invoked Agents instead of the rostered persistent Teammates (builder, scribe). Contributing factor in the phantom-wipe incident: no stable owner to query, unmodeled side effects (the worktree), Team Lead doing scribe/builder work inline. Brooks directed this into the retro. Candidate TEAM_DIRECTIVE edit: sprint slices route to persistent Teammates; Invoked Agents are for gates and one-shot checks only."
+    },
+    {
+      "title": "Relative-path forensics produced a false catastrophic reading",
+      "body": "Every absolute-path check during the incident returned truth; every relative-path check returned the worktree. Candidate PROCESS edit (Trust-the-deployed-state section): verify any data-loss premise from a fresh shell at the repo root with absolute paths before any recovery or kill action."
+    }
+  ],
+  "step_log": [
+    {
+      "step": "process_review_pass",
+      "at": "2026-06-10",
+      "artifact": "plan sprint 4",
+      "summary": "PASS, 0 violations: lifecycle order, sprint tracking partitions, and grill-first all conform"
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-049 src/bin/cli.js + src/bin/stamp-policy.js",
+      "summary": "PASS — 0 violations; update verb and stamp-policy data module conform to all Structure, CLI, and Commenting rules"
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-049 update path — init writes .excn/framework-version.json marker; new update verb re-stamps invariants",
+      "summary": "PASS, 0 violations: manifest+marker, idempotent init, JSON parse, gitignore set/anchoring, pack parity, skip-safety, full pointer battery, update (idempotent/drift/variant/restore/exit-1) all hold"
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-042/046/047 hooks + gitignore slim-down (template + root mirrors)",
+      "summary": "PASS, 0 violations; stubs judged live wired seams, fail-safe deviation sanctioned per PRD-007/ADR-0006"
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-042/046/047/049 combined: stamped gitignore=*_progress.json only; 8 new template files (.claude/hooks x5, .claude/settings.json, .excn/hooks.config.json, hooks-config.schema.json); framework-version.json marker; update verb; stamp-policy.js",
+      "summary": "PASS, 0 violations — manifest exact (35 template files + marker + pointers), idempotent re-init, JSON parses, gitignore semantics correct (work-tracking tracked, *_progress.json ignored, marker not ignored), full pointer battery, skip-safety (pre-existing .claude/settings.json skipped without --force, overwritten with), hooks fail-safe on garbage/empty stdin, npm pack product-only with template parity, update verb: idempotent fresh / drift persists across two runs incl. pre-marker template-hash anchor / variant+work-tracking untouched / missing invariant restored / exit 1 unstamped."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": "src/template/.claude/agents/clerk.md",
+      "summary": "PASS, 0 violations — chartered slice EXEC-048 (PRD-007, ADR-0004 carve-out); single-responsibility mechanical executor, ownership-only language, minimal, Src-First respected"
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": "src/template/.claude/agents/scribe.md",
+      "summary": "PASS, 0 violations — one delegation bullet under Partition mechanics; scribe keeps decision ownership, clerk gets execution; no scope or responsibility change"
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": "src/template/.claude/agents/nothing-new-under-the-sun.md",
+      "summary": "PASS, 0 violations — chartered slice EXEC-051 (PRD-007); research-only single responsibility, no edits/verdicts, non-prescriptive, sourced-or-omitted rule enforces minimalism"
+    }
+  ]
+}
