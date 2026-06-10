@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "framework_version": "0.3.0",
-  "stamped": "2026-06-10T21:56:18.588Z",
+  "stamped": "2026-06-10T22:54:31.916Z",
   "files": {
     ".claude/agents/_adherence-agent.template.md": "0417f72a32ad1f26787421f76007c9d4017034fabc8da68a49337f986a2810f7",
     ".claude/agents/_teammate.template.md": "f1e1071831424d4f619cd16f777d72b0eea0d8887a9eb385e2c6dd1f84392e4d",
@@ -15,6 +15,8 @@
     ".claude/hooks/load-report.js": "a141312c52f65d505e0a8e57ec16d390ea9c777c265ed8ff89ec0f820c9975d8",
     ".claude/hooks/message-nudge.js": "d77962b8d525483ba13a45a7eeef378afd83d208926a52ca2fb379f91936b949",
     ".claude/hooks/nudge-rules.js": "e43b325fb3b1a918280e5aaecacf59359757635305f782262d988f7fc24eaac7",
+    ".claude/hooks/spawn-guard-rules.js": "dad61c812c9f952987af3beda638c06efe6421239ce67fe8fd3355152826b1ab",
+    ".claude/hooks/spawn-guard.js": "0bf2c85c4b49abbdebfc692ff03f80a9400011fedf536205e618a7a6813da075",
     ".claude/hooks/viewer-server-daemon.js": "6667dcc5df0c02bcfb1672a344db1779828e313388394630f3cb4ddcdf70b1b2",
     ".claude/hooks/viewer-server-rules.js": "e9d606498a88a5180bd96b189e0e32685388ca65a3b327a4d1de5778a2d38675",
     ".claude/hooks/viewer-server.js": "d03ebdd6bfaf83d7f1cefa4482306a3efaf044b2df6d69b22b6d36ec3542b276",
