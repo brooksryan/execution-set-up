@@ -1,6 +1,6 @@
 # Process
 
-How work moves in this project. This document is invariant — the same in every project set up with this framework. It is the rubric the `process-adherence` Adherence Agent enforces. Project-specific rules live in `.excn/TEAM_DIRECTIVE.md`; the domain glossary lives in `.excn/CONTEXT.md`; the universal Principles are baked into the framework.
+How work moves in this project. This document is invariant. It is the rubric the `process-adherence` Adherence Agent enforces. Project-specific rules live in `.excn/TEAM_DIRECTIVE.md`; the domain glossary lives in `.excn/CONTEXT.md`; the universal Principles are baked into the framework.
 
 ## The Lifecycle
 
@@ -25,7 +25,7 @@ Hard-to-reverse decisions surfaced at grill time are recorded as **ADRs** — co
 
 ## Sprint tracking
 
-Each sprint is one JSON file at `.excn/sprints/sprint_<N>.json`, conforming to `.excn/schemas/sprint.schema.json`. scribe owns it. The JSON is the source of truth.
+Each sprint is one JSON file at `.excn/sprints/sprint_<N>.json`, conforming to `.excn/schemas/sprint.schema.json`. scribe owns it.
 
 Issues are partitioned by lifecycle location: open, unpulled issues live in `.excn/issues/backlog.json`; a sprint's pulled issues live in its companion `.excn/issues/sprint-<N>/sprint-<N>-issues.json`, which becomes that sprint's archive once it closes. An issue's file IS its state; ids stay globally unique across all partitions. scribe moves issues at sprint boundaries.
 
@@ -61,4 +61,4 @@ Session and sprint close artifacts describe what is, not what comes next. No "ne
 
 ## Trust the deployed state over message order
 
-If your inbox says one thing and the files on disk say another, the files are right. Messages can cross. When in doubt, read the file before acting on a message. An approved breakdown or ruling is written to its work artifact before any work executes against it.
+If your inbox says one thing and the files on disk say another, the files are right. When in doubt, read the file before acting on a message. An approved breakdown or ruling is written to its work artifact before any work executes against it.

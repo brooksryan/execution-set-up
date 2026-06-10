@@ -11,8 +11,10 @@
 // so we probe sprint files by number from 1 upward until a gap, then render the
 // highest-numbered sprint whose status is "active" (the live sprint, per
 // EXEC-036). The sprint record itself carries the shipped/in_progress/not_shipped
-// lanes, so the only other fetch is the backlog. A 404 ends sprint probing; any
-// other fetch failure aborts loudly.
+// lanes, so the other fetches are the backlog and the optional per-Teammate
+// load records (EXEC-045). A 404 ends sprint probing; any other fetch failure
+// aborts loudly — except the optional load file, whose absence means the
+// load-reporting feature is off.
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -24,6 +26,11 @@ const EXCN_ROOT = '../.excn';
 
 const SPRINT_PATH = (n) => `${EXCN_ROOT}/sprints/sprint_${n}.json`;
 const BACKLOG_PATH = `${EXCN_ROOT}/issues/backlog.json`;
+
+// Per-Teammate load telemetry (EXEC-045, load-progress.schema.json). Optional:
+// the load-report hook only creates this file when load reporting is enabled,
+// so a 404 means the feature is off — render an off state, never an error.
+const LOAD_PROGRESS_PATH = `${EXCN_ROOT}/load_progress.json`;
 
 // Probe ceiling — a hard stop so a misconfigured serve can never loop forever.
 // Far above any realistic sprint count; raise it only if sprints exceed it.
@@ -53,6 +60,13 @@ const SPRINT_LANES = [
 ];
 
 const BACKLOG_LANE = { body: 'lane-backlog', count: 'count-backlog' };
+
+const LOAD_PANEL = { panel: 'load-panel', note: 'load-note', body: 'load-body', count: 'count-load' };
+
+// Recency windows for the load aggregation and last-seen phrasing (ms).
+const ONE_MINUTE_MS = 60 * 1000;
+const ONE_HOUR_MS = 60 * ONE_MINUTE_MS;
+const ONE_DAY_MS = 24 * ONE_HOUR_MS;
 
 // ---------------------------------------------------------------------------
 // Fetch helpers (fail-closed)
@@ -143,6 +157,56 @@ async function loadBacklog() {
   return collection.issues;
 }
 
+/**
+ * Load the per-Teammate load records, distinguishing "feature off" from data.
+ * @returns {Promise<Array<object>|null>} the load records (possibly empty), or
+ *   null when load_progress.json is absent (load reporting disabled).
+ * @throws {Error} if the file exists but cannot be fetched, parsed, or lacks
+ *   the schema's records array (fail-closed on a present-but-broken file).
+ */
+async function loadLoadRecords() {
+  const collection = await fetchOptionalJson(LOAD_PROGRESS_PATH);
+  if (collection === null) {
+    return null;
+  }
+  if (!Array.isArray(collection.records)) {
+    throw new Error(`${LOAD_PROGRESS_PATH} has no records array (load-progress.schema.json)`);
+  }
+  return collection.records;
+}
+
+/**
+ * Aggregate load records per Teammate: agent_type, plus agent_id when present,
+ * keys an entry (load-progress.schema.json identity fields).
+ * @param {Array<object>} records - load records ({ts, agent_type, agent_id?, tool_name}).
+ * @param {number} nowMs - reference time for the recency windows (epoch ms).
+ * @returns {Array<object>} entries {label, total, lastHour, lastDay, lastSeenMs},
+ *   sorted by total descending (heaviest load first).
+ */
+function aggregateLoad(records, nowMs) {
+  const byTeammate = new Map();
+  for (const record of records) {
+    const label = record.agent_id ? `${record.agent_type} · ${record.agent_id}` : record.agent_type;
+    let entry = byTeammate.get(label);
+    if (entry === undefined) {
+      entry = { label, total: 0, lastHour: 0, lastDay: 0, lastSeenMs: 0 };
+      byTeammate.set(label, entry);
+    }
+    const tsMs = Date.parse(record.ts);
+    entry.total += 1;
+    if (nowMs - tsMs <= ONE_HOUR_MS) {
+      entry.lastHour += 1;
+    }
+    if (nowMs - tsMs <= ONE_DAY_MS) {
+      entry.lastDay += 1;
+    }
+    if (tsMs > entry.lastSeenMs) {
+      entry.lastSeenMs = tsMs;
+    }
+  }
+  return Array.from(byTeammate.values()).sort((a, b) => b.total - a.total);
+}
+
 // ---------------------------------------------------------------------------
 // Rendering
 // ---------------------------------------------------------------------------
@@ -230,6 +294,79 @@ function renderBoard(sprint, backlog) {
   byId(ELEMENT_IDS.board).hidden = false;
 }
 
+/**
+ * Format a last-seen timestamp as a relative phrase ("just now", "Nm ago"…).
+ * @param {number} lastSeenMs - the event time (epoch ms).
+ * @param {number} nowMs - reference time (epoch ms).
+ * @returns {string} the relative phrase.
+ */
+function formatLastSeen(lastSeenMs, nowMs) {
+  const ageMs = nowMs - lastSeenMs;
+  if (ageMs < ONE_MINUTE_MS) {
+    return 'just now';
+  }
+  if (ageMs < ONE_HOUR_MS) {
+    return `${Math.floor(ageMs / ONE_MINUTE_MS)}m ago`;
+  }
+  if (ageMs < ONE_DAY_MS) {
+    return `${Math.floor(ageMs / ONE_HOUR_MS)}h ago`;
+  }
+  return `${Math.floor(ageMs / ONE_DAY_MS)}d ago`;
+}
+
+/**
+ * Build a card element for one Teammate's aggregated load.
+ * @param {object} entry - {label, total, lastHour, lastDay, lastSeenMs} from aggregateLoad.
+ * @param {number} nowMs - reference time for the last-seen phrase (epoch ms).
+ * @returns {HTMLElement} the card.
+ */
+function renderLoadEntry(entry, nowMs) {
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.appendChild(elementWithText('h3', 'card-title', entry.label));
+
+  const stats = document.createElement('p');
+  stats.className = 'load-stats';
+  const pairs = [
+    ['total', entry.total],
+    ['last hour', entry.lastHour],
+    ['last day', entry.lastDay],
+  ];
+  for (const [name, value] of pairs) {
+    stats.appendChild(elementWithText('strong', '', String(value)));
+    stats.appendChild(document.createTextNode(` ${name} · `));
+  }
+  stats.appendChild(document.createTextNode(`seen ${formatLastSeen(entry.lastSeenMs, nowMs)}`));
+  card.appendChild(stats);
+  return card;
+}
+
+/**
+ * Render the Teammate-load panel: off state (records null), empty state, or
+ * one card per Teammate. The count badge shows total events rendered.
+ * @param {Array<object>|null} records - load records, or null when reporting is off.
+ */
+function renderLoadPanel(records) {
+  const note = byId(LOAD_PANEL.note);
+  byId(LOAD_PANEL.panel).hidden = false;
+  if (records === null) {
+    note.hidden = false;
+    note.textContent = 'Load reporting is off — no load_progress.json. Enable the load-report hook to populate this panel.';
+    return;
+  }
+  byId(LOAD_PANEL.count).textContent = String(records.length);
+  if (records.length === 0) {
+    note.hidden = false;
+    note.textContent = 'Load reporting is on, but no events are recorded yet.';
+    return;
+  }
+  const body = byId(LOAD_PANEL.body);
+  const nowMs = Date.now();
+  for (const entry of aggregateLoad(records, nowMs)) {
+    body.appendChild(renderLoadEntry(entry, nowMs));
+  }
+}
+
 // ---------------------------------------------------------------------------
 // DOM utilities
 // ---------------------------------------------------------------------------
@@ -301,8 +438,25 @@ function showLoadError(detail) {
 // ---------------------------------------------------------------------------
 
 /**
+ * Render the Teammate-load panel, containing its own failures: a broken
+ * load_progress.json names itself in the panel note instead of taking down
+ * the board (which renders from independent files).
+ */
+async function initLoadPanel() {
+  try {
+    renderLoadPanel(await loadLoadRecords());
+  } catch (err) {
+    const note = byId(LOAD_PANEL.note);
+    byId(LOAD_PANEL.panel).hidden = false;
+    note.hidden = false;
+    note.textContent = `Could not load the load records: ${err.message}`;
+  }
+}
+
+/**
  * Entry point: load the live sprint + backlog and render, or fail closed.
  * Any fetch/parse failure shows the error surface instead of a partial board.
+ * The load panel renders independently — its data is optional telemetry.
  */
 async function init() {
   try {
@@ -312,10 +466,11 @@ async function init() {
       const backlog = await loadBacklog();
       fillLane(BACKLOG_LANE.body, BACKLOG_LANE.count, backlog, renderBacklogIssue);
       byId(ELEMENT_IDS.board).hidden = false;
-      return;
+    } else {
+      const backlog = await loadBacklog();
+      renderBoard(sprint, backlog);
     }
-    const backlog = await loadBacklog();
-    renderBoard(sprint, backlog);
+    await initLoadPanel();
   } catch (err) {
     showLoadError(err.message);
   }

@@ -15,6 +15,7 @@
   --in-progress: #1565c0;
   --not-shipped: #b26a00;
   --backlog: #5b5b62;
+  --load: #6a1b9a;
   --error-bg: #fdecea;
   --error-ink: #8a1c12;
   --radius: 8px;
@@ -191,6 +192,42 @@ body {
   font-size: 0.82rem;
   color: var(--ink-muted);
   font-style: italic;
+}
+
+/* Teammate-load panel (EXEC-045) — same surface treatment as a lane, but a
+   full-width strip below the board with one card per Teammate. */
+.load-panel {
+  max-width: var(--maxwidth);
+  margin: var(--gap) auto 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--load);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.load-note {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.load-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.load-stats {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.load-stats strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
 
 .page-footer {

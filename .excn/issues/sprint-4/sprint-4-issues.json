@@ -4,7 +4,7 @@
     {
       "id": "EXEC-002",
       "title": "Precise-minimalism pass over remaining template artifacts",
-      "status": "open",
+      "status": "closed",
       "severity": "P3",
       "scope": [
         "src/template"
@@ -13,11 +13,11 @@
       "actionable_now": true,
       "description": "PHILOSOPHY.md and TEAM_DIRECTIVE.md seeds were trimmed to instruction-only. Sweep PROCESS.md, the CONTEXT.md seed, the CLAUDE.md stub, and the agent defs for explanatory prose that is not instruction.",
       "root_cause": null,
-      "fix": null,
+      "fix": "Precise-minimalism sweep: 5 explanatory clauses cut (PROCESS.md x3, scribe.md x1, nothing-new-under-the-sun.md x1); CONTEXT.md seed and remaining agent defs verified instruction-only; no CLAUDE.md stub exists (pointer text is code, out of scope). alignment PASS; root mirrored.",
       "depends_on": [],
       "related_tickets": [],
       "assigned_sprint": 4,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 4,
       "notes": null
     },
     {
@@ -107,7 +107,7 @@
     {
       "id": "EXEC-045",
       "title": "Hook-based teammate load reporting, surfaced in the status-page viewer",
-      "status": "in_progress",
+      "status": "closed",
       "severity": "P3",
       "scope": [
         "src/template",
@@ -126,14 +126,14 @@
       ],
       "slice_type": "AFK",
       "root_cause": null,
-      "fix": null,
+      "fix": "Hook side: load-report.js + load-progress.schema.json (rolling 5000-record window, ships off). Viewer side: per-Teammate load panel in viewer/ (absent-file off-state, broken-file named error, agent_type/agent_id aggregation). Gates PASS (viewer lane after one revise cycle: ONE_MINUTE_MS).",
       "depends_on": [
         "EXEC-046"
       ],
       "related_tickets": [],
       "assigned_sprint": 4,
-      "closed_in_sprint": null,
-      "notes": "Filed 2026-06-10 (Brooks). Exploratory; acceptance criteria set by the EXEC-043 grill/PRD. Hook side shipped + gated 2026-06-10 (load-report.js + load-progress.schema.json, rolling 5000-record window); viewer lane remains — owned by viewer."
+      "closed_in_sprint": 4,
+      "notes": "Filed 2026-06-10 (Brooks). Exploratory; acceptance criteria set by the EXEC-043 grill/PRD. Hook side and viewer lane both shipped + gated 2026-06-10."
     },
     {
       "id": "EXEC-046",

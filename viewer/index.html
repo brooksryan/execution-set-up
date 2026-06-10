@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <!--
   .excn status viewer — at-a-glance team status over the work-tracking JSON.
-  Contract: read-only render of the live sprint (highest-N "active") plus the
-  backlog. No build step; viewer.js fetches the .excn JSON client-side. Must be
+  Contract: read-only render of the live sprint (highest-N "active"), the
+  backlog, and per-Teammate load (optional load_progress.json, EXEC-045).
+  No build step; viewer.js fetches the .excn JSON client-side. Must be
   served over http(s) — file:// blocks fetch() of sibling files (see README.md).
 -->
 <html lang="en">
@@ -42,6 +43,15 @@
         <div class="lane-body" id="lane-backlog"></div>
       </section>
     </main>
+
+    <!-- Per-Teammate load (EXEC-045): rendered from .excn/load_progress.json.
+         The file is optional — absent means load reporting is off, and the
+         panel shows an off state instead of breaking the board above. -->
+    <section id="load-panel" class="load-panel" hidden>
+      <h2 class="lane-title">Teammate&nbsp;load <span class="count" id="count-load">0</span></h2>
+      <p class="load-note" id="load-note" hidden></p>
+      <div class="load-body" id="load-body"></div>
+    </section>
 
     <footer class="page-footer">
       <p id="footer-note">Read-only over the .excn work-tracking JSON.</p>

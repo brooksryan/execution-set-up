@@ -35,7 +35,7 @@
       "owns": "the status-page viewer / UI"
     }
   ],
-  "goal": "Decide and implement the work-tracking visibility question (ADR), run the hooks grill→PRD that unblocks the three hook ideas, and finish the template precise-minimalism sweep.",
+  "goal": "Decide and implement the work-tracking visibility question (ADR), run the hooks grill\u2192PRD that unblocks the three hook ideas, and finish the template precise-minimalism sweep.",
   "issues_addressed": [
     "EXEC-042",
     "EXEC-043",
@@ -53,7 +53,7 @@
     {
       "id": "S4-2",
       "type": "DOCS",
-      "title": "Grill→PRD: hook-invoked lightweight reviewers + smaller-model secretary work",
+      "title": "Grill\u2192PRD: hook-invoked lightweight reviewers + smaller-model secretary work",
       "owner": "team-lead",
       "summary": "Grill ran 2026-06-10 (context-loaded session, caveat accepted): remind-only hooks (ADR-0006), per-feature opt-in scripts via a schema-validated .excn toggle config, sent-message nudge, load_progress.json record, clerk small-model offload. PRD-007 published and amended same day with the Instance update path (Brooks's added scope); broken into EXEC-046..050 + re-scoped EXEC-044/045.",
       "closes_issues": [
@@ -132,7 +132,7 @@
       "type": "FEAT",
       "title": "Sent-message follow-through nudge (ships off)",
       "owner": "builder",
-      "summary": "message-nudge.js implemented (sent-side additionalContext follow-through nudge, rules in nudge-rules.js, ships off); payload field names probed not live-confirmed — confirm against a live SendMessage payload before enabling. Gates PASS.",
+      "summary": "message-nudge.js implemented (sent-side additionalContext follow-through nudge, rules in nudge-rules.js, ships off); payload field names probed not live-confirmed \u2014 confirm against a live SendMessage payload before enabling. Gates PASS.",
       "closes_issues": [
         "EXEC-044"
       ],
@@ -148,34 +148,32 @@
         "EXEC-051"
       ],
       "notes": "AFK once approved; demo against PRD-007."
-    }
-  ],
-  "in_progress": [
+    },
     {
       "id": "S4-10",
       "type": "FEAT",
       "title": "Load-reporting hook + viewer lane (ships off)",
       "owner": "builder",
-      "summary": "EXEC-045 hook side; viewer lane owned by viewer; depends on EXEC-046.",
+      "summary": "Hook side: load-report.js + load-progress.schema.json (rolling 5000-record window, ships off). Viewer side: per-Teammate load panel in viewer/ (absent-file off-state, broken-file named error, agent_type/agent_id aggregation). Gates PASS (viewer lane after one revise cycle: ONE_MINUTE_MS).",
       "closes_issues": [
         "EXEC-045"
       ],
       "notes": "AFK. hook side shipped+gated; viewer lane in flight."
-    }
-  ],
-  "not_shipped": [
+    },
     {
       "id": "S4-3",
       "type": "DOCS",
       "title": "Precise-minimalism pass over remaining template artifacts",
       "owner": "team-lead",
-      "summary": "Sweep PROCESS.md, the CONTEXT.md seed, the CLAUDE.md stub, and the agent defs in src/template for explanatory prose that is not instruction. Src-First; alignment gate on persistent-doc edits.",
+      "summary": "Precise-minimalism sweep: 5 explanatory clauses cut (PROCESS.md x3, scribe.md x1, nothing-new-under-the-sun.md x1); CONTEXT.md seed and remaining agent defs verified instruction-only; no CLAUDE.md stub exists (pointer text is code, out of scope). alignment PASS; root mirrored.",
       "closes_issues": [
         "EXEC-002"
       ],
       "notes": "AFK."
     }
   ],
+  "in_progress": [],
+  "not_shipped": [],
   "defects_discovered": [
     {
       "id": "D4-1",
@@ -204,7 +202,7 @@
   "retrospective_notes": [
     {
       "title": "Grill ran context-loaded again",
-      "body": "The sprint-4 Work Grill (EXEC-042/043) ran in the planning session rather than a fresh one — second consecutive occurrence of the caveat sprint 3 recorded for acceptance runs. Carried for the Retro Loop: whether the fresh-session pin needs teeth or relaxation."
+      "body": "The sprint-4 Work Grill (EXEC-042/043) ran in the planning session rather than a fresh one \u2014 second consecutive occurrence of the caveat sprint 3 recorded for acceptance runs. Carried for the Retro Loop: whether the fresh-session pin needs teeth or relaxation."
     },
     {
       "title": "Sprint work ran on transient background agents, not persistent Teammates",
@@ -216,7 +214,7 @@
     },
     {
       "title": "gate-watch verdict sensing misses where verdicts actually land",
-      "body": "First live firings of the EXEC-047 gate reminder on the dogfood Instance: it correctly caught gate-relevant edits, but its verdict-clearing signal watches writes to .excn/*_progress.json while the Adherence Agents record verdicts in the sprint JSON step_log — so the Stop block fires even when gates are already running or logged. Candidate fix for the gate-watch rules: treat a step_log append to the active sprint JSON as verdict evidence (or move verdict logging to a *_progress.json record)."
+      "body": "First live firings of the EXEC-047 gate reminder on the dogfood Instance: it correctly caught gate-relevant edits, but its verdict-clearing signal watches writes to .excn/*_progress.json while the Adherence Agents record verdicts in the sprint JSON step_log \u2014 so the Stop block fires even when gates are already running or logged. Candidate fix for the gate-watch rules: treat a step_log append to the active sprint JSON as verdict evidence (or move verdict logging to a *_progress.json record)."
     },
     {
       "title": "step_log practice vs sprint schema",
@@ -234,12 +232,12 @@
       "step": "code_standards_pass",
       "at": "2026-06-10",
       "artifact": "EXEC-049 src/bin/cli.js + src/bin/stamp-policy.js",
-      "summary": "PASS — 0 violations; update verb and stamp-policy data module conform to all Structure, CLI, and Commenting rules"
+      "summary": "PASS \u2014 0 violations; update verb and stamp-policy data module conform to all Structure, CLI, and Commenting rules"
     },
     {
       "step": "package_qa_pass",
       "at": "2026-06-10",
-      "artifact": "EXEC-049 update path — init writes .excn/framework-version.json marker; new update verb re-stamps invariants",
+      "artifact": "EXEC-049 update path \u2014 init writes .excn/framework-version.json marker; new update verb re-stamps invariants",
       "summary": "PASS, 0 violations: manifest+marker, idempotent init, JSON parse, gitignore set/anchoring, pack parity, skip-safety, full pointer battery, update (idempotent/drift/variant/restore/exit-1) all hold"
     },
     {
@@ -252,25 +250,25 @@
       "step": "package_qa_pass",
       "at": "2026-06-10",
       "artifact": "EXEC-042/046/047/049 combined: stamped gitignore=*_progress.json only; 8 new template files (.claude/hooks x5, .claude/settings.json, .excn/hooks.config.json, hooks-config.schema.json); framework-version.json marker; update verb; stamp-policy.js",
-      "summary": "PASS, 0 violations — manifest exact (35 template files + marker + pointers), idempotent re-init, JSON parses, gitignore semantics correct (work-tracking tracked, *_progress.json ignored, marker not ignored), full pointer battery, skip-safety (pre-existing .claude/settings.json skipped without --force, overwritten with), hooks fail-safe on garbage/empty stdin, npm pack product-only with template parity, update verb: idempotent fresh / drift persists across two runs incl. pre-marker template-hash anchor / variant+work-tracking untouched / missing invariant restored / exit 1 unstamped."
+      "summary": "PASS, 0 violations \u2014 manifest exact (35 template files + marker + pointers), idempotent re-init, JSON parses, gitignore semantics correct (work-tracking tracked, *_progress.json ignored, marker not ignored), full pointer battery, skip-safety (pre-existing .claude/settings.json skipped without --force, overwritten with), hooks fail-safe on garbage/empty stdin, npm pack product-only with template parity, update verb: idempotent fresh / drift persists across two runs incl. pre-marker template-hash anchor / variant+work-tracking untouched / missing invariant restored / exit 1 unstamped."
     },
     {
       "step": "alignment_review_pass",
       "at": "2026-06-10",
       "artifact": "src/template/.claude/agents/clerk.md",
-      "summary": "PASS, 0 violations — chartered slice EXEC-048 (PRD-007, ADR-0004 carve-out); single-responsibility mechanical executor, ownership-only language, minimal, Src-First respected"
+      "summary": "PASS, 0 violations \u2014 chartered slice EXEC-048 (PRD-007, ADR-0004 carve-out); single-responsibility mechanical executor, ownership-only language, minimal, Src-First respected"
     },
     {
       "step": "alignment_review_pass",
       "at": "2026-06-10",
       "artifact": "src/template/.claude/agents/scribe.md",
-      "summary": "PASS, 0 violations — one delegation bullet under Partition mechanics; scribe keeps decision ownership, clerk gets execution; no scope or responsibility change"
+      "summary": "PASS, 0 violations \u2014 one delegation bullet under Partition mechanics; scribe keeps decision ownership, clerk gets execution; no scope or responsibility change"
     },
     {
       "step": "alignment_review_pass",
       "at": "2026-06-10",
       "artifact": "src/template/.claude/agents/nothing-new-under-the-sun.md",
-      "summary": "PASS, 0 violations — chartered slice EXEC-051 (PRD-007); research-only single responsibility, no edits/verdicts, non-prescriptive, sourced-or-omitted rule enforces minimalism"
+      "summary": "PASS, 0 violations \u2014 chartered slice EXEC-051 (PRD-007); research-only single responsibility, no edits/verdicts, non-prescriptive, sourced-or-omitted rule enforces minimalism"
     },
     {
       "step": "code_standards_fail",
@@ -282,13 +280,37 @@
       "step": "package_qa_pass",
       "at": "2026-06-10",
       "artifact": "sprint-4 combined: doctor verb + health-policy.js; message-nudge.js + nudge-rules.js; load-report.js + load-progress.schema.json; clerk/nothing-new-under-the-sun/scribe agents stamp",
-      "summary": "PASS — 0 violations. Full battery on npm-pack-extracted package: manifest parity (37 files, byte-identical, gitignore restored), idempotent re-init, JSON parse, check-ignore semantics, pack parity, skip-safety, fail-safe + enabled hook paths, update regression, doctor 5 scenarios."
+      "summary": "PASS \u2014 0 violations. Full battery on npm-pack-extracted package: manifest parity (37 files, byte-identical, gitignore restored), idempotent re-init, JSON parse, check-ignore semantics, pack parity, skip-safety, fail-safe + enabled hook paths, update regression, doctor 5 scenarios."
     },
     {
       "step": "code_standards_pass",
       "at": "2026-06-10",
       "artifact": "src/bin/cli.js (EXEC-050/044/045 re-gate)",
-      "summary": "PASS — prior named-constants violation resolved (MS_PER_MINUTE/MS_PER_HOUR); 0 violations"
+      "summary": "PASS \u2014 prior named-constants violation resolved (MS_PER_MINUTE/MS_PER_HOUR); 0 violations"
+    },
+    {
+      "step": "code_standards_fail",
+      "at": "2026-06-10",
+      "artifact": "viewer/index.html, viewer/styles.css, viewer/viewer.js (EXEC-045 viewer lane)",
+      "summary": "FAIL \u2014 1 violation: Named constants (formatLastSeen uses magic literal 60 * 1000 for one minute, twice)"
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "viewer/viewer.js",
+      "summary": "PASS on re-gate \u2014 magic literal 60*1000 in formatLastSeen resolved via ONE_MINUTE_MS named constant; 0 violations."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "viewer/viewer.js (EXEC-045 viewer lane re-gate)",
+      "summary": "PASS on re-gate \u2014 magic literal 60*1000 in formatLastSeen resolved via ONE_MINUTE_MS named constant; 0 violations."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": "src/template/.excn/PROCESS.md, src/template/.claude/agents/scribe.md, src/template/.claude/agents/nothing-new-under-the-sun.md",
+      "summary": "PASS - 0 violations. EXEC-002 precise-minimalism sweep: cuts remove rationale/restatement only; Lifecycle still states sprint JSON is source of truth; scribe universality kept in description line."
     }
   ]
 }
