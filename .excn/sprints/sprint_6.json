@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": 6,
+  "name": "Sprint 6",
+  "status": "active",
+  "dates": {
+    "start": "2026-06-10",
+    "end": null,
+    "duration_note": "Opened 2026-06-10 by Team Lead directive. EXEC-065 (update false-positive-drift fix) pulled grill-skipping as a bug fix; the rest of sprint-6 scope (viewer improvements, progress-file organization/naming, guard hooks) awaits the upcoming Work Grill before issues are filed and pulled."
+  },
+  "team": [
+    {
+      "name": "team-lead",
+      "role": "Team Lead",
+      "owns": "arbitration, src/template, final approval"
+    },
+    {
+      "name": "scribe",
+      "role": "Scribe",
+      "owns": "work-tracking JSON + Retro Loop"
+    },
+    {
+      "name": "builder",
+      "role": "Builder",
+      "owns": "src/bin + hooks"
+    },
+    {
+      "name": "viewer",
+      "role": "Viewer",
+      "owns": "status-page viewer/UI"
+    },
+    {
+      "name": "packager",
+      "role": "Packager",
+      "owns": "npm release"
+    },
+    {
+      "name": "architect",
+      "role": "Architect",
+      "owns": "research + standards"
+    }
+  ],
+  "goal": "Ship the update false-positive-drift fix (EXEC-065) and the sprint-6 scope set by the upcoming Work Grill (viewer improvements, progress-file organization/naming, guard hooks).",
+  "issues_addressed": [
+    "EXEC-065"
+  ],
+  "shipped": [],
+  "in_progress": [],
+  "not_shipped": [
+    {
+      "id": "S6-1",
+      "type": "BUG",
+      "title": "EXEC-065: Scaffolder update stops false-positive drift when a file matches the incoming template",
+      "owner": "builder",
+      "summary": "update() classifies a file drifted whenever its current hash differs from the recorded stamped hash, even when byte-identical to the incoming template, and carries the stale anchor forward. Fix: when currentHash === templateHash, classify unchanged and record templateHash before the drift check. Dogfood: 8 of 9 reported-drifted files were identical to the template.",
+      "closes_issues": [
+        "EXEC-065"
+      ],
+      "notes": "Grill-skipping local bug fix pulled by Team Lead directive 2026-06-10."
+    }
+  ],
+  "defects_discovered": [],
+  "decisions": [],
+  "retrospective_notes": [
+    {
+      "title": "Sprint-6 scope is grill-pending; EXEC-065 pulled ahead of it",
+      "body": "The Work Grill for the rest of sprint-6 scope (viewer improvements, progress-file organization/naming, guard hooks) has not run yet. EXEC-065 is a grill-skipping bug fix pulled into sprint 6 by Team Lead directive on 2026-06-10; the remaining scope is filed and pulled only after the grill runs."
+    }
+  ]
+}
