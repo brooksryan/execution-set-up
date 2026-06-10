@@ -137,22 +137,22 @@
     },
     {
       "id": "EXEC-046",
-      "title": "Auto-run a lightweight viewer server when an execution session starts",
+      "title": "Hook plumbing: .excn toggle config + schema + stamped settings wiring",
       "status": "closed",
       "severity": "P2",
       "scope": [
-        "viewer",
         "src/template",
         "hooks"
       ],
       "classification": "macro",
       "actionable_now": true,
-      "description": "The status-page viewer fails closed under file:// and today requires manually starting an http server. Ship a really simple view server that starts automatically when a session opens in a repo with execution set up, so the web page is always available. Likely mechanism: the SessionStart hook (rides the EXEC-043 per-feature hook plumbing) starting/reusing a tiny static server over the .excn JSON + viewer assets. Hard requirements: as lightweight and fast-running as possible — no framework, no build step, negligible startup cost, no orphaned processes (idempotent start, detect an already-running instance). Src-First.",
-      "prd": null,
+      "description": "The Scaffolder stamps the hook scaffolding's shared plumbing: a schema-validated toggle config in .excn (one enable flag per hook feature; schema added to the Instance schemas) and the project settings wiring that routes hook events to per-feature scripts. A missing or malformed config fails safe to no-op. Src-First; per ADR-0006.",
+      "prd": "PRD-007",
       "acceptance_criteria": [
-        "Opening a session in an execution repo makes the status page reachable in a browser with no manual step",
-        "Starting twice does not spawn a second server; no orphaned process after sessions end",
-        "Startup overhead is negligible and the server has zero runtime dependencies"
+        "A freshly stamped Instance carries the toggle config, its schema, and the settings wiring",
+        "Each feature script no-ops when its toggle is off, when the config is missing, or when it is malformed",
+        "package-qa passes on the stamp contract",
+        "Root Instance mirrors src/ (Src-First)"
       ],
       "slice_type": "AFK",
       "root_cause": null,
@@ -161,22 +161,27 @@
       "related_tickets": [],
       "assigned_sprint": 4,
       "closed_in_sprint": 4,
-      "notes": "Filed 2026-06-10 (Brooks). Step 1 of the viewer-server track; validate here on the dogfood Instance before EXEC-047 generalizes it."
+      "notes": "Filed 2026-06-10 (Brooks). Record restored 2026-06-10 after an id collision with a parallel-session filing (now EXEC-054)."
     },
     {
       "id": "EXEC-047",
-      "title": "Ship the viewer server as a separate globally-installed package; sessions detect or connect to it",
+      "title": "Gate-reminder hook: path-watch reminder + stop-block on missing gate verdict (default on)",
       "status": "closed",
-      "severity": "P3",
+      "severity": "P2",
       "scope": [
-        "viewer",
-        "packaging"
+        "src/template",
+        "hooks"
       ],
-      "classification": "macro",
+      "classification": "local",
       "actionable_now": true,
-      "description": "Once EXEC-046 validates the in-repo auto-run server, extract it into its own package installed globally (separate from the to-execution Scaffolder package). Individual execution repos/sessions check whether the global server exists and connect to it instead of each running their own — one server, many Instances. Same hard requirements: lightweight, fast-running, zero/near-zero dependencies. Needs design decisions (port/discovery convention, multi-repo serving, version skew between server and Instances) — grill before implementation.",
-      "prd": null,
-      "acceptance_criteria": [],
+      "description": "The first hook feature on the EXEC-046 plumbing, shipped enabled by default: a post-tool watch on gate-relevant paths injects a gate-due reminder via additionalContext, and a Stop-time block catches an agent idling with gated edits but no gate verdict recorded. Remind-only — it never spawns a gate (ADR-0006).",
+      "prd": "PRD-007",
+      "acceptance_criteria": [
+        "Editing a gated path produces the gate-due reminder in the editing agent's context",
+        "An agent idling with gated edits and no gate verdict is stop-blocked once (loop-guarded via stop_hook_active)",
+        "The feature ships enabled by default and disabling it via the toggle config silences both behaviors",
+        "No hook path spawns an agent"
+      ],
       "slice_type": "AFK",
       "root_cause": null,
       "fix": "gate-watch.js: PostToolUse path-watch reminder + Stop block-once with stop_hook_active guard + verdict sensing; ships enabled; code-standards PASS.",
@@ -186,31 +191,35 @@
       "related_tickets": [],
       "assigned_sprint": 4,
       "closed_in_sprint": 4,
-      "notes": "Filed 2026-06-10 (Brooks). Step 2 of the viewer-server track; acceptance criteria set after EXEC-046 validates and a grill resolves discovery/packaging."
+      "notes": "Filed 2026-06-10 (Brooks). Record restored 2026-06-10 after an id collision with a parallel-session filing (now EXEC-055)."
     },
     {
       "id": "EXEC-048",
-      "title": "Edit and add issues from the status-page viewer",
+      "title": "clerk Invoked Agent (small model) + scribe delegation of mechanical record moves",
       "status": "closed",
       "severity": "P2",
       "scope": [
-        "viewer"
+        "src/template",
+        "agents"
       ],
       "classification": "macro",
       "actionable_now": true,
-      "description": "Extend the status-page viewer from read-only to read-write for issues: add new issues and edit existing ones from the web page. Writes go through the server (EXEC-046/047) since a static page cannot write the .excn JSON; every write must remain schema-valid against issue.schema.json and respect the issue partitioning (backlog vs sprint partitions, scribe ownership of moves). Hard requirements: keep it as lightweight and fast as possible — no framework, minimal surface.",
-      "prd": null,
-      "acceptance_criteria": [],
-      "slice_type": "AFK",
+      "description": "Add a clerk Invoked Agent pinned to a small model for the mechanical, schema-validated record moves: partition moves at sprint boundaries, status flips, verdict appends. scribe's definition delegates those steps to clerk and keeps judgment work; scribe remains owner of the work-tracking artifacts. Chartered definition change (ADR-0004 path). Src-First.",
+      "prd": "PRD-007",
+      "acceptance_criteria": [
+        "clerk agent definition exists in the Template and the root Instance, pinned to a small model",
+        "scribe's definition routes mechanical moves to clerk and retains judgment work",
+        "alignment PASS on both definition changes; Team Lead approval recorded",
+        "A representative partition move executed by clerk validates against the issue schema"
+      ],
+      "slice_type": "HITL",
       "root_cause": null,
       "fix": "clerk.md (haiku-pinned) + scribe delegation bullet; alignment PASS, Team Lead approved.",
-      "depends_on": [
-        "EXEC-046"
-      ],
+      "depends_on": [],
       "related_tickets": [],
       "assigned_sprint": 4,
       "closed_in_sprint": 4,
-      "notes": "Filed 2026-06-10 (Brooks). Builds on the viewer-server track; interaction with scribe ownership of issue JSON to be resolved at grill time."
+      "notes": "Filed 2026-06-10 (Brooks). Record restored 2026-06-10 after an id collision with a parallel-session filing (now EXEC-056). Clerk's first live delegation deferred to next session (definition not loadable mid-session); the demo criterion rides the next sprint-boundary move."
     },
     {
       "id": "EXEC-049",

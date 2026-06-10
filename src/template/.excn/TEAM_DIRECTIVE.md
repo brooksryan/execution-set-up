@@ -19,6 +19,8 @@ _(one paragraph: what this team builds and what done means.)_
 | sprint / issue / retro artifact | scribe |
 | design decision, arbitration | Team Lead |
 
+Sprint slices route to the rostered persistent Teammates; Invoked Agents are for gates and one-shot checks only.
+
 ## QA gates
 
 | Work | Gates, in order | Mandatory |
@@ -35,3 +37,5 @@ _(who decides when blocked or in disagreement.)_
 ## Don'ts
 
 _(explicit prohibitions.)_
+
+- Never self-assign an issue id — scribe assigns ids; parallel sessions request them.

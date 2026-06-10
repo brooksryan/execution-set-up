@@ -28,6 +28,8 @@ Ship and maintain the execution framework — the `to-execution` package and ski
 | template content, design decision, arbitration | Team Lead |
 | best-practices research / engineering-standard change | architect |
 
+Sprint slices route to the rostered persistent Teammates; Invoked Agents are for gates and one-shot checks only.
+
 ## QA gates
 
 | Work | Gates, in order | Mandatory |
@@ -58,3 +60,5 @@ Cosmetic ratifications with a sane default (naming, visibility) default-and-flag
 - Never bend a guard to fit a procedure — change the procedure.
 - Never close a path-changing sweep without checking the live Instance's entry points (root CLAUDE.md, AGENTS.md).
 - Never sweep another owner's files — hand the owner the hit list.
+
+- Never self-assign an issue id — scribe assigns ids; parallel sessions request them.
