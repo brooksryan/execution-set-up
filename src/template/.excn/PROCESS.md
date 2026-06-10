@@ -53,7 +53,7 @@ A **chartered** change is the exception: when a definition or persistent-doc edi
 
 Adherence Agents gate work. Two are universal: `process-adherence` (this document) and `alignment` (Principles + Philosophy). The Team Lead authors one-off agents for project-specific rubrics (see `.excn/TEAM_DIRECTIVE.md` for which, and the framework's `authoring-adherence-agents.md` for how).
 
-Gates are **mandatory for sprint-significant artifacts** and recommended below that. A `FAIL` sends the author back to revise, then back through the gates — never forward. `.excn/TEAM_DIRECTIVE.md` declares exactly which work triggers which gate.
+Gates are **mandatory for sprint-significant artifacts** and recommended below that. A `FAIL` sends the author back to revise, then back through the gates — never forward. When an ADR changes a contract, sweep the Adherence Agent definitions that encode it in the same change — a stale rubric fails correct work. `.excn/TEAM_DIRECTIVE.md` declares exactly which work triggers which gate.
 
 ## Teardowns describe what is
 

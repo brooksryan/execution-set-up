@@ -22,6 +22,7 @@ You are viewer — a persistent Teammate.
 - Src-First when the viewer is framework-shipped (`src/template`); root-only when it is a repo tool. Its home is decided at design time.
 
 ## Constraints
+- Before handing work to a gate, grep your diff for bare literals in logic (numbers, status codes, suffix/pattern strings) and name them.
 - Read-only over work-tracking — the viewer renders state, never edits it.
 - Minimalist — no framework heft and no build step unless a grill rules otherwise.
 - All code conforms to `.excn/CODE_STANDARDS.md`.

@@ -2,11 +2,11 @@
   "schema_version": "1.0",
   "sprint_id": 5,
   "name": "Sprint 5",
-  "status": "active",
+  "status": "closed",
   "dates": {
     "start": "2026-06-10",
-    "end": null,
-    "duration_note": null
+    "end": "2026-06-10",
+    "duration_note": "2026-06-10, single day. Final: 9 shipped / 0 in_progress / 0 not_shipped; all 9 companion issues closed_in_sprint 5. Shipped: viewer-server grill (ADR-0007, PRD-008), EXEC-054 auto-run viewer server, EXEC-052/053 verdict-ledger alignment, EXEC-057 prior-art digest persistence, EXEC-059/060 model tiers + Teammate colors, EXEC-061 viewer relocated into .excn/viewer (ADR-0002 ruling), EXEC-063 hook invocation logging + CODE_STANDARDS rule, EXEC-064 spawn guard (fired live on first opportunity). package-qa stale-rubric FAIL superseded after the def corrected to ADR-0005. Retro Loop landed two edits (builder/viewer pre-handoff literal self-check; PROCESS rubric-sweep-on-ADR-change), one revise cycle, alignment PASS; drafted by the Team Lead — no persistent scribe teammate existed this session and the spawn guard blocks one-shot scribe spawns; clerk executed the mechanical closes. Fresh-session grill pin carried a fourth time, undecided. process-adherence PASS at close."
   },
   "team": [
     {
@@ -56,7 +56,7 @@
     {
       "id": "S5-1",
       "type": "DOCS",
-      "title": "Grill\u2192PRD: viewer-server track (auto-run server, global-package discovery, viewer read-write)",
+      "title": "Grill→PRD: viewer-server track (auto-run server, global-package discovery, viewer read-write)",
       "owner": "team-lead",
       "summary": "Viewer-server grill ran: ADR-0007 (one global server, repo registry, writes through the server) + PRD-008 published; EXEC-054 criteria extended, EXEC-055/056 criteria set in backlog. alignment PASS on the ADR.",
       "closes_issues": [],
@@ -168,15 +168,19 @@
   "retrospective_notes": [
     {
       "title": "Grill ran context-loaded (third occurrence)",
-      "body": "The sprint-5 viewer-server grill ran in the working session; PROCESS pins Work Grills to a fresh session. Third consecutive caveat-accepted occurrence (sprints 3, 4, 5). The pin is either getting teeth or getting rewritten \u2014 carried again for the Retro Loop."
+      "body": "The sprint-5 viewer-server grill ran in the working session; PROCESS pins Work Grills to a fresh session. Third consecutive caveat-accepted occurrence (sprints 3, 4, 5). The pin is either getting teeth or getting rewritten — carried again for the Retro Loop."
     },
     {
-      "title": "Named-constants is the only violation builders hit \u2014 three times running",
-      "body": "Every code-standards FAIL across sprints 4\u20135 (builder twice, viewer once, builder again) is the same Structure rule: a meaningful literal inline where the file already names equivalents. Candidate: one sentence in builder/viewer defs or the CODE_STANDARDS rule itself calling out the self-check before handoff (\"grep your diff for digit literals and string suffixes in logic\")."
+      "title": "Named-constants is the only violation builders hit — three times running",
+      "body": "Every code-standards FAIL across sprints 4–5 (builder twice, viewer once, builder again) is the same Structure rule: a meaningful literal inline where the file already names equivalents. Candidate: one sentence in builder/viewer defs or the CODE_STANDARDS rule itself calling out the self-check before handoff (\"grep your diff for digit literals and string suffixes in logic\")."
     },
     {
       "title": "Adherence rubrics can go stale against ratified ADRs",
-      "body": "package-qa's definition encoded the old gitignore contract and correctly FAILed current code against it \u2014 a false positive from rubric staleness, not gate malfunction. Candidate: when an ADR changes a contract, the closing checklist includes sweeping Adherence Agent definitions that encode it."
+      "body": "package-qa's definition encoded the old gitignore contract and correctly FAILed current code against it — a false positive from rubric staleness, not gate malfunction. Candidate: when an ADR changes a contract, the closing checklist includes sweeping Adherence Agent definitions that encode it."
+    },
+    {
+      "title": "Retro Loop drafted by the Team Lead, not scribe",
+      "body": "No persistent scribe teammate existed this session; the spawn guard (EXEC-064) correctly blocked one-shot scribe spawns, so the Team Lead drafted the close edits with per-edit alignment gates and clerk executed the mechanical record changes. Standing question for next sprint open: spawn the rostered Teammates as actual persistent teammates at sprint start so scribe owns its loop."
     }
   ],
   "step_log": [
@@ -184,7 +188,7 @@
       "step": "alignment_review_pass",
       "at": "2026-06-10",
       "artifact": "src/template/.claude/agents/nothing-new-under-the-sun.md",
-      "summary": "PASS, 0 violations \u2014 chartered EXEC-057 change (digest persists to .excn/research/prior-art-<prd-id>.md) conforms to Principles and Philosophy; namespaced file coexists with architect's research ownership."
+      "summary": "PASS, 0 violations — chartered EXEC-057 change (digest persists to .excn/research/prior-art-<prd-id>.md) conforms to Principles and Philosophy; namespaced file coexists with architect's research ownership."
     },
     {
       "step": "alignment_review_pass",
@@ -196,43 +200,43 @@
       "step": "code_standards_fail",
       "at": "2026-06-10",
       "artifact": "EXEC-052/053: sprint.schema.json (+mirror), src/bin/stamp-policy.js, gate-watch.js + gate-rules.js (+mirrors)",
-      "summary": "FAIL \u2014 1 violation: Named constants in src/template/.claude/hooks/gate-watch.js verdictEvidenceSince (inline /^sprint_\\d+\\.json$/ and '_progress.json' literals duplicate SPRINT_FILE_PATTERN/PROGRESS_FILE_PATTERN semantics). All other rules hold; mirrors byte-identical; fail-safe exit-0 sanctioned by ADR-0006."
+      "summary": "FAIL — 1 violation: Named constants in src/template/.claude/hooks/gate-watch.js verdictEvidenceSince (inline /^sprint_\\d+\\.json$/ and '_progress.json' literals duplicate SPRINT_FILE_PATTERN/PROGRESS_FILE_PATTERN semantics). All other rules hold; mirrors byte-identical; fail-safe exit-0 sanctioned by ADR-0006."
     },
     {
       "step": "code_standards_pass",
       "at": "2026-06-10",
       "artifact": "gate-watch.js (src/template + root mirror)",
-      "summary": "PASS, 0 violations \u2014 verdictEvidenceSince now tests reconstructed root-relative paths against SPRINT_FILE_PATTERN/PROGRESS_FILE_PATTERN"
+      "summary": "PASS, 0 violations — verdictEvidenceSince now tests reconstructed root-relative paths against SPRINT_FILE_PATTERN/PROGRESS_FILE_PATTERN"
     },
     {
       "step": "code_standards_fail",
       "at": "2026-06-10",
       "artifact": "EXEC-054 viewer_server batch",
-      "summary": "FAIL \u2014 5 named-constants violations (bare 200 in viewer-server.js and cli.js, djb2 literals 5381/33, text/plain mime, {url} placeholder string)"
+      "summary": "FAIL — 5 named-constants violations (bare 200 in viewer-server.js and cli.js, djb2 literals 5381/33, text/plain mime, {url} placeholder string)"
     },
     {
       "step": "code_standards_fail",
       "at": "2026-06-10",
       "artifact": "EXEC-054 viewer_server batch re-gate",
-      "summary": "FAIL \u2014 1 violation. All 5 prior named-constants violations resolved (DJB2_SEED/DJB2_MULTIPLIER, shared HTTP_OK, ERROR_CONTENT_TYPE, CONTEXT_URL_PLACEHOLDER, VIEWER_HEALTH_OK_STATUS); mirrors byte-identical. New: Truthful comments \u2014 viewer-server-rules.js documents ERROR_CONTENT_TYPE as 'the daemon's plain-text error bodies (404/405)' but viewer-server-daemon.js sets it only on the 404 response; the 405 response sets no Content-Type."
+      "summary": "FAIL — 1 violation. All 5 prior named-constants violations resolved (DJB2_SEED/DJB2_MULTIPLIER, shared HTTP_OK, ERROR_CONTENT_TYPE, CONTEXT_URL_PLACEHOLDER, VIEWER_HEALTH_OK_STATUS); mirrors byte-identical. New: Truthful comments — viewer-server-rules.js documents ERROR_CONTENT_TYPE as 'the daemon's plain-text error bodies (404/405)' but viewer-server-daemon.js sets it only on the 404 response; the 405 response sets no Content-Type."
     },
     {
       "step": "package_qa_pass",
       "at": "2026-06-10",
       "artifact": "sprint-5 combined EXEC-052/053/054: viewer_server hook feature (3 template hook scripts + rules data module, SessionStart wiring), hooks.config.json variant-classing in stamp-policy, doctor async + viewer liveness, sprint.schema.json optional step_log",
-      "summary": "PASS \u2014 0 violations. Manifest parity (43 stamped incl. 3 new viewer hooks, dotted .gitignore, marker, pointers), idempotent re-init, JSON parse, npm pack parity exact, viewer-server_progress.json ignored / marker not / root .gitignore untouched, skip-safety + --force host-byte preservation, all 4 hooks fail-safe on garbage+empty stdin, update idempotent with drift persisted, variant untouched, flipped hooks.config.json toggles not drift-reported and stale marker hash dropped (EXEC-052 fix), doctor healthy/broken-config/outdated/unstamped + viewer disabled state, live viewer smoke (health 200, whitelist 404, traversal 404, idempotent pid reuse, record written, daemon killed clean), sprint_4+sprint_5 strictly valid against new schema."
+      "summary": "PASS — 0 violations. Manifest parity (43 stamped incl. 3 new viewer hooks, dotted .gitignore, marker, pointers), idempotent re-init, JSON parse, npm pack parity exact, viewer-server_progress.json ignored / marker not / root .gitignore untouched, skip-safety + --force host-byte preservation, all 4 hooks fail-safe on garbage+empty stdin, update idempotent with drift persisted, variant untouched, flipped hooks.config.json toggles not drift-reported and stale marker hash dropped (EXEC-052 fix), doctor healthy/broken-config/outdated/unstamped + viewer disabled state, live viewer smoke (health 200, whitelist 404, traversal 404, idempotent pid reuse, record written, daemon killed clean), sprint_4+sprint_5 strictly valid against new schema."
     },
     {
       "step": "alignment_review_pass",
       "at": "2026-06-10",
       "artifact": ".claude/agents + src/template/.claude/agents (EXEC-059: model sonnet on Invoked Agent defs)",
-      "summary": "PASS \u2014 0 violations. Frontmatter-only addition, minimal, no cognition coaching, single responsibility intact, Src-First honored (template mirrors updated; root-only defs are project-local), tied to chartered observation (Brooks directive 2026-06-10, ADR-0004)."
+      "summary": "PASS — 0 violations. Frontmatter-only addition, minimal, no cognition coaching, single responsibility intact, Src-First honored (template mirrors updated; root-only defs are project-local), tied to chartered observation (Brooks directive 2026-06-10, ADR-0004)."
     },
     {
       "step": "alignment_review_pass",
       "at": "2026-06-10",
       "artifact": ".claude/agents + src/template/.claude/agents (EXEC-060: color frontmatter on persistent Teammates + _teammate.template placeholder)",
-      "summary": "PASS \u2014 0 violations. One-line color frontmatter per Teammate, unique colors, template shape extended with placeholder per Precise Minimalism, Src-First honored, tied to chartered observation (Brooks directive 2026-06-10, ADR-0004)."
+      "summary": "PASS — 0 violations. One-line color frontmatter per Teammate, unique colors, template shape extended with placeholder per Precise Minimalism, Src-First honored, tied to chartered observation (Brooks directive 2026-06-10, ADR-0004)."
     },
     {
       "step": "code_standards_pass",
@@ -243,8 +247,8 @@
     {
       "step": "alignment_review_pass",
       "at": "2026-06-10",
-      "artifact": ".excn/CODE_STANDARDS.md (S5-8 part 1 \u2014 ## Hooks section, EXEC-063)",
-      "summary": "PASS, 0 violations \u2014 all three bullets are mechanically checkable: append-on-every-path (readable from hook source), helper-only writes (greppable), helper self-catches (inspectable). Standards Encode Only Checkable Rules holds. Tied to chartered EXEC-063 retro observation."
+      "artifact": ".excn/CODE_STANDARDS.md (S5-8 part 1 — ## Hooks section, EXEC-063)",
+      "summary": "PASS, 0 violations — all three bullets are mechanically checkable: append-on-every-path (readable from hook source), helper-only writes (greppable), helper self-catches (inspectable). Standards Encode Only Checkable Rules holds. Tied to chartered EXEC-063 retro observation."
     },
     {
       "step": "code_standards_pass",
@@ -262,19 +266,43 @@
       "step": "package_qa_fail",
       "at": "2026-06-10",
       "artifact": "EXEC-061/063/064 combined: viewer relocated to .excn/viewer/, hook-lib logInvocation + unified log, spawn-guard + rules + optional schema fields + Task|Agent PreToolUse wiring, doctor unified-log heartbeats",
-      "summary": "FAIL \u2014 1 violation. Gitignore: src/template/.excn/gitignore contains only '*_progress.json'; missing required patterns sprints/, issues/, prds/, retros/. All other checks pass: manifest parity (46 files, .excn/viewer/* stamped, no top-level viewer/), idempotent re-init (0 writes), JSON parse, pack parity (.excn/viewer/* + spawn-guard files in tarball, undotted gitignore), skip-safety, hooks fail-safe (garbage+empty stdin exit 0 on all 6 scripts), update idempotent + variant untouched + drift reported not overwritten, doctor (all 5 features, broken config, outdated, unstamped exit 1), spawn-guard behavioral (deny with reason / pass silent / both outcomes logged), viewer end-to-end (SessionStart starts daemon, / index with root-absolute assets, .excn/issues/backlog.json 200, traversal+old-path 404, health 200), invocation log (correct fields, rolling cap at 5000)."
+      "summary": "FAIL — 1 violation. Gitignore: src/template/.excn/gitignore contains only '*_progress.json'; missing required patterns sprints/, issues/, prds/, retros/. All other checks pass: manifest parity (46 files, .excn/viewer/* stamped, no top-level viewer/), idempotent re-init (0 writes), JSON parse, pack parity (.excn/viewer/* + spawn-guard files in tarball, undotted gitignore), skip-safety, hooks fail-safe (garbage+empty stdin exit 0 on all 6 scripts), update idempotent + variant untouched + drift reported not overwritten, doctor (all 5 features, broken config, outdated, unstamped exit 1), spawn-guard behavioral (deny with reason / pass silent / both outcomes logged), viewer end-to-end (SessionStart starts daemon, / index with root-absolute assets, .excn/issues/backlog.json 200, traversal+old-path 404, health 200), invocation log (correct fields, rolling cap at 5000)."
     },
     {
       "step": "alignment_review_pass",
       "at": "2026-06-10",
       "artifact": ".claude/agents/package-qa.md",
-      "summary": "PASS, 0 violations \u2014 Gitignore bullet updated from pre-ADR-0005 set (sprints/, issues/, prds/, retros/, *_progress.json) to ADR-0005 contract (exactly *_progress.json); factual-staleness correction tied to the real package_qa_fail observation; root-only def, one bullet changed, no cognition coaching, single responsibility intact."
+      "summary": "PASS, 0 violations — Gitignore bullet updated from pre-ADR-0005 set (sprints/, issues/, prds/, retros/, *_progress.json) to ADR-0005 contract (exactly *_progress.json); factual-staleness correction tied to the real package_qa_fail observation; root-only def, one bullet changed, no cognition coaching, single responsibility intact."
     },
     {
       "step": "package_qa_pass",
       "at": "2026-06-10",
       "artifact": "EXEC-061/063/064 combined: viewer relocated to .excn/viewer/, hook-lib logInvocation + unified log, spawn-guard + rules + optional schema fields + Task|Agent PreToolUse wiring, doctor unified-log heartbeats",
-      "summary": "PASS \u2014 0 violations. Prior FAIL superseded: gitignore rubric was stale; ADR-0005 changed the contract to *_progress.json only (work-tracking set is version-controlled), which is exactly what the template ships. All checks pass: manifest parity (46 files, .excn/viewer/* stamped, no top-level viewer/), idempotent re-init (0 writes), JSON parse, pack parity, gitignore (*_progress.json only, host root .gitignore untouched, anchored inside .excn/), skip-safety, hooks fail-safe, update idempotent + variant untouched + drift reported, doctor (5 features, broken config, outdated, unstamped exit 1), spawn-guard behavioral (deny with reason / pass silent / outcomes logged), viewer end-to-end (/ index root-absolute assets, backlog.json 200, traversal+old-path 404, health 200), invocation log (correct fields, rolling cap at 5000)."
+      "summary": "PASS — 0 violations. Prior FAIL superseded: gitignore rubric was stale; ADR-0005 changed the contract to *_progress.json only (work-tracking set is version-controlled), which is exactly what the template ships. All checks pass: manifest parity (46 files, .excn/viewer/* stamped, no top-level viewer/), idempotent re-init (0 writes), JSON parse, pack parity, gitignore (*_progress.json only, host root .gitignore untouched, anchored inside .excn/), skip-safety, hooks fail-safe, update idempotent + variant untouched + drift reported, doctor (5 features, broken config, outdated, unstamped exit 1), spawn-guard behavioral (deny with reason / pass silent / outcomes logged), viewer end-to-end (/ index root-absolute assets, backlog.json 200, traversal+old-path 404, health 200), invocation log (correct fields, rolling cap at 5000)."
+    },
+    {
+      "step": "process_review_pass",
+      "at": "2026-06-10",
+      "artifact": "close sprint 5",
+      "summary": "PASS, 0 violations. All 9 items shipped, 0 in_progress, 0 not_shipped; companion issues all closed with closed_in_sprint 5; decisions and retrospective_notes recorded; QA gate sequence complete (alignment x5, code-standards fail+revise+pass x2 cycles, package-qa fail+rubric-correction-alignment-pass+repass); stale-rubric FAIL superseded correctly per alignment gate on the rubric correction; work committed and pushed through 8dd1731. Retro Loop: no emergent edits landed this cycle (all three retro observations carried as candidates); TL-drafted deviation documented in retrospective_notes; outcome identical to scribe-drafted path. Teardown language conforms."
+    },
+    {
+      "step": "alignment_review_fail",
+      "at": "2026-06-10",
+      "artifact": ".claude/agents/builder.md + .claude/agents/viewer.md",
+      "summary": "FAIL, 1 violation — Minimalism/Precise Minimalism: the trailing clause 'the named-constants rule is the only standard this team has ever failed' is explanatory rationale, not instruction; the imperative stands without it. Instruction itself conforms and is tied to the real retro observation."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": ".claude/agents/builder.md + .claude/agents/viewer.md (cycle 2)",
+      "summary": "PASS, 0 violations — rationale clause removed; bullet is pure instruction; conforms to all Principles and Precise Minimalism; tied to sprint-5 named-constants retro observation."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": ".excn/PROCESS.md + src/template/.excn/PROCESS.md (QA gates stale-rubric sentence)",
+      "summary": "PASS, 0 violations — sentence conforms to all Principles and project Philosophy; both clauses carry distinct instruction weight; tied to the sprint-5 stale-rubric retrospective observation and the package-qa decision."
     }
   ]
 }
