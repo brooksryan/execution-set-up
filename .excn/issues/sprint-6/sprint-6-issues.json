@@ -118,15 +118,15 @@
       "depends_on": []
     },
     {
-      "status": "open",
+      "status": "closed",
       "actionable_now": true,
       "prd": "PRD-009",
       "slice_type": "AFK",
       "root_cause": null,
-      "fix": null,
+      "fix": "to-execution migrate command relocates legacy flat *_progress.json records into ADR-0008 homes by writer class (runtime basenames -> .excn/runtime/, rest -> .excn/progress/); location-only (fs.rename, byte-identical), idempotent, every move reported; doctor flags legacy layout and names migrate; gate-watch scan follows ledgers into .excn/progress/. Commit 813217e. code-standards + package-qa PASS (24+5-check fixtures). Deferred to Team Lead per the root-restamp ruling: live dogfood-root migration at a clean-tree point, and the durable package-qa rubric extension (alignment-gated).",
       "related_tickets": [],
       "assigned_sprint": 6,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 6,
       "notes": null,
       "id": "EXEC-069",
       "title": "Migrate command relocates Progress and Runtime Records; doctor flags the legacy flat layout",

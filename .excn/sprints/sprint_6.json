@@ -117,21 +117,21 @@
         "EXEC-067"
       ],
       "notes": "Commit 2badcaa (10 files: hook-lib, load-report, gate-watch, viewer-server-rules + dogfood mirrors + cli.js doctor help + health-policy.js read-side). Gates: code-standards PASS (prior FAIL cleared by the CODE_STANDARDS ## Hooks rubric sweep 5f8111f) + package-qa PASS, manifest 51 files (step_log). The deferred EXEC-070 doctor card (progress_location_guard HOOK_FEATURES) landed here in health-policy.js, completing that deferral. PRD-009 slice 2. depends_on: EXEC-066."
-    }
-  ],
-  "in_progress": [],
-  "not_shipped": [
+    },
     {
       "id": "S6-5",
       "type": "FEAT",
       "title": "EXEC-069: migrate command relocates Progress/Runtime Records; doctor flags the legacy flat layout",
       "owner": "builder",
-      "summary": "New Scaffolder migrate command relocates known records on an already-stamped Instance into their ADR-0008 homes: versioned migration table, idempotent re-run, location-only (byte-identical), every move reported. doctor detects the legacy flat layout and names migrate. update's never-touch-work-tracking contract unchanged. package-qa rubric extended (chartered, alignment-gated per ADR-0004). Dogfood root migrated as proof. Src-First.",
+      "summary": "A to-execution migrate command relocates legacy flat-layout *_progress.json records into their ADR-0008 homes by writer class (RUNTIME_RECORD_BASENAMES -> .excn/runtime/, all others -> .excn/progress/). Location-only (fs.rename, byte-identical), idempotent (scans base top-level only; re-run no-op; destination clash skipped not clobbered), every move reported. doctor flags the legacy flat layout and names migrate, reports clean after. update untouched. gate-watch's verdict-evidence scan now follows verdict ledgers into .excn/progress/. Src-First + dogfood mirror.",
       "closes_issues": [
         "EXEC-069"
       ],
-      "notes": "PRD-009 slice 4. depends_on: EXEC-066, EXEC-067."
-    },
+      "notes": "Commit 813217e (4 files: migrate-policy.js new + cli.js migrate verb/doctor/dispatch + gate-watch.js + root mirror). Gates: code-standards PASS + package-qa PASS, which exercised the full migrate contract (24-check + 5-check fixtures). Two acceptance pieces deliberately deferred per the root-restamp ruling: (1) the live dogfood-root migration + marker re-anchor — Team Lead sequences it at a clean-tree point, proven here by temp-dir fixtures + sign-off; (2) the durable package-qa rubric extension (chartered, alignment-gated per ADR-0004) — builder handed Team Lead the exact check delta to fold into the package-qa definition. PRD-009 slice 4. depends_on: EXEC-066, EXEC-067."
+    }
+  ],
+  "in_progress": [],
+  "not_shipped": [
     {
       "id": "S6-8",
       "type": "FEAT",
@@ -242,6 +242,18 @@
       "at": "2026-06-10",
       "artifact": "EXEC-067 — hook-written state becomes Runtime Records under .excn/runtime/ (ADR-0008) + health-policy HOOK_FEATURES gains progress_location_guard",
       "summary": "PASS — 0 violations. Manifest exact (51 files, gitignore rename correct, .excn/runtime/.gitkeep present). Idempotency: 0 writes/51 skipped on second init, both pointers already-present. JSON: all 11 stamped JSON files parse clean. Gitignore: .excn/.gitignore exactly *_progress.json, root .gitignore not touched, pattern anchored in .excn/. Runtime contract: load-report.js wrote load_progress.json to .excn/runtime/ only (not .excn/ base); hook-lib logInvocation wrote hook-invocations_progress.json to .excn/runtime/ only; gate-watch.js wrote gate-watch_progress.json to .excn/runtime/ only. PATH_WHITELIST: .excn/runtime/*.json served, subdir traversal rejected. Doctor: heartbeat cited from .excn/runtime/hook-invocations_progress.json; all 6 features listed; progress_location_guard reports disabled (wired) with no wiring problem (script on disk + settings.json PreToolUse entry confirmed). Skip-safety, pointer wiring (both-create, preserve, no-double-append, force-preserves-pointer, one-exists, deleted-block-reappended, oversize-warning) all pass. Pack parity: 59 files in tarball, progress-location-guard.js + rules file both shipped."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-069 — src/bin/migrate-policy.js (new), src/bin/cli.js (recordHome, legacyRecords, migrate, doctor record-layout line, main migrate case), src/template/.claude/hooks/gate-watch.js + dogfood mirror (PROGRESS_FILE_PATTERN broadened, PROGRESS_RECORD_DIRS, verdictEvidenceSince scans both homes)",
+      "summary": "PASS — 0 violations. All Structure rules hold: single responsibility per function, no shallow pass-throughs, all meaningful literals are named constants (relocation table in migrate-policy data module, dirs/pattern named in gate-watch), migrate exits non-zero with an actionable error on missing .excn, no dead code, deterministic layout in all four files. All CLI rules hold: data-out-of-logic (relocation table in migrate-policy.js), Node builtins only, failure exits non-zero, error to stderr/output to stdout, actionable failure message names the missing dir and names init. All Commenting rules hold: file headers complete and accurate, JSDoc on recordHome/legacyRecords/migrate covers purpose/params/return/failure, why-not-what comments on skip invariant and PROGRESS_RECORD_DIRS runtime-exclusion, PROGRESS_FILE_PATTERN comment is truthful (regex confirmed to exclude .excn/runtime/ paths), no TODO/FIXME. All Hooks rules hold: gate-watch logInvocation path unchanged, no new exit paths, helper delegation intact."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-069 — new Scaffolder migrate command + migrate-policy.js data module + doctor record layout line",
+      "summary": "PASS — 0 violations. Stamp contract: manifest exact (51 files, gitignore rename correct), idempotency (0 writes/51 skipped on second init), all 10 stamped JSON parse, .excn/.gitignore exactly *_progress.json (no root .gitignore), pack parity (migrate-policy.js ships in tarball at package/bin/, gitignore un-dotted, no .gitignore in tarball), skip-safety (existing file not overwritten without --force), pointer wiring (all sub-cases pass: both-create, preserve, no-double-append, force-preserves-pointer, one-exists-no-phantom, deleted-block-reappended, sentinel visible text not HTML comment, oversize warning). Migrate contract: seeded 4 runtime + 3 progress records at .excn base; migrate moved all 7 to correct homes (runtime records → .excn/runtime/, others → .excn/progress/), reported every move, exit 0; all 7 byte-identical at destination; no record remains at .excn base. Re-run is a no-op (moved 0, skipped 0). Clash: base record whose name exists at destination skipped (reported), home copy not clobbered, base copy left in place. Doctor before: LEGACY — 7 record(s); doctor after: ADR-0008 homes. No-.excn target: exit 1 with stderr message (fail-closed). Update: all 7 records in both homes byte-identical after update (work-tracking never touched)."
     }
   ],
   "retrospective_notes": [
