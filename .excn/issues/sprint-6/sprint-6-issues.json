@@ -262,6 +262,35 @@
       "assigned_sprint": 6,
       "closed_in_sprint": 6,
       "notes": "Surfaced 2026-06-10 while scoping plugin-marketplace publication: the Preflight dependency story is the real publish blocker."
+    },
+    {
+      "id": "EXEC-079",
+      "title": "Spawn guard allows persistent team spawns (name + team_name); keeps denying one-shot Teammate copies",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "hooks"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "The spawn guard denies any Agent-tool call whose subagent_type names a rostered persistent Teammate, keying only on AGENT_TYPE_KEYS — it cannot distinguish a transient one-shot copy from a legitimate persistent-teammate spawn carrying name + team_name. Net effect observed live: the Team Lead spawning builder/packager into the team had to fall back to subagent_type general-purpose with the role inlined in the prompt, so rostered Teammates run WITHOUT their .claude/agents definitions. Fix in spawn-guard rules/logic: when the spawn payload carries both name and team_name (a persistent team spawn), allow it even for a rostered type; continue denying bare one-shot spawns of rostered types with the existing redirect reason. Update the deny reason to name the allowed mechanism (spawn with name + team_name into the team).",
+      "prd": null,
+      "acceptance_criteria": [
+        "A spawn payload with subagent_type = rostered Teammate AND both name and team_name passes the guard.",
+        "A spawn payload with subagent_type = rostered Teammate and no team_name (or no name) is denied with a redirect reason that names the persistent-spawn mechanism.",
+        "Non-rostered types pass unchanged; fail-safe exit 0 on malformed config/payload preserved.",
+        "Rules stay data-only (vocabulary in spawn-guard-rules.cjs), decision logic in spawn-guard.cjs.",
+        "Verified with payload simulations covering allow/deny/fail-safe; ships as .cjs in template + dogfood mirror; passes code-standards and package-qa gates.",
+        "Released to npm in the next version (0.5.2)."
+      ],
+      "slice_type": "AFK",
+      "root_cause": "spawn-guard keyed only on AGENT_TYPE_KEYS, so it could not distinguish a persistent team spawn (name + team_name) from a transient one-shot copy of a rostered Teammate.",
+      "fix": "Guard allows a rostered type when the payload carries both non-empty name and team_name; one-shots and partial payloads stay denied with a reason naming the mechanism. Commit e5bcf81 after code-standards and package-qa PASS.",
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 6,
+      "closed_in_sprint": 6,
+      "notes": null
     }
   ]
 }

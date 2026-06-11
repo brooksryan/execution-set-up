@@ -277,6 +277,36 @@
       "assigned_sprint": null,
       "closed_in_sprint": null,
       "notes": null
-    }
+    },
+    {
+      "id": "EXEC-078",
+      "title": "Viewer issue-detail view with formatted (markdown) content",
+      "status": "open",
+      "severity": "P3",
+      "scope": [
+        "viewer"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "The status-page viewer lists issues but clicking one gives no readable detail view. Add an issue-detail view: clicking an issue in the viewer opens a formatted panel/page showing title, id, status/severity/scope badges, description, acceptance criteria, root_cause/fix, depends_on (linked to their issues), and sprint fields. Render description, acceptance_criteria items, root_cause, fix, and notes as markdown so bullets, code spans, and emphasis display properly \u2014 these are already free-text strings in issue.schema.json, so richer text means authoring markdown in them, no schema change. Document in the schema descriptions (or CONTEXT) that these fields support markdown.",
+      "prd": null,
+      "acceptance_criteria": [
+        "Clicking an issue anywhere it appears in the viewer opens its detail view.",
+        "Detail view shows all populated issue fields; null/empty fields are omitted, not rendered as 'null'.",
+        "description, acceptance_criteria, root_cause, fix, and notes render markdown (bullets, code spans, emphasis, line breaks).",
+        "Markdown rendering is safe: no raw HTML injection from issue content.",
+        "depends_on ids link to the referenced issues' detail views, across partitions.",
+        "Viewer stays read-only and localhost-only; existing list views unchanged otherwise.",
+        "Field-level markdown support is documented (schema description text or CONTEXT note)."
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": null,
+      "closed_in_sprint": null,
+      "notes": null
+    },
   ]
 }

@@ -50,7 +50,8 @@
     "EXEC-070",
     "EXEC-071",
     "EXEC-072",
-    "EXEC-073"
+    "EXEC-073",
+    "EXEC-079"
   ],
   "shipped": [
     {
@@ -151,6 +152,17 @@
         "EXEC-073"
       ],
       "notes": "Commit f8551d8; ships in npm 0.5.0. Acceptance verified (grep clean, prose current). Late grill-skipping fix pulled by Team Lead directive 2026-06-10; surfaced while scoping plugin-marketplace publication (the Preflight dependency story was the real publish blocker)."
+    },
+    {
+      "id": "S6-10",
+      "type": "FEAT",
+      "title": "EXEC-079: spawn guard allows persistent team spawns (name + team_name)",
+      "owner": "builder",
+      "summary": "Spawn guard distinguishes persistent team spawns (name + team_name present) from transient one-shot copies of rostered Teammates; allows the former, keeps denying the latter with a redirect naming the mechanism.",
+      "closes_issues": [
+        "EXEC-079"
+      ],
+      "notes": "Commit e5bcf81 (4 files: template spawn-guard{,-rules}.cjs + dogfood .js mirrors). Gates: code-standards PASS + package-qa PASS (step_log). Ships in npm 0.5.2."
     }
   ],
   "in_progress": [],
