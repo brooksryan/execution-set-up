@@ -601,11 +601,13 @@ function init(args) {
 
 /**
  * Run the `update` command: re-stamp only invariant files at the installed version.
- * Variant files and work-tracking state are never touched. An invariant file whose
- * current content differs from its recorded stamped-form hash has drifted locally:
- * it is reported and left in place (its old hash is kept so drift stays anchored to
- * what was actually stamped). Ends by rewriting the version marker at the installed
- * version. Reports refreshed/unchanged/drifted to stdout.
+ * Variant files and work-tracking state are never touched. A file byte-identical to
+ * the incoming template is unchanged, whatever its recorded hash. Otherwise, an
+ * invariant file whose content differs from its recorded stamped-form hash has
+ * drifted locally: it is reported and left in place (its old hash is kept so drift
+ * stays anchored to what was actually stamped). A file still at its stamped form
+ * when the template has moved on is refreshed. Ends by rewriting the version marker
+ * at the installed version. Reports refreshed/unchanged/drifted to stdout.
  * @param {string[]} args - args after the `update` command word (target only).
  * @returns {void}
  * @throws Exits non-zero (after a stderr message) if the template is missing or the
@@ -655,31 +657,40 @@ function update(args) {
 
     const currentHash = sha256(fs.readFileSync(destination));
     const recordedHash = recordedHashes[posixRel];
+    if (currentHash === templateHash) {
+      // Byte-identical to the incoming template: unchanged, whatever the recorded
+      // hash says. A stale anchor (recorded != template, left by a prior lockstep
+      // stamp) must not read as drift — test template match before the drift check.
+      // Re-anchor on the template hash so the stale anchor is not carried forward.
+      unchanged.push(posixRel);
+      nextHashes[posixRel] = templateHash;
+      continue;
+    }
     if (recordedHash !== undefined && currentHash !== recordedHash) {
-      // Drifted from its stamped form: the Instance edited it on purpose or by
-      // accident — either way the decision is theirs, so report and keep the old
-      // hash as the drift anchor.
+      // Differs from both the template and its stamped form: the Instance edited it
+      // on purpose or by accident — either way the decision is theirs, so report and
+      // keep the old hash as the drift anchor.
       drifted.push(posixRel);
       nextHashes[posixRel] = recordedHash;
       continue;
     }
-    if (recordedHash === undefined && currentHash !== templateHash) {
-      // No stamped-form record (pre-marker stamp or untracked local file) and the
-      // content is not the installed version's: unverifiable, treat as drifted.
-      // Anchor on the template hash, never the current content — recording the
-      // local content would make the next run read it as unchanged-from-recorded
-      // and overwrite the user's edit. With the template hash recorded, current
-      // != recorded holds on every later run until the user resolves the drift.
+    if (recordedHash === undefined) {
+      // No stamped-form record (pre-marker stamp or untracked local file) and (per
+      // the template-match check above) not the installed version's content:
+      // unverifiable, treat as drifted. Anchor on the template hash, never the
+      // current content — recording the local content would make the next run read
+      // it as unchanged-from-recorded and overwrite the user's edit. With the
+      // template hash recorded, current != recorded holds on every later run until
+      // the user resolves the drift.
       drifted.push(posixRel);
       nextHashes[posixRel] = templateHash;
       continue;
     }
 
-    if (currentHash === templateHash) unchanged.push(posixRel);
-    else {
-      fs.writeFileSync(destination, templateContent);
-      refreshed.push(posixRel);
-    }
+    // Recorded form matches the current content but the template moved on: a clean
+    // upgrade — refresh to the installed version and re-anchor.
+    fs.writeFileSync(destination, templateContent);
+    refreshed.push(posixRel);
     nextHashes[posixRel] = templateHash;
   }
 
