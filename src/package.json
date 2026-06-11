@@ -1,6 +1,6 @@
 {
   "name": "to-execution",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Stamps the invariant layout for autonomous, agent-driven work into a project. Driven by the to-execution skill.",
   "bin": {
     "to-execution": "bin/cli.js"
