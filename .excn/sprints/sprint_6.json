@@ -73,6 +73,17 @@
         "EXEC-066"
       ],
       "notes": "Commit 7e4a7d8 (5 files: src/bin/stamp-policy.js + src/template/.excn/{progress,runtime}/.gitkeep + dogfood-root mirror). Gates: code-standards PASS + package-qa PASS (step_log). PRD-009 slice 1 (dependency root). depends_on: none."
+    },
+    {
+      "id": "S6-7",
+      "type": "FEAT",
+      "title": "EXEC-071: viewer sprint switcher — past sprints readable from the status page",
+      "owner": "viewer",
+      "summary": "Viewer keeps every probed sprint and adds a header switcher (newest first, active default); a closed sprint renders the same lanes plus its decisions, retrospective notes, and step_log verdicts. Selection round-trips through the History API (pushState/popstate, ?sprint=N deep-link). No server change; read-only over the .excn JSON. Src-First + dogfood mirror; verified on the live viewer server.",
+      "closes_issues": [
+        "EXEC-071"
+      ],
+      "notes": "Commit bc8e892 (8 viewer files). Gate: code-standards PASS (step_log). PRD-009 slice 6; shipped ahead of S6-3..S6-6 (no deps). depends_on: none."
     }
   ],
   "in_progress": [],
@@ -120,17 +131,6 @@
         "EXEC-070"
       ],
       "notes": "PRD-009 slice 5. depends_on: EXEC-066."
-    },
-    {
-      "id": "S6-7",
-      "type": "FEAT",
-      "title": "EXEC-071: viewer sprint switcher — past sprints readable from the status page",
-      "owner": "viewer",
-      "summary": "The viewer gains a sprint switcher over the sprint files it already probes: active sprint renders by default; selecting a closed sprint renders the same lanes plus its decisions, retrospective notes, and step_log gate verdicts. No server change; viewer stays read-only over .excn JSON. Src-First, verified on the live viewer server.",
-      "closes_issues": [
-        "EXEC-071"
-      ],
-      "notes": "PRD-009 slice 6. depends_on: none."
     },
     {
       "id": "S6-8",

@@ -182,15 +182,15 @@
       ]
     },
     {
-      "status": "open",
+      "status": "closed",
       "actionable_now": true,
       "prd": "PRD-009",
       "slice_type": "AFK",
       "root_cause": null,
-      "fix": null,
+      "fix": "Viewer header sprint switcher over probed sprint files (newest first, active default); closed sprints render lanes + decisions + retrospective notes + step_log verdicts; selection round-trips through the History API (?sprint=N deep-link). No server change; read-only. Commit bc8e892. code-standards PASS.",
       "related_tickets": [],
       "assigned_sprint": 6,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 6,
       "notes": null,
       "id": "EXEC-071",
       "title": "Viewer sprint switcher: past sprints readable from the status page",
