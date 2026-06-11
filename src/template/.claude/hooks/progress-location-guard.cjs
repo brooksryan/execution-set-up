@@ -14,13 +14,13 @@
 // never blocks a legitimate write.
 
 const path = require('path');
-const lib = require('./hook-lib');
+const lib = require('./hook-lib.cjs');
 const {
   RECORD_SUFFIX,
   RECORD_HOME_PREFIXES,
   PATH_PLACEHOLDER,
   DENY_REASON_TEMPLATE,
-} = require('./progress-location-guard-rules');
+} = require('./progress-location-guard-rules.cjs');
 
 const FEATURE = 'progress_location_guard';
 

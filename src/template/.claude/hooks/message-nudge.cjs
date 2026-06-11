@@ -5,15 +5,15 @@
 // default OFF). Wired in settings.json as PostToolUse on SendMessage (the agent-teams
 // messaging tool — verified against the Claude Code agent-teams docs), so it fires in
 // the SENDER's session. When the toggle is on, it scans the sent message's content for
-// the follow-through it implies (record update, issue, gate — nudge-rules.js) and
+// the follow-through it implies (record update, issue, gate — nudge-rules.cjs) and
 // injects that as additionalContext back to the sender. Remind-only: it never blocks
 // and never watches recipients. Every firing logs one invocation record via hook-lib
 // (CODE_STANDARDS ## Hooks). FAIL SAFE: every path, including thrown errors, exits
 // 0 (PRD-007); injected phrasing must read as legitimate ops instruction (§3.1).
 
 const path = require('path');
-const lib = require('./hook-lib');
-const { FOLLOW_THROUGH_RULES, DEFAULT_ACTION, NUDGE_TEMPLATE } = require('./nudge-rules');
+const lib = require('./hook-lib.cjs');
+const { FOLLOW_THROUGH_RULES, DEFAULT_ACTION, NUDGE_TEMPLATE } = require('./nudge-rules.cjs');
 
 const FEATURE = 'message_nudge';
 

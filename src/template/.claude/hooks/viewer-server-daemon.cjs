@@ -8,15 +8,15 @@
 // Orphan prevention is idle self-exit, never a shutdown hook: the process exits
 // after IDLE_EXIT_MS without a request; the status page's polling counts as
 // activity. /__viewer-server identifies the daemon to the hook (and doctor) by
-// echoing {repo, pid, version}. Invocation (by viewer-server.js, not by hand):
-//   node viewer-server-daemon.js --root <abs-repo> --port <n> [--idle-ms <n>]
+// echoing {repo, pid, version}. Invocation (by viewer-server.cjs, not by hand):
+//   node viewer-server-daemon.cjs --root <abs-repo> --port <n> [--idle-ms <n>]
 // --idle-ms overrides the idle threshold; it exists for behavioral testing of the
 // self-exit and has no production caller.
 
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
-const rules = require('./viewer-server-rules');
+const rules = require('./viewer-server-rules.cjs');
 
 // Where a stamped Instance records its framework version; echoed in health output.
 const VERSION_MARKER_RELATIVE_PATH = '.excn/framework-version.json';
@@ -128,7 +128,7 @@ function main() {
   const portArg = argValue('--port');
   const port = Number(portArg);
   if (rootArg === null || !Number.isInteger(port)) {
-    process.stderr.write('usage: viewer-server-daemon.js --root <abs-repo> --port <n> [--idle-ms <n>]\n');
+    process.stderr.write('usage: viewer-server-daemon.cjs --root <abs-repo> --port <n> [--idle-ms <n>]\n');
     process.exit(1);
   }
   const root = path.resolve(rootArg);

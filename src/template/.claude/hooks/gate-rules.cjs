@@ -2,7 +2,7 @@
 
 // gate-rules — data module for the gate-reminders hook feature: which Instance paths
 // put which QA gates on the hook, and the reminder/block phrasing injected back.
-// Data only (no logic); gate-watch.js consumes it. Phrasing constraint (ADR-0006,
+// Data only (no logic); gate-watch.cjs consumes it. Phrasing constraint (ADR-0006,
 // research §3.1): injected text is model-judged, so it must read as legitimate
 // operational instruction grounded in the documented QA-gate protocol.
 

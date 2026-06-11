@@ -2,8 +2,8 @@
 
 // viewer-server-rules — shared data for the viewer_server hook feature (PRD-008,
 // ADR-0007 step 1): the port convention, the serving whitelist, the idle-exit
-// threshold, and the discovery-record contract. Data only, no logic; viewer-server.js
-// (the SessionStart hook) and viewer-server-daemon.js (the server) both consume it so
+// threshold, and the discovery-record contract. Data only, no logic; viewer-server.cjs
+// (the SessionStart hook) and viewer-server-daemon.cjs (the server) both consume it so
 // the two sides can never disagree on the contract.
 
 // Ports derive from a hash of the repo path into this quiet range; on collision with
@@ -12,7 +12,7 @@ const PORT_RANGE_START = 41000;
 const PORT_RANGE_SIZE = 1000;
 const PORT_PROBE_LIMIT = 20;
 
-// djb2 string-hash parameters (homePort in viewer-server.js): the canonical seed
+// djb2 string-hash parameters (homePort in viewer-server.cjs): the canonical seed
 // and multiplier of the algorithm, named here so the port derivation is auditable.
 const DJB2_SEED = 5381;
 const DJB2_MULTIPLIER = 33;

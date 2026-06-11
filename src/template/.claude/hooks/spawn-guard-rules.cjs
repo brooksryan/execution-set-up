@@ -1,8 +1,8 @@
 'use strict';
 
-// spawn-guard-rules — data for spawn-guard.js (EXEC-064). Which tool_input keys may
+// spawn-guard-rules — data for spawn-guard.cjs (EXEC-064). Which tool_input keys may
 // carry a spawn request's agent type, and the deny reason surfaced to the model.
-// Data only, no logic: spawn-guard.js owns the decision; this module owns the
+// Data only, no logic: spawn-guard.cjs owns the decision; this module owns the
 // vocabulary, so phrasing and payload-shape changes never touch the decision code.
 
 // tool_input keys that can carry the requested agent type on the one-shot spawn

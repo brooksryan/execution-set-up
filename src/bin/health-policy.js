@@ -26,41 +26,41 @@
 const HOOK_FEATURES = [
   {
     key: 'gate_reminders',
-    scripts: ['gate-watch.js'],
+    scripts: ['gate-watch.cjs'],
     evidence: '.excn/runtime/gate-watch_progress.json',
   },
   {
     key: 'message_nudge',
-    scripts: ['message-nudge.js'],
+    scripts: ['message-nudge.cjs'],
     evidence: null,
   },
   {
     key: 'load_reporting',
-    scripts: ['load-report.js'],
+    scripts: ['load-report.cjs'],
     evidence: '.excn/runtime/load_progress.json',
   },
   {
     key: 'viewer_server',
-    scripts: ['viewer-server.js'],
-    spawnedScripts: ['viewer-server-daemon.js'],
+    scripts: ['viewer-server.cjs'],
+    spawnedScripts: ['viewer-server-daemon.cjs'],
     evidence: '.excn/runtime/viewer-server_progress.json',
     liveness: true,
   },
   {
     key: 'spawn_guard',
-    scripts: ['spawn-guard.js'],
+    scripts: ['spawn-guard.cjs'],
     evidence: null,
   },
   {
     key: 'progress_location_guard',
-    scripts: ['progress-location-guard.js'],
+    scripts: ['progress-location-guard.cjs'],
     evidence: null,
   },
 ];
 
 // The unified hook invocation log (CODE_STANDARDS ## Hooks) — doctor's primary
 // heartbeat source; a Runtime Record under .excn/runtime/ (ADR-0008). Mirrors
-// INVOCATION_LOG_RELATIVE_PATH in the stamped hook-lib.js (one contract, two packages).
+// INVOCATION_LOG_RELATIVE_PATH in the stamped hook-lib.cjs (one contract, two packages).
 const INVOCATION_LOG_PATH = '.excn/runtime/hook-invocations_progress.json';
 
 // How doctor probes a viewer_server discovery record: the daemon's loopback health
@@ -70,7 +70,7 @@ const VIEWER_HEALTH_HOST = '127.0.0.1';
 const VIEWER_HEALTH_PATH = '/__viewer-server';
 const VIEWER_PROBE_TIMEOUT_MS = 500;
 // The only status the daemon's health endpoint answers with on success — mirrors
-// HTTP_OK in the stamped viewer-server-rules.js (one contract, two packages).
+// HTTP_OK in the stamped viewer-server-rules.cjs (one contract, two packages).
 const VIEWER_HEALTH_OK_STATUS = 200;
 
 // Where the stamped hook wiring and toggle config live in an Instance.

@@ -126,12 +126,12 @@ const HEARTBEAT_FRESH_MS = ONE_DAY_MS;
 // feature's heartbeat is the latest invocation-ledger record across its scripts.
 // Keep this list in lockstep with health-policy.js when features are added.
 const HOOK_FEATURES = [
-  { key: 'gate_reminders', label: 'Gate reminders', scripts: ['gate-watch.js'] },
-  { key: 'message_nudge', label: 'Message nudge', scripts: ['message-nudge.js'] },
-  { key: 'load_reporting', label: 'Load reporting', scripts: ['load-report.js'] },
-  { key: 'viewer_server', label: 'Viewer server', scripts: ['viewer-server.js'] },
-  { key: 'spawn_guard', label: 'Spawn guard', scripts: ['spawn-guard.js'] },
-  { key: 'progress_location_guard', label: 'Progress-location guard', scripts: ['progress-location-guard.js'] },
+  { key: 'gate_reminders', label: 'Gate reminders', scripts: ['gate-watch.cjs'] },
+  { key: 'message_nudge', label: 'Message nudge', scripts: ['message-nudge.cjs'] },
+  { key: 'load_reporting', label: 'Load reporting', scripts: ['load-report.cjs'] },
+  { key: 'viewer_server', label: 'Viewer server', scripts: ['viewer-server.cjs'] },
+  { key: 'spawn_guard', label: 'Spawn guard', scripts: ['spawn-guard.cjs'] },
+  { key: 'progress_location_guard', label: 'Progress-location guard', scripts: ['progress-location-guard.cjs'] },
 ];
 
 // Doctor-parity health states the cards render (firing/stale derive from the

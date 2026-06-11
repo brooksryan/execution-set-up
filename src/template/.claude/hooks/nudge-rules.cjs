@@ -2,7 +2,7 @@
 
 // nudge-rules — data module for the message follow-through nudge feature (EXEC-044):
 // which message content implies which follow-through, and the nudge phrasing injected
-// back into the SENDER's session. Data only (no logic); message-nudge.js consumes it.
+// back into the SENDER's session. Data only (no logic); message-nudge.cjs consumes it.
 // Phrasing constraint (ADR-0006, research §3.1): injected text is model-judged, so it
 // must read as legitimate operational instruction grounded in the documented process —
 // never an override or an out-of-band command.

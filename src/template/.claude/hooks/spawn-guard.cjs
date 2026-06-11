@@ -14,8 +14,8 @@
 // with no output (ADR-0006) — a broken guard never blocks legitimate spawns.
 
 const path = require('path');
-const lib = require('./hook-lib');
-const { AGENT_TYPE_KEYS, TYPE_PLACEHOLDER, DENY_REASON_TEMPLATE } = require('./spawn-guard-rules');
+const lib = require('./hook-lib.cjs');
+const { AGENT_TYPE_KEYS, TYPE_PLACEHOLDER, DENY_REASON_TEMPLATE } = require('./spawn-guard-rules.cjs');
 
 const FEATURE = 'spawn_guard';
 

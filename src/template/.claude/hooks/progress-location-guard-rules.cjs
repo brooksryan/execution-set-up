@@ -1,6 +1,6 @@
 'use strict';
 
-// progress-location-guard-rules — data for progress-location-guard.js (EXEC-070,
+// progress-location-guard-rules — data for progress-location-guard.cjs (EXEC-070,
 // ADR-0008). The Record suffix that marks a path as a Progress/Runtime Record, the
 // two sanctioned homes, and the deny reason surfaced to the model. Data only, no
 // logic: the guard owns the decision; this module owns the vocabulary, so phrasing
