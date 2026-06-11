@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "id": "PRD-009",
+  "title": "Progress Record homes, migrate path, location guard, and viewer history",
+  "status": "published",
+  "created": "2026-06-10",
+  "amended": null,
+  "problem_statement": "Progress files pile up flat at the .excn base \u2014 thirteen on the dogfood Instance \u2014 mixing agent- and gate-written Progress Records with hook-written Runtime Records under one suffix and no naming convention. The most-written record (the session Verdict Ledger) violates the only progress schema that exists. Nothing stops an agent from filing a progress write in the wrong place, already-stamped Instances have no sanctioned way to adopt a better layout (update never touches work-tracking), and the viewer shows only the active sprint and no hook health \u2014 past sprints and hook logs are JSON-only.",
+  "solution": "Adopt ADR-0008: split by writer into two homes \u2014 Progress Records in .excn/progress/, Runtime Records in .excn/runtime/ \u2014 keeping the _progress.json suffix so the stamped gitignore pattern survives unchanged. Give Verdict Ledgers their own schema beside the unit-of-work tracker schema. Ship a versioned, idempotent, location-only migrate command that doctor points to when it detects the legacy flat layout. Enforce the boundary with a location-only deny guard in the spawn-guard pattern. Extend the viewer with a sprint switcher over the sprint history it already fetches and a hook-health view (doctor-parity cards plus an invocation-log table).",
+  "user_stories": [
+    {
+      "id": 1,
+      "actor": "Teammate or gate agent",
+      "want": "one obvious, enforced home for every Progress Record I write",
+      "benefit": "my verdicts and step logs land where every reader looks, and a misfiled write is denied with a redirect instead of rotting at the wrong path"
+    },
+    {
+      "id": 2,
+      "actor": "Instance lead on an already-stamped project",
+      "want": "a single command that relocates my existing progress files into the new homes",
+      "benefit": "I adopt the new layout without hand-moving state or trusting update with work-tracking it promises never to touch"
+    },
+    {
+      "id": 3,
+      "actor": "Adherence Agent",
+      "want": "a schema that matches what I actually append (a Verdict Ledger entry)",
+      "benefit": "my output validates strictly instead of violating a tracker schema shaped for different work"
+    },
+    {
+      "id": 4,
+      "actor": "Team Lead",
+      "want": "to browse past sprints in the viewer \u2014 lanes, decisions, retro notes, gate verdicts",
+      "benefit": "sprint history is readable at a glance without opening archived JSON"
+    },
+    {
+      "id": 5,
+      "actor": "Team Lead",
+      "want": "hook health cards and the invocation log in the viewer",
+      "benefit": "I see a stale or broken hook the moment I look at the status page, with the log right there to diagnose it"
+    }
+  ],
+  "implementation_decisions": [
+    {
+      "title": "Two homes split by writer (ADR-0008)",
+      "summary": "Agents and gates write Progress Records under .excn/progress/; hooks and machines write Runtime Records under .excn/runtime/. The writer, not the filename, determines the class. The Template ships both directories; the stamp policy classifies them as work-tracking."
+    },
+    {
+      "title": "Suffix kept, stems standardized",
+      "summary": "Every record keeps the _progress.json suffix so the stamped gitignore pattern matches unchanged at any depth. Ledger and tracker stems follow <kind>-<id> (sprint-6, prd-008, session, task-<kebab>); Runtime Records keep their feature name."
+    },
+    {
+      "title": "Two schemas",
+      "summary": "A new Verdict Ledger schema covers what gates append \u2014 the session ledger and a sprint's step_log entries share the entry shape. The existing progress tracker schema keeps the unit-of-work shape. Each kind validates against the schema its kind implies."
+    },
+    {
+      "title": "Migrate, never update",
+      "summary": "A new Scaffolder migrate command relocates known records into their homes: versioned, idempotent, location-only, every move reported, content never rewritten. doctor detects the legacy flat layout and names the command. update's never-touch-work-tracking contract is preserved exactly."
+    },
+    {
+      "title": "Location-only deny guard",
+      "summary": "A PreToolUse guard denies a progress-suffixed write outside the two homes with a redirect reason naming the right one, following the spawn-guard pattern: rules/decision split, hooks.config toggle, invocation-logged, fail-safe on any error. Content and schema stay the gates' job (ADR-0006 division)."
+    },
+    {
+      "title": "Viewer sprint switcher",
+      "summary": "The viewer already probes every sprint file; a switcher (active sprint default) renders any closed sprint with the same lanes plus its decisions, retrospective notes, and step_log verdicts."
+    },
+    {
+      "title": "Viewer hook health",
+      "summary": "Per-feature health cards mirror doctor (firing/stale/disabled, last heartbeat) over the runtime invocation ledger, with a collapsible recent-invocations table filterable by feature and outcome."
+    }
+  ],
+  "testing_decisions": [
+    "Migrate command: temp-dir fixture tests \u2014 legacy flat layout in, assert every known record lands in its home, re-run is a no-op (idempotent), file content byte-identical; package-qa rubric extended to exercise the migrate contract.",
+    "Guard hook: payload-simulation tests in the spawn-guard pattern \u2014 misfiled progress write denied with the redirect reason, correct-home write passes untouched, malformed payload or missing config fails safe (exit 0, no output).",
+    "Viewer modules: no automated harness; code-standards gate plus manual verification against the live viewer server."
+  ],
+  "out_of_scope": [
+    "EXEC-065 (update false-positive drift fix) \u2014 already filed and pulled into sprint 6 independently of this PRD.",
+    "Schema validation inside the guard hook \u2014 the guard checks location only; schema conformance stays with gates and clerk.",
+    "Renaming or restructuring committed work-tracking (sprints/, issues/, prds/, retros/) \u2014 ADR-0005 layout stands.",
+    "A viewer automated test harness."
+  ],
+  "issues": [
+    "EXEC-066",
+    "EXEC-067",
+    "EXEC-068",
+    "EXEC-069",
+    "EXEC-070",
+    "EXEC-071",
+    "EXEC-072"
+  ],
+  "notes": [
+    "Synthesized from the sprint-6 Work Grill held 2026-06-10 in-session (Team Lead waived the fresh-session preference); decisions recorded in ADR-0008 and four CONTEXT.md terms (Progress Record, Verdict Ledger, Runtime Record, Migrate), alignment PASS in sprint-6 step_log.",
+    "Release-process observation for the retro: npm 0.3.0 lagged HEAD at the same version number \u2014 consider a preflight guard forcing a version bump when template content changes."
+  ]
+}

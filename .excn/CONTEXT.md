@@ -69,6 +69,22 @@ _Avoid_: "a reviewer that fixes" — an Adherence Agent never edits the input; i
 ### Setup Grill / Work Grill
 Two hard-separated grills. The **Setup Grill** is the one-time Setup Skill interview (context + philosophy + team) that ends at Handoff and does **not** plan work. The **Work Grill** is the recurring Lifecycle entry point (`grill → PRD → issues`) run in a *fresh session* after setup to start a sprint against the current goal. Separation keeps setup context out of work-planning context. The Work Grill's three steps are run by the Instance-stamped skills `execution-grill-with-docs`, `execution-to-prd`, and `execution-to-issues` — named distinctly from the global skills they fork because personal-level skills override project-level ones on a name collision.
 
+### Progress Record
+An agent- or gate-written `*_progress.json` under `.excn/progress/` — a unit-of-work tracker (`progress.schema.json`) or a Verdict Ledger. Gitignored, per-session churn (ADR-0005, ADR-0008).
+_Avoid_: "progress update", "status file", "runtime record" — those are hook-written.
+
+### Verdict Ledger
+An append-only array of gate verdicts (`verdict-ledger.schema.json`): the session ledger (`session_progress.json`) and a sprint's `step_log` entries share this entry shape.
+_Avoid_: "progress tracker" — a ledger has no `current_step`; it only accumulates verdicts.
+
+### Runtime Record
+A hook- or machine-written `*_progress.json` under `.excn/runtime/` — invocation heartbeats, the viewer-server pid record. State, not progress; no agent writes here.
+_Avoid_: "progress record" — the writer, not the suffix, sets the class.
+
+### Migrate
+The Scaffolder command that relocates known Progress/Runtime Records into their homes on an already-stamped Instance — versioned, idempotent, location-only. The only sanctioned relocation path; `update` never touches work-tracking (ADR-0008).
+_Avoid_: "update" — update refreshes invariant files; it never moves state.
+
 ## Relationships
 
 - The **Template** lives in `src/`; the **Scaffolder** (`to-execution`) stamps its invariant layout and a **Grill** fills the variant files — together producing one **Instance**. One Template → many Instances.
@@ -77,6 +93,7 @@ Two hard-separated grills. The **Setup Grill** is the one-time Setup Skill inter
 - The **Team Lead** drives the **Lifecycle** (grill → PRD → issues → sprint → retro); the **Retro Loop** is the only edge from a sprint's retro back into **persistent docs / Teammate definitions**, gated by the **alignment** Adherence Agent and approved by the Team Lead.
 - **Principles** (universal, baked into alignment) and **Philosophy** (project-specific, grows only through the Retro Loop) are the two rubrics **alignment** checks against. **ADRs** record grill-time hard-to-reverse decisions; the retro records sprint-time decisions — the Two-decision-records split.
 - **Src-First** governs every change: it lands in `src/` first, then the root **Instance** mirrors.
+- Writer determines home: agents and gates write **Progress Records** (`.excn/progress/`); hooks write **Runtime Records** (`.excn/runtime/`). **Migrate** relocates both on old Instances; a deny guard enforces the boundary on writes.
 
 ## Example dialogue
 
