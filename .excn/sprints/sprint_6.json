@@ -283,6 +283,12 @@
       "at": "2026-06-10",
       "artifact": "src/template/.claude/skills/make-teammate/SKILL.md, src/SKILL.md (Preflight), .excn/adr/0003-lifecycle-skills-fork.md",
       "summary": "PASS — 0 violations. EXEC-074 change set conforms to all Principles and project Philosophy. make-teammate stamped verbatim (byte-identical to global; Src-First; no added prose); Preflight gate removal is instruction-only with no coaching language; ADR amendment follows declared Amendment convention rather than rewriting history; all three changes are tied to the real plugin-marketplace publication observation and Team Lead ruling filed as EXEC-074 in backlog."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-10",
+      "artifact": "Release 0.5.0 gate — EXEC-074 adds src/template/.claude/skills/make-teammate/SKILL.md; src/package.json version 0.4.0 → 0.5.0",
+      "summary": "PASS — 0 violations. All stamp-contract checks hold: manifest exact (52 files including new make-teammate/SKILL.md, gitignore rename correct), idempotency (0 writes/52 skipped on second init), all 11 JSON parse, .excn/.gitignore exactly *_progress.json (no root .gitignore), pack parity (make-teammate/SKILL.md ships in tarball at template/.claude/skills/make-teammate/SKILL.md, gitignore un-dotted as template/.excn/gitignore, no dotted form; stamp from extracted tarball writes make-teammate/SKILL.md and .excn/.gitignore correctly), skip-safety (pre-existing file preserved), pointer wiring (all sub-cases pass: both-create, preserve, no-double-append, force-preserves-pointer, one-exists-no-phantom, deleted-block-reappended, sentinel visible text not HTML comment, oversize warning). Migrate contract: 6-record seed (4 runtime + 2 progress) moved to homes byte-identical; re-run no-op; destination clash skipped not clobbered; migrate without .excn exits 1; doctor before reports LEGACY/names migrate, after reports ADR-0008 homes; records in homes survive update byte-identical."
     }
   ],
   "retrospective_notes": [
