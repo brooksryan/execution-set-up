@@ -5,7 +5,8 @@
     "message_nudge": false,
     "load_reporting": false,
     "viewer_server": true,
-    "spawn_guard": true
+    "spawn_guard": true,
+    "progress_location_guard": false
   },
   "spawn_guard_persistent_types": ["scribe", "builder", "viewer", "packager", "architect"]
 }
