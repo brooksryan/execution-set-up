@@ -30,6 +30,13 @@ const {
   MARKER_SCHEMA_VERSION,
 } = require('./stamp-policy');
 const {
+  RUNTIME_RECORD_BASENAMES,
+  PROGRESS_HOME,
+  RUNTIME_HOME,
+  LEGACY_RECORD_DIR,
+  MIGRATION_ID,
+} = require('./migrate-policy');
+const {
   HOOK_FEATURES,
   INVOCATION_LOG_PATH,
   SETTINGS_PATH,
@@ -479,6 +486,13 @@ async function doctor(args) {
   const config = checkHooksConfig(target);
   lines.push(`toggle config: ${config.valid ? config.detail : `BROKEN — ${config.detail}`}`);
 
+  const legacy = legacyRecords(target);
+  lines.push(
+    legacy.length > 0
+      ? `record layout: LEGACY — ${legacy.length} record(s) at the ${LEGACY_RECORD_DIR} base; run \`to-execution migrate\` to relocate into ${PROGRESS_HOME}/ and ${RUNTIME_HOME}/ (ADR-0008)`
+      : `record layout: ADR-0008 homes (no records at the ${LEGACY_RECORD_DIR} base)`
+  );
+
   // Toggles are read straight from the file even when schema-invalid: the hooks
   // themselves fail safe to disabled in that case, and the per-feature verdict
   // below carries the broken-config reason instead of guessing intent.
@@ -522,12 +536,16 @@ function printUsage() {
       '  npx to-execution init [target]   stamp template/ into target (default: cwd)',
       '  npx to-execution init --force    overwrite existing files',
       '  npx to-execution update [target] re-stamp invariant files at the installed version',
+      '  npx to-execution migrate [target] relocate legacy *_progress.json records into their .excn homes',
       '  npx to-execution doctor [target] report per-feature hook health and outdated status',
       '',
       'init stamps the .excn/ namespace; .excn/.gitignore keeps per-session *_progress.json out of git.',
       'init records the framework version and stamped-form hashes in .excn/framework-version.json.',
       'update refreshes invariant files only: variant (grilled) files and work-tracking state',
       'are never touched, and a locally drifted invariant file is reported, not overwritten.',
+      'migrate relocates legacy *_progress.json records into .excn/progress/ (agent/gate-written)',
+      'and .excn/runtime/ (hook-written) by writer class — location only, idempotent, content never',
+      'rewritten; doctor flags the legacy flat layout and names this command (ADR-0008).',
       'init wires a pointer block into existing CLAUDE.md / AGENTS.md (append-only,',
       'even under --force; both created if neither exists).',
       'init never overwrites an existing manifest file unless --force.',
@@ -710,9 +728,87 @@ function update(args) {
 }
 
 /**
+ * Class a legacy-base record by writer to its ADR-0008 home: the hook- and
+ * machine-written Runtime Records to .excn/runtime/, every other *_progress.json to
+ * the agent/gate Progress home .excn/progress/.
+ * @param {string} basename - the record's file basename.
+ * @returns {string} the destination home, Instance-root-relative.
+ */
+function recordHome(basename) {
+  return RUNTIME_RECORD_BASENAMES.includes(basename) ? RUNTIME_HOME : PROGRESS_HOME;
+}
+
+/**
+ * List the legacy flat-layout records: *_progress.json directly under the .excn base.
+ * The homes beneath it are the migrated location, not legacy, so the scan is the base
+ * top level only. migrate moves these; doctor counts them to detect the legacy layout.
+ * @param {string} target - absolute Instance root.
+ * @returns {string[]} base-level record basenames (empty when none or .excn is absent).
+ */
+function legacyRecords(target) {
+  try {
+    return fs
+      .readdirSync(path.join(target, LEGACY_RECORD_DIR), { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith(PROGRESS_FILE_SUFFIX))
+      .map((entry) => entry.name);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Run the `migrate` command: relocate legacy flat-layout records into their ADR-0008
+ * homes. Location only — each record is moved byte-identical (fs.rename, never a
+ * rewrite). Every *_progress.json at the .excn base is classed by writer (recordHome)
+ * and moved unless its name already exists at the destination, in which case it is left
+ * in place and reported, never clobbered. Idempotent: a re-run (or an already-relocated
+ * record) finds nothing at the base and is a no-op. update's never-touch-work-tracking
+ * contract is unaffected — relocation is migrate's job alone (ADR-0008). Reports
+ * moved/skipped to stdout.
+ * @param {string[]} args - args after the `migrate` command word (target only).
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) when the target has no .excn directory.
+ */
+function migrate(args) {
+  const target = path.resolve(args.find((arg) => !arg.startsWith(FLAG_PREFIX)) || '.');
+  const legacyDir = path.join(target, LEGACY_RECORD_DIR);
+  if (!fs.existsSync(legacyDir)) {
+    process.stderr.write(`error: no ${LEGACY_RECORD_DIR} directory at ${legacyDir} — run \`to-execution init\` first\n`);
+    process.exit(1);
+  }
+
+  const moved = [];
+  const skipped = [];
+  for (const basename of legacyRecords(target)) {
+    const home = recordHome(basename);
+    const destinationDir = path.join(target, home);
+    const destination = path.join(destinationDir, basename);
+    if (fs.existsSync(destination)) {
+      // Already relocated, or a name clash: never clobber a record at its home.
+      skipped.push(`${basename} (already present in ${home}/)`);
+      continue;
+    }
+    fs.mkdirSync(destinationDir, { recursive: true });
+    fs.renameSync(path.join(legacyDir, basename), destination);
+    moved.push(`${basename} → ${home}/`);
+  }
+
+  process.stdout.write(
+    [
+      `Migrated legacy records in ${target} (${MIGRATION_ID})`,
+      `  moved   ${moved.length} record(s)${moved.length ? `: ${moved.join(', ')}` : ''}`,
+      `  skipped ${skipped.length} already-placed record(s)${skipped.length ? `: ${skipped.join(', ')}` : ''}`,
+      '(location only — record content is never rewritten; update never touches work-tracking)',
+      '',
+    ].join('\n')
+  );
+}
+
+/**
  * Entry point: dispatch on the first CLI argument. `init` stamps; `update`
- * re-stamps invariants; `doctor` reports hook health; no command or
- * -h/--help prints usage and exits zero; any other word fails non-zero with usage.
+ * re-stamps invariants; `migrate` relocates legacy records into their ADR-0008 homes;
+ * `doctor` reports hook health; no command or -h/--help prints usage and exits zero;
+ * any other word fails non-zero with usage.
  * @returns {void}
  * @throws Exits non-zero (after usage on stderr+stdout) on an unrecognized command.
  */
@@ -723,6 +819,8 @@ function main() {
       return init(args);
     case 'update':
       return update(args);
+    case 'migrate':
+      return migrate(args);
     case 'doctor':
       return doctor(args);
     case undefined:

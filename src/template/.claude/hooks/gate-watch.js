@@ -46,11 +46,13 @@ const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 // The file-editing tools whose payloads carry a file_path worth classifying.
 const EDIT_TOOLS = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
 
-// A write to any progress record or to a sprint record is where gate verdicts land
+// A write to any Progress Record or to a sprint record is where gate verdicts land
 // (PROCESS.md; gates append step_log entries to .excn/sprints/sprint_<N>.json), so
 // either clears this session's pending gates — except a write to this feature's own
-// state.
-const PROGRESS_FILE_PATTERN = /^\.excn\/[^/]*_progress\.json$/;
+// state. The pattern matches a Progress Record in its ADR-0008 home (.excn/progress/)
+// or, for a not-yet-migrated Instance, at the legacy .excn base; the .excn/runtime/
+// home is excluded — hook-written Runtime Records are never verdicts.
+const PROGRESS_FILE_PATTERN = /^\.excn\/(?:progress\/)?[^/]*_progress\.json$/;
 const SPRINT_FILE_PATTERN = /^\.excn\/sprints\/sprint_\d+\.json$/;
 const OWN_STATE_BASENAME = 'gate-watch_progress.json';
 
@@ -61,6 +63,12 @@ const OWN_STATE_BASENAME = 'gate-watch_progress.json';
 // gated edit").
 const SPRINTS_DIR = path.join('.excn', 'sprints');
 const EXCN_DIR = '.excn';
+
+// The directories a Progress Record (session Verdict Ledger) can live in: its
+// ADR-0008 home (.excn/progress/) and, for a not-yet-migrated Instance, the legacy
+// .excn base. The .excn/runtime/ home is intentionally absent — Runtime Records are
+// never verdicts. Each entry is filtered by PROGRESS_FILE_PATTERN before it counts.
+const PROGRESS_RECORD_DIRS = [EXCN_DIR, path.join('.excn', 'progress')];
 
 /**
  * Normalize an edited file's path to Instance-root-relative, forward-slash form.
@@ -184,17 +192,19 @@ function verdictEvidenceSince(projectRoot, sinceMs) {
       }
     }
   } catch {
-    // No sprints directory — progress records may still carry the verdict.
+    // No sprints directory — Progress Records may still carry the verdict.
   }
-  try {
-    const excnDir = path.join(projectRoot, EXCN_DIR);
-    for (const name of fs.readdirSync(excnDir)) {
-      if (PROGRESS_FILE_PATTERN.test(`${EXCN_DIR}/${name}`) && name !== OWN_STATE_BASENAME) {
-        candidates.push(path.join(excnDir, name));
+  for (const recordDir of PROGRESS_RECORD_DIRS) {
+    try {
+      const absoluteDir = path.join(projectRoot, recordDir);
+      for (const name of fs.readdirSync(absoluteDir)) {
+        if (PROGRESS_FILE_PATTERN.test(`${recordDir}/${name}`) && name !== OWN_STATE_BASENAME) {
+          candidates.push(path.join(absoluteDir, name));
+        }
       }
+    } catch {
+      // Home absent (not-yet-created .excn/progress/, or no .excn at all) — nothing to read.
     }
-  } catch {
-    // No .excn directory — nothing to read, no evidence.
   }
   for (const file of candidates) {
     try {
