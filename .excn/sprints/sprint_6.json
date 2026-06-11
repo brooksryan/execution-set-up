@@ -84,6 +84,17 @@
         "EXEC-071"
       ],
       "notes": "Commit bc8e892 (8 viewer files). Gate: code-standards PASS (step_log). PRD-009 slice 6; shipped ahead of S6-3..S6-6 (no deps). depends_on: none."
+    },
+    {
+      "id": "S6-4",
+      "type": "INFRA",
+      "title": "EXEC-068: Verdict Ledger schema — gates' append shape validates strictly",
+      "owner": "builder",
+      "summary": "New verdict-ledger.schema.json: a top-level append-only array of {step, at, artifact, summary}, entry shape defined once under #/$defs/entry. sprint.schema.json step_log items now reference it via cross-file $ref (verdict-ledger.schema.json#/$defs/entry) instead of an inlined duplicate; progress.schema.json untouched. ajv-validated: the live session ledger (.excn/session_progress.json) and sprint_6.json (cross-ref resolved) both validate. Src-First + dogfood mirror.",
+      "closes_issues": [
+        "EXEC-068"
+      ],
+      "notes": "Commit f9f2af6 (4 files: verdict-ledger.schema.json new + sprint.schema.json + dogfood-root mirror of both). Gate: package-qa PASS, manifest 49 files (step_log). code-standards not run — EXEC-068's acceptance omits the code gates and the JS-focused rubric has nothing to evaluate in a JSON schema (flagged to Team Lead). PRD-009 slice 3. depends_on: none."
     }
   ],
   "in_progress": [],
@@ -98,17 +109,6 @@
         "EXEC-067"
       ],
       "notes": "PRD-009 slice 2. depends_on: EXEC-066."
-    },
-    {
-      "id": "S6-4",
-      "type": "INFRA",
-      "title": "EXEC-068: Verdict Ledger schema — gates' append shape validates strictly",
-      "owner": "builder",
-      "summary": "New verdict-ledger.schema.json defines the append-only array of gate verdicts (step, at, artifact, summary). The session Verdict Ledger and a sprint record's step_log share the entry shape; sprint.schema.json references it rather than duplicating. progress.schema.json unchanged for trackers. Src-First.",
-      "closes_issues": [
-        "EXEC-068"
-      ],
-      "notes": "PRD-009 slice 3. depends_on: none."
     },
     {
       "id": "S6-5",
@@ -194,6 +194,30 @@
       "at": "2026-06-10",
       "artifact": "EXEC-066 — Template ships .excn/progress/ and .excn/runtime/ with .gitkeep; stamp-policy adds both to WORK_TRACKING_DIR_PREFIXES",
       "summary": "PASS — 0 violations. All stamp-contract checks hold: manifest exact (48 files, progress/.gitkeep and runtime/.gitkeep present, gitignore rename correct), idempotency (0 writes on second init, 48 skipped), all JSON parses, .excn/.gitignore contains exactly *_progress.json (16 bytes, no root .gitignore created), pack parity (both .gitkeep files ship in tarball as 0B entries, un-dotted gitignore ships, no dotted form), skip-safety (pre-existing file preserved), pointer wiring (all 7 sub-cases pass including oversized AGENTS.md warning). EXEC-066 specifics: progress/.gitkeep and runtime/.gitkeep stamped on init; neither appears in framework-version.json files map (work-tracking, not invariant); a *_progress.json placed in each home survives update byte-identical and is not listed in refreshed/drifted output; .excn/.gitignore unchanged at *_progress.json."
+    },
+    {
+      "step": "code_standards_fail",
+      "at": "2026-06-10",
+      "artifact": "EXEC-067 — hook-lib, load-report, gate-watch, viewer-server-rules, health-policy, cli.js + dogfood mirrors (Runtime Records move to .excn/runtime/)",
+      "summary": "FAIL — 1 violation. Hooks/Invocation logging: CODE_STANDARDS.md ## Hooks states the invocation record goes to .excn/hook-invocations_progress.json; the change routes it to .excn/runtime/hook-invocations_progress.json. The standard has not been updated to reflect ADR-0008. Fix: update CODE_STANDARDS.md via the alignment gate before or alongside landing EXEC-067, then resubmit."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-067 — hook-written Runtime Records move to .excn/runtime/; doctor heartbeats follow; PATH_WHITELIST gains .excn/runtime/*.json",
+      "summary": "PASS — 0 violations. All stamp-contract checks hold: manifest exact (48 files), idempotency (0 writes on second init), all JSON parse, .excn/.gitignore still exactly *_progress.json, no root .gitignore, pack parity (.excn/runtime/.gitkeep ships in tarball, gitignore un-dotted). Skip-safety and all pointer-wiring sub-cases pass. EXEC-067 runtime contract verified end-to-end: (1) load-report.js writes load_progress.json to .excn/runtime/ not .excn base; (2) gate-watch.js writes gate-watch_progress.json to .excn/runtime/ not .excn base; (3) hook-lib logInvocation writes hook-invocations_progress.json to .excn/runtime/ not .excn base; (4) zero *_progress.json at .excn base level after all hook firings; (5) doctor reports gate_reminders and load_reporting as 'firing' citing .excn/runtime/hook-invocations_progress.json; (6) help text references .excn/runtime/hook-invocations_progress.json; (7) INVOCATION_LOG_RELATIVE_PATH (hook-lib) and INVOCATION_LOG_PATH (health-policy) resolve to the same .excn/runtime/hook-invocations_progress.json; (8) viewer-server-rules RECORD_RELATIVE_PATH and health-policy viewer_server evidence both .excn/runtime/viewer-server_progress.json; (9) PATH_WHITELIST allows .excn/runtime/*.json and blocks path-traversal (.excn/runtime/../../../etc/passwd) and subdirectory paths (.excn/runtime/subdir/file.json); (10) gate-watch PROGRESS_FILE_PATTERN does not match runtime records (correct — depth-1 pattern)."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": ".excn/CODE_STANDARDS.md",
+      "summary": "PASS — 0 violations. One-token path update (.excn/hook-invocations_progress.json → .excn/runtime/hook-invocations_progress.json) in ## Hooks Invocation logging rule conforms to all Principles and project Philosophy. Change is minimal, tied to ADR-0008 (accepted 2026-06-10) and the code_standards_fail step_log entry for EXEC-067, and keeps the document in its declared pass/fail-rules-only shape."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-068 — src/template/.excn/schemas/verdict-ledger.schema.json (new) + sprint.schema.json step_log items now cross-ref verdict-ledger.schema.json#/$defs/entry",
+      "summary": "PASS — 0 violations. All stamp-contract checks hold: manifest exact (49 files, verdict-ledger.schema.json present, gitignore rename correct), idempotency (0 writes / 49 skipped on second init), all JSON including verdict-ledger.schema.json and sprint.schema.json parse, .excn/.gitignore exactly *_progress.json (no root .gitignore), pack parity (both new/updated schema files ship in tarball at template/.excn/schemas/), skip-safety (pre-existing file preserved without --force), pointer wiring (all sub-cases pass: neither-exists creates both, second init appends nothing, --force preserves pointer content, existing content byte-preserved with block appended once, user-deleted block re-appended, one-exists appends there only with no phantom second file, sentinel is visible text)."
     }
   ],
   "retrospective_notes": [
