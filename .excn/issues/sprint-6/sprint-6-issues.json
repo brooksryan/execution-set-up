@@ -151,15 +151,15 @@
       ]
     },
     {
-      "status": "open",
+      "status": "closed",
       "actionable_now": true,
       "prd": "PRD-009",
       "slice_type": "AFK",
       "root_cause": null,
-      "fix": null,
+      "fix": "PreToolUse deny guard (spawn-guard pattern, ADR-0008): a *_progress.json write outside .excn/progress/ and .excn/runtime/ is denied with a redirect naming both homes; default OFF, fail-safe, one invocation record per firing, toggle optional in hooks-config.schema.json. Commit e7f4cd5 (10 files). code-standards + package-qa PASS; 15-check payload simulation.",
       "related_tickets": [],
       "assigned_sprint": 6,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 6,
       "notes": null,
       "id": "EXEC-070",
       "title": "Progress-location deny guard: misfiled Progress Record writes are denied with a redirect",

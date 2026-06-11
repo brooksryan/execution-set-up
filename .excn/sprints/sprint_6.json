@@ -95,6 +95,17 @@
         "EXEC-068"
       ],
       "notes": "Commit f9f2af6 (4 files: verdict-ledger.schema.json new + sprint.schema.json + dogfood-root mirror of both). Gate: package-qa PASS, manifest 49 files (step_log). code-standards not run — EXEC-068's acceptance omits the code gates and the JS-focused rubric has nothing to evaluate in a JSON schema (flagged to Team Lead). PRD-009 slice 3. depends_on: none."
+    },
+    {
+      "id": "S6-6",
+      "type": "FEAT",
+      "title": "EXEC-070: progress-location deny guard — misfiled Progress Record writes denied with a redirect",
+      "owner": "builder",
+      "summary": "PreToolUse deny guard in the spawn-guard pattern (ADR-0008): when enabled, a *_progress.json write outside the two homes (.excn/progress/, .excn/runtime/) is denied with a redirect reason naming both homes + the writer-class rule; every other write passes. Default OFF, fail-safe on any error/malformed config/payload, one invocation record per firing. Toggle optional in hooks-config.schema.json (older configs stay valid, spawn_guard precedent). Location only — schema and content stay the gates' job. Src-First + dogfood mirror.",
+      "closes_issues": [
+        "EXEC-070"
+      ],
+      "notes": "Commit e7f4cd5 (10 files: progress-location-guard{,-rules}.js + settings.json + hooks.config.json toggle + hooks-config.schema.json, all dogfood-mirrored). Gates: code-standards PASS + package-qa PASS, manifest 51 files (step_log); 15-check payload simulation (deny/pass/fail-safe). Scope note: the guard's doctor card (HOOK_FEATURES in src/bin/health-policy.js) ships with EXEC-067 to avoid splitting that shared file across two blocked commits — not an EXEC-070 acceptance criterion. PRD-009 slice 5. depends_on: EXEC-066."
     }
   ],
   "in_progress": [],
@@ -120,17 +131,6 @@
         "EXEC-069"
       ],
       "notes": "PRD-009 slice 4. depends_on: EXEC-066, EXEC-067."
-    },
-    {
-      "id": "S6-6",
-      "type": "FEAT",
-      "title": "EXEC-070: progress-location deny guard — misfiled Progress Record writes denied with a redirect",
-      "owner": "builder",
-      "summary": "PreToolUse guard in the spawn-guard pattern denies a *_progress.json write outside .excn/progress/ and .excn/runtime/, redirect reason naming the right home. Rules/decision split, hooks.config toggle, every firing invocation-logged, fail-safe on any error. Location only — schema and content stay the gates' job. Src-First.",
-      "closes_issues": [
-        "EXEC-070"
-      ],
-      "notes": "PRD-009 slice 5. depends_on: EXEC-066."
     },
     {
       "id": "S6-8",
@@ -218,6 +218,18 @@
       "at": "2026-06-10",
       "artifact": "EXEC-068 — src/template/.excn/schemas/verdict-ledger.schema.json (new) + sprint.schema.json step_log items now cross-ref verdict-ledger.schema.json#/$defs/entry",
       "summary": "PASS — 0 violations. All stamp-contract checks hold: manifest exact (49 files, verdict-ledger.schema.json present, gitignore rename correct), idempotency (0 writes / 49 skipped on second init), all JSON including verdict-ledger.schema.json and sprint.schema.json parse, .excn/.gitignore exactly *_progress.json (no root .gitignore), pack parity (both new/updated schema files ship in tarball at template/.excn/schemas/), skip-safety (pre-existing file preserved without --force), pointer wiring (all sub-cases pass: neither-exists creates both, second init appends nothing, --force preserves pointer content, existing content byte-preserved with block appended once, user-deleted block re-appended, one-exists appends there only with no phantom second file, sentinel is visible text)."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-070 — src/template/.claude/hooks/{progress-location-guard,progress-location-guard-rules}.js + settings.json + .excn/hooks.config.json + .excn/schemas/hooks-config.schema.json + dogfood-root mirrors",
+      "summary": "PASS — 0 violations. All Structure, Commenting, and Hooks rules hold. Single responsibility: rootRelative/guard/main each do one job. Named constants: FEATURE, SCRIPT_NAME, HOOK_EVENT, PERMISSION_DENY, EDIT_TOOLS, RECORD_SUFFIX, RECORD_HOME_PREFIXES, PATH_PLACEHOLDER, DENY_REASON_TEMPLATE — no magic literals in logic. Data-out-of-logic: all literals live in the rules module. File headers and exported-function JSDoc complete and truthful. Hooks: logInvocation called unconditionally on every path (normal/disabled/noop/error) before process.exit(0); delegated to hook-lib; fail-safe intact."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-070 — two new stamped hook scripts (progress-location-guard.js + progress-location-guard-rules.js); settings.json PreToolUse second entry; hooks.config.json progress_location_guard toggle; hooks-config.schema.json optional property",
+      "summary": "PASS — 0 violations. All stamp-contract checks hold: manifest exact (51 files, both new hook files stamped, gitignore rename correct), idempotency (0 writes/51 skipped on second init, both pointers already-present), all JSON parses (settings.json, hooks.config.json, hooks-config.schema.json all parse clean), .excn/.gitignore exactly *_progress.json (no root .gitignore created), pack parity (both hook files ship in tarball at template/.claude/hooks/, settings.json + hooks.config.json + hooks-config.schema.json all present), skip-safety (pre-existing hook file preserved without --force). Schema validation: hooks.config.json validates against hooks-config.schema.json (progress_location_guard present-and-boolean is valid; old config WITHOUT the key also validates — it is optional/not-required). Guard behavior end-to-end with feature enabled: misfiled .excn/session_progress.json write denied (stdout permissionDecision deny, exit 0); write to .excn/progress/ passes (no output, exit 0); write to .excn/runtime/ passes (no output, exit 0); malformed payload fails safe (no output, exit 0); malformed config fails safe (no output, exit 0); feature disabled — misfiled write passes (no output, exit 0). Doctor exits 0, toggle config valid, progress_location_guard not listed in HOOK_FEATURES (expected per EXEC-070 scope). Pointer wiring all sub-cases pass."
     }
   ],
   "retrospective_notes": [
