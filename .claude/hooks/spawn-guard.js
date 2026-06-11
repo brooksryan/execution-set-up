@@ -15,7 +15,7 @@
 
 const path = require('path');
 const lib = require('./hook-lib');
-const { AGENT_TYPE_KEYS, TYPE_PLACEHOLDER, DENY_REASON_TEMPLATE } = require('./spawn-guard-rules');
+const { AGENT_TYPE_KEYS, TEAM_SPAWN_KEYS, TYPE_PLACEHOLDER, DENY_REASON_TEMPLATE } = require('./spawn-guard-rules');
 
 const FEATURE = 'spawn_guard';
 
@@ -46,13 +46,22 @@ function persistentTypes(projectRoot) {
 }
 
 /**
+ * Extract a spawn payload's tool_input object.
+ * @param {object} payload - the PreToolUse hook payload.
+ * @returns {object} the tool_input object, or an empty object when absent/non-object.
+ */
+function toolInputOf(payload) {
+  return payload.tool_input && typeof payload.tool_input === 'object' ? payload.tool_input : {};
+}
+
+/**
  * Pull the requested agent type from a spawn payload's tool_input.
  * @param {object} payload - the PreToolUse hook payload.
  * @returns {string|null} the requested type, or null when no candidate key carries
  * one (treated as not-a-guarded-spawn — pass).
  */
 function requestedType(payload) {
-  const toolInput = payload.tool_input && typeof payload.tool_input === 'object' ? payload.tool_input : {};
+  const toolInput = toolInputOf(payload);
   for (const key of AGENT_TYPE_KEYS) {
     if (typeof toolInput[key] === 'string' && toolInput[key] !== '') return toolInput[key];
   }
@@ -60,16 +69,31 @@ function requestedType(payload) {
 }
 
 /**
- * Decide this spawn: deny a configured persistent-Teammate type with the routing
- * reason, pass everything else.
+ * Is this a persistent-Teammate spawn into a team? True only when the payload carries
+ * a value for every TEAM_SPAWN_KEYS key (name AND team_name) — the legitimate rostered
+ * mechanism, which the guard allows even for a rostered type. A bare one-shot spawn
+ * carries neither and is not exempt.
+ * @param {object} payload - the PreToolUse hook payload.
+ * @returns {boolean} true when both team-spawn keys carry a non-empty string.
+ */
+function isTeamSpawn(payload) {
+  const toolInput = toolInputOf(payload);
+  return TEAM_SPAWN_KEYS.every((key) => typeof toolInput[key] === 'string' && toolInput[key] !== '');
+}
+
+/**
+ * Decide this spawn: deny a configured persistent-Teammate type spawned as a one-shot
+ * copy with the routing reason; pass everything else — including a rostered type
+ * spawned into a team (name + team_name), the legitimate persistent-Teammate mechanism.
  * @param {object} payload - the PreToolUse hook payload.
  * @param {string} projectRoot - the Instance root.
- * @returns {string} an invocation-log outcome: OUTCOME_OK when the deny was
- * emitted, OUTCOME_NOOP when the spawn passed (not a guarded type, or no list).
+ * @returns {string} an invocation-log outcome: OUTCOME_OK when the deny was emitted,
+ * OUTCOME_NOOP when the spawn passed (not a guarded type, no list, or a team spawn).
  */
 function guard(payload, projectRoot) {
   const type = requestedType(payload);
   if (type === null || !persistentTypes(projectRoot).includes(type)) return lib.OUTCOME_NOOP;
+  if (isTeamSpawn(payload)) return lib.OUTCOME_NOOP;
   lib.emit({
     hookSpecificOutput: {
       hookEventName: HOOK_EVENT,
