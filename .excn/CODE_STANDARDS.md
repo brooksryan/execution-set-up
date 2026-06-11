@@ -30,7 +30,7 @@ The rubric the `code-standards` Adherence Agent enforces on every `builder` and 
 
 ## Hooks
 
-- **Invocation logging.** Every script wired under `hooks` in `.claude/settings.json` appends exactly one invocation record to `.excn/hook-invocations_progress.json` before it exits, on every code path — normal, disabled, no-op, and error alike. The record has exactly the fields `ts` (ISO-8601 string), `script` (file basename), `event` (the hook event name), and `outcome` (one of `ok`, `disabled`, `noop`, `error`).
+- **Invocation logging.** Every script wired under `hooks` in `.claude/settings.json` appends exactly one invocation record to `.excn/runtime/hook-invocations_progress.json` before it exits, on every code path — normal, disabled, no-op, and error alike. The record has exactly the fields `ts` (ISO-8601 string), `script` (file basename), `event` (the hook event name), and `outcome` (one of `ok`, `disabled`, `noop`, `error`).
 - **Log via the shared helper.** The append goes through the single logging helper exported by `hook-lib.js` — no hook writes the log file directly.
 - **Logging never breaks fail-safe.** The helper catches its own failures internally; no error from the append may propagate past the hook's fail-safe guard (ADR-0006: hooks exit 0 silent on failure).
 
