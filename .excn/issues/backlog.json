@@ -189,6 +189,94 @@
       "assigned_sprint": null,
       "closed_in_sprint": null,
       "notes": "Surfaced 2026-06-10 scoping plugin publication, immediately after EXEC-073 removed the async-questions gate."
+    },
+    {
+      "id": "EXEC-075",
+      "title": "Stamped hooks break under host \"type\":\"module\" \u2014 ship template hooks as .cjs",
+      "status": "closed",
+      "severity": "P1",
+      "scope": [
+        "template",
+        "hooks"
+      ],
+      "classification": "macro",
+      "actionable_now": true,
+      "description": "All hooks in src/template/.claude/hooks/ are CommonJS .js files. When a host project's package.json declares \"type\":\"module\" (observed live in evo-gnit), Node treats every .js hook as ESM and each throws ReferenceError: require is not defined in ES module scope \u2014 gate-watch, spawn-guard, message-nudge, viewer-server, load-report, hook-lib, and every rules file silently or visibly fail. Rename the stamped hook and rules files to .cjs, update intra-hook require paths (e.g. require('./hook-lib') \u2192 './hook-lib.cjs'), and update every hook command in src/template/.claude/settings.json to point at the .cjs filenames. The Scaffolder must stamp the .cjs layout for new Instances.",
+      "prd": null,
+      "acceptance_criteria": [
+        "Every file in src/template/.claude/hooks/ uses the .cjs extension; no .js hook or rules file remains in the template.",
+        "All intra-hook require() paths resolve to the .cjs filenames.",
+        "src/template/.claude/settings.json hook commands reference the .cjs paths.",
+        "A scaffold stamped into a temp project whose package.json has \"type\":\"module\" runs every hook (PostToolUse, Stop, spawn-guard, viewer-server) without an ESM ReferenceError.",
+        "package-qa stamp-contract check passes on the new manifest."
+      ],
+      "slice_type": "AFK",
+      "root_cause": "Stamped hooks were CommonJS .js; host package.json \"type\":\"module\" made Node parse them as ESM, so require() threw.",
+      "fix": "Template hooks renamed to .cjs with settings.json/requires/health-policy updated; landed in commit c624700 after code-standards and package-qa PASS.",
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": null,
+      "closed_in_sprint": null,
+      "notes": null
+    },
+    {
+      "id": "EXEC-076",
+      "title": "Migrate already-stamped Instances to the .cjs hook layout",
+      "status": "closed",
+      "severity": "P1",
+      "scope": [
+        "migrate",
+        "hooks"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "Instances stamped before EXEC-075 (e.g. evo-gnit) carry the broken .js hooks and a settings.json pointing at them; under host \"type\":\"module\" every hook fails at require(). Extend migrate-policy so the Migrate command renames the stamped hook/rules files to .cjs, rewrites the settings.json hook commands, and removes the stale .js copies. The health check should flag an Instance still on the .js layout.",
+      "prd": null,
+      "acceptance_criteria": [
+        "Running the Migrate command on an Instance stamped with the old .js hooks leaves it on the .cjs layout: hooks renamed, settings.json commands updated, no stale .js hook files.",
+        "Migration is idempotent \u2014 a second run is a no-op.",
+        "Health check reports the .js layout as decayed/migration-due.",
+        "Verified end-to-end on evo-gnit: Stop hook runs without the ESM ReferenceError."
+      ],
+      "slice_type": "AFK",
+      "root_cause": "Instances stamped before EXEC-075 carry CommonJS .js hooks that break under host \"type\":\"module\".",
+      "fix": "migrate renames legacy .js hooks to .cjs (hash-guarded, idempotent, marker re-keying), rewrites settings.json commands and sibling requires; doctor flags .js layout MIGRATION-DUE. Landed in commit 7b54a6e after code-standards and package-qa PASS; verified live on evo-gnit.",
+      "depends_on": [
+        "EXEC-075"
+      ],
+      "related_tickets": [],
+      "assigned_sprint": null,
+      "closed_in_sprint": null,
+      "notes": null
+    },
+    {
+      "id": "EXEC-077",
+      "title": "Sprint-close team-teardown reminder hook",
+      "status": "open",
+      "severity": "P3",
+      "scope": [
+        "hooks",
+        "template"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "Persistent Teammates spawned for a sprint outlive sprint close, bloating context with idle-notification traffic and stale team/task dirs (~/.claude/teams, ~/.claude/tasks). Add a remind-only hook (gate-watch pattern, fail-safe exit 0) that fires when an edit closes a sprint \u2014 Write/Edit on .excn/sprints/sprint_<N>.json setting status to closed, or an equivalently clear close trigger \u2014 and injects a reminder to tear the team down: shutdown_request each Teammate, then TeamDelete. Remind-only; never tears down itself.",
+      "prd": null,
+      "acceptance_criteria": [
+        "A hook detects a sprint-close edit (sprint JSON status flipped to closed, or an equivalently unambiguous trigger) and injects a teardown reminder naming the steps: shutdown_request each persistent Teammate, await responses, TeamDelete.",
+        "Remind-only: the hook performs no teardown and never blocks more than once (gate-watch stop_hook_active pattern).",
+        "Fail-safe: missing/malformed config or payload exits 0 with no output.",
+        "No reminder fires on sprint edits that do not close the sprint.",
+        "Hook ships as .cjs in the template, logs invocations via hook-lib, and passes code-standards + package-qa gates."
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": null,
+      "closed_in_sprint": null,
+      "notes": null
     }
   ]
 }
