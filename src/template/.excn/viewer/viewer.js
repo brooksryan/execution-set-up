@@ -1,6 +1,6 @@
 'use strict';
 
-// .excn status viewer — client-side render of the live sprint + backlog.
+// .excn status viewer — client-side render of a selectable sprint + backlog.
 //
 // Contract: READ-ONLY. Fetches the work-tracking JSON under .excn/ and renders
 // it; never writes. No build step and no dependencies — plain DOM. Must run over
@@ -8,13 +8,19 @@
 // with a serve instruction rather than rendering a half-empty board.
 //
 // Sprint discovery without a directory listing: the browser cannot list .excn/,
-// so we probe sprint files by number from 1 upward until a gap, then render the
-// highest-numbered sprint whose status is "active" (the live sprint, per
-// EXEC-036). The sprint record itself carries the shipped/in_progress/not_shipped
-// lanes, so the other fetches are the backlog and the optional per-Teammate
-// load records (EXEC-045). A 404 ends sprint probing; any other fetch failure
-// aborts loudly — except the optional load file, whose absence means the
-// load-reporting feature is off.
+// so we probe sprint files by number from 1 upward until a gap (EXEC-036), and
+// keep every one. A switcher (EXEC-071) lists them newest-first; the active
+// sprint (highest-N "active") is selected by default, falling back to the newest
+// when none is active. Switching re-renders from the already-probed records —
+// the page is a load-time snapshot, matching the no-poll behaviour it always had.
+// Selecting a closed sprint also renders its decisions, retrospective notes, and
+// step_log gate verdicts. The selection round-trips through the History API so
+// browser back/forward and a ?sprint=N URL both work.
+//
+// The sprint record itself carries the shipped/in_progress/not_shipped lanes, so
+// the other fetches are the backlog and the optional per-Teammate load records
+// (EXEC-045). A 404 ends sprint probing; any other fetch failure aborts loudly —
+// except the optional load file, whose absence means load reporting is off.
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -47,12 +53,27 @@ const HTTP_NOT_FOUND = 404;
 // Severity that warrants visual emphasis on a backlog card.
 const SEVERITY_HIGH = 'P1';
 
+// Query-string key the switcher reads on load and writes on each selection, so a
+// ?sprint=N URL deep-links to one sprint and back/forward navigate the history.
+const SPRINT_QUERY_PARAM = 'sprint';
+
 const ELEMENT_IDS = {
   sprintLine: 'sprint-line',
+  switcher: 'switcher',
+  sprintSelect: 'sprint-select',
+  detail: 'sprint-detail',
   loadError: 'load-error',
   board: 'board',
-  footerNote: 'footer-note',
 };
+
+// Sprint-detail blocks (EXEC-071), in render order. `field` is the sprint-record
+// array each renders; `build` names the per-entry card builder (resolved in
+// renderDetail, since the builders are declared below the constants section).
+const DETAIL_BLOCKS = [
+  { field: 'decisions', build: 'decision', block: 'block-decisions', body: 'detail-decisions', count: 'count-decisions' },
+  { field: 'retrospective_notes', build: 'retro', block: 'block-retro', body: 'detail-retro', count: 'count-retro' },
+  { field: 'step_log', build: 'stepLog', block: 'block-steplog', body: 'detail-steplog', count: 'count-steplog' },
+];
 
 // Lane id → the sprint work-item array it renders.
 const SPRINT_LANES = [
@@ -69,6 +90,19 @@ const LOAD_PANEL = { panel: 'load-panel', note: 'load-note', body: 'load-body', 
 const ONE_MINUTE_MS = 60 * 1000;
 const ONE_HOUR_MS = 60 * ONE_MINUTE_MS;
 const ONE_DAY_MS = 24 * ONE_HOUR_MS;
+
+// ---------------------------------------------------------------------------
+// Module state
+// ---------------------------------------------------------------------------
+
+// The probed sprint records, keyed by sprint_id, populated once at load. The
+// switcher and History handlers re-render from this map without refetching —
+// the page is a load-time snapshot, so switching never hits the network again.
+const sprintsById = new Map();
+
+// The default sprint id (highest "active", else newest), resolved once at load.
+// popstate and a bare or unknown ?sprint= URL fall back to it.
+let defaultSprintId = null;
 
 // ---------------------------------------------------------------------------
 // Fetch helpers (fail-closed)
@@ -129,24 +163,38 @@ async function fetchOptionalJson(url) {
 // ---------------------------------------------------------------------------
 
 /**
- * Probe sprint files from 1 upward and return the live sprint record.
- * Probing stops at the first missing number; the live sprint is the
- * highest-numbered one whose status is "active".
- * @returns {Promise<object|null>} the active sprint record, or null if none.
+ * Probe sprint files from 1 upward and return every one found, ascending.
+ * Probing stops at the first missing number (the contiguous sequence ends).
+ * @returns {Promise<Array<object>>} sprint records ordered by sprint_id ascending
+ *   (empty when no sprint file exists yet).
  * @throws {Error} if a sprint file exists but cannot be fetched or parsed.
  */
-async function loadLiveSprint() {
-  let live = null;
+async function probeSprints() {
+  const sprints = [];
   for (let n = 1; n <= MAX_SPRINT_PROBE; n += 1) {
     const sprint = await fetchOptionalJson(SPRINT_PATH(n));
     if (sprint === null) {
       break; // First gap ends the contiguous sprint sequence.
     }
+    sprints.push(sprint);
+  }
+  return sprints;
+}
+
+/**
+ * Pick the sprint to show by default: the highest-numbered "active" sprint (the
+ * live one), or the newest sprint when none is active.
+ * @param {Array<object>} sprints - probed sprint records, ascending by sprint_id.
+ * @returns {object} the sprint to select by default (caller guarantees non-empty).
+ */
+function defaultSprint(sprints) {
+  let active = null;
+  for (const sprint of sprints) {
     if (sprint.status === STATUS_ACTIVE) {
-      live = sprint; // Keep the highest active seen; numbering ascends.
+      active = sprint; // Keep the highest active seen; numbering ascends.
     }
   }
-  return live;
+  return active === null ? sprints[sprints.length - 1] : active;
 }
 
 /**
@@ -269,6 +317,7 @@ function renderBacklogIssue(issue) {
  */
 function fillLane(bodyId, countId, items, build) {
   const body = byId(bodyId);
+  body.replaceChildren(); // Idempotent: clear any prior render before refilling on a switch.
   byId(countId).textContent = String(items.length);
   if (items.length === 0) {
     body.appendChild(elementWithText('p', 'empty', 'none'));
@@ -280,20 +329,129 @@ function fillLane(bodyId, countId, items, build) {
 }
 
 /**
- * Render the whole board from the live sprint and backlog.
- * @param {object} sprint - the active sprint record.
+ * Render the backlog lane. The backlog is global (current open issues), not
+ * sprint-scoped, so it renders once at load and does not change when the
+ * sprint switcher selects a different sprint.
  * @param {Array<object>} backlog - open backlog issues.
  */
-function renderBoard(sprint, backlog) {
-  byId(ELEMENT_IDS.sprintLine).textContent =
-    `Sprint ${sprint.sprint_id}: ${sprint.name} — started ${sprint.dates.start}`;
+function renderBacklogLane(backlog) {
+  fillLane(BACKLOG_LANE.body, BACKLOG_LANE.count, backlog, renderBacklogIssue);
+}
 
+/**
+ * Render one sprint's lanes and detail: the sprint line, the three work-item
+ * lanes, and the decisions / retrospective / step_log detail blocks. Idempotent
+ * — safe to call repeatedly as the switcher changes selection.
+ * @param {object} sprint - the sprint record to render.
+ */
+function renderSprint(sprint) {
+  byId(ELEMENT_IDS.sprintLine).textContent = sprintLineText(sprint);
   for (const lane of SPRINT_LANES) {
     fillLane(lane.body, lane.count, sprint[lane.field], renderWorkItem);
   }
-  fillLane(BACKLOG_LANE.body, BACKLOG_LANE.count, backlog, renderBacklogIssue);
+  renderDetail(sprint);
+}
 
-  byId(ELEMENT_IDS.board).hidden = false;
+/**
+ * Phrase the sprint line: id, name, status, and the date span.
+ * @param {object} sprint - the sprint record.
+ * @returns {string} the one-line summary shown under the page title.
+ */
+function sprintLineText(sprint) {
+  const span = sprint.dates.end ? `${sprint.dates.start} – ${sprint.dates.end}` : `started ${sprint.dates.start}`;
+  return `Sprint ${sprint.sprint_id}: ${sprint.name} — ${sprint.status}, ${span}`;
+}
+
+/**
+ * Build a card element for a sprint decision.
+ * @param {object} decision - a decision ({title, summary}).
+ * @returns {HTMLElement} the card.
+ */
+function renderDecision(decision) {
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.appendChild(elementWithText('h3', 'card-title', decision.title));
+  card.appendChild(elementWithText('p', 'card-summary', decision.summary));
+  return card;
+}
+
+/**
+ * Build a card element for a retrospective note.
+ * @param {object} note - a retrospective note ({title, body}).
+ * @returns {HTMLElement} the card.
+ */
+function renderRetroNote(note) {
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.appendChild(elementWithText('h3', 'card-title', note.title));
+  card.appendChild(elementWithText('p', 'card-summary', note.body));
+  return card;
+}
+
+/**
+ * Build a card element for a step_log gate verdict.
+ * @param {object} entry - a step_log entry ({step, at, artifact, summary}).
+ * @returns {HTMLElement} the card.
+ */
+function renderStepLogEntry(entry) {
+  const card = document.createElement('article');
+  card.className = 'card';
+
+  const head = document.createElement('div');
+  head.className = 'card-head';
+  head.appendChild(spanWithText('card-id', entry.step));
+  head.appendChild(spanWithText('tag', entry.at));
+  card.appendChild(head);
+
+  card.appendChild(elementWithText('p', 'card-meta', `artifact: ${entry.artifact}`));
+  card.appendChild(elementWithText('p', 'card-summary', entry.summary));
+  return card;
+}
+
+// Resolve a DETAIL_BLOCKS `build` key to its card builder. Kept beside the
+// builders rather than in the constants block so the constants stay pure data.
+const DETAIL_BUILDERS = {
+  decision: renderDecision,
+  retro: renderRetroNote,
+  stepLog: renderStepLogEntry,
+};
+
+/**
+ * Render the sprint-detail region: decisions, retrospective notes, and step_log
+ * verdicts for the selected sprint. Each block is shown only when the sprint has
+ * entries for it; the region is hidden when every block is empty.
+ * @param {object} sprint - the selected sprint record.
+ */
+function renderDetail(sprint) {
+  let anyShown = false;
+  for (const blockCfg of DETAIL_BLOCKS) {
+    const items = Array.isArray(sprint[blockCfg.field]) ? sprint[blockCfg.field] : [];
+    const shown = fillDetailBlock(blockCfg, items, DETAIL_BUILDERS[blockCfg.build]);
+    anyShown = anyShown || shown;
+  }
+  byId(ELEMENT_IDS.detail).hidden = !anyShown;
+}
+
+/**
+ * Fill one detail block, or hide it when empty. Idempotent across re-renders.
+ * @param {object} blockCfg - a DETAIL_BLOCKS entry ({block, body, count, …}).
+ * @param {Array<object>} items - the entries to render.
+ * @param {(item: object) => HTMLElement} build - card builder for one entry.
+ * @returns {boolean} true when the block has content and is shown.
+ */
+function fillDetailBlock(blockCfg, items, build) {
+  const body = byId(blockCfg.body);
+  body.replaceChildren(); // Idempotent: clear any prior render before refilling on a switch.
+  if (items.length === 0) {
+    byId(blockCfg.block).hidden = true;
+    return false;
+  }
+  byId(blockCfg.count).textContent = String(items.length);
+  for (const item of items) {
+    body.appendChild(build(item));
+  }
+  byId(blockCfg.block).hidden = false;
+  return true;
 }
 
 /**
@@ -436,6 +594,85 @@ function showLoadError(detail) {
 }
 
 // ---------------------------------------------------------------------------
+// Sprint switcher (History API)
+// ---------------------------------------------------------------------------
+
+/**
+ * Populate the switcher <select> with one option per probed sprint, newest
+ * first, and reveal it. The option value is the sprint_id.
+ * @param {Array<object>} sprints - probed sprint records, ascending by sprint_id.
+ */
+function buildSwitcher(sprints) {
+  const select = byId(ELEMENT_IDS.sprintSelect);
+  select.replaceChildren();
+  // Newest first: walk the ascending probe order in reverse.
+  for (let i = sprints.length - 1; i >= 0; i -= 1) {
+    const sprint = sprints[i];
+    const option = document.createElement('option');
+    option.value = String(sprint.sprint_id);
+    option.textContent = `Sprint ${sprint.sprint_id} — ${sprint.name} (${sprint.status})`;
+    select.appendChild(option);
+  }
+  byId(ELEMENT_IDS.switcher).hidden = false;
+}
+
+/**
+ * Read the sprint id from the URL query string when it names a probed sprint.
+ * popstate does not fire on initial load, so the initial selection comes from
+ * location.search (so refresh and deep links work), not from history state.
+ * @returns {number|null} the requested sprint_id when present and known, else null.
+ */
+function sprintIdFromUrl() {
+  const raw = new URLSearchParams(window.location.search).get(SPRINT_QUERY_PARAM);
+  if (raw === null) {
+    return null;
+  }
+  const id = Number.parseInt(raw, 10);
+  return sprintsById.has(id) ? id : null;
+}
+
+/**
+ * Render the named sprint and sync the switcher value. Optionally push a history
+ * entry so back/forward navigate selections and the URL carries ?sprint=N.
+ * @param {number} sprintId - a sprint_id known to sprintsById.
+ * @param {boolean} pushHistory - true on a user switch (push a history entry);
+ *   false on the initial render and on popstate (history already moved).
+ * @throws {Error} if sprintId names no probed sprint (a caller contract break).
+ */
+function selectSprint(sprintId, pushHistory) {
+  const sprint = sprintsById.get(sprintId);
+  if (sprint === undefined) {
+    throw new Error(`no probed sprint with id ${sprintId}`);
+  }
+  byId(ELEMENT_IDS.sprintSelect).value = String(sprintId);
+  renderSprint(sprint);
+  if (pushHistory) {
+    window.history.pushState({ sprintId }, '', `?${SPRINT_QUERY_PARAM}=${sprintId}`);
+  }
+}
+
+/**
+ * Switcher change handler: render the chosen sprint and push a history entry.
+ */
+function onSwitcherChange() {
+  const sprintId = Number.parseInt(byId(ELEMENT_IDS.sprintSelect).value, 10);
+  selectSprint(sprintId, true);
+}
+
+/**
+ * popstate handler: re-render the sprint named by the history state, then the
+ * URL, then the default — whichever is the first known sprint. History already
+ * moved, so this never pushes a new entry.
+ * @param {PopStateEvent} event - the popstate event.
+ */
+function onPopState(event) {
+  const fromState = event.state && typeof event.state.sprintId === 'number' ? event.state.sprintId : null;
+  const candidate = fromState !== null ? fromState : sprintIdFromUrl();
+  const sprintId = candidate !== null && sprintsById.has(candidate) ? candidate : defaultSprintId;
+  selectSprint(sprintId, false);
+}
+
+// ---------------------------------------------------------------------------
 // Public surface
 // ---------------------------------------------------------------------------
 
@@ -456,22 +693,32 @@ async function initLoadPanel() {
 }
 
 /**
- * Entry point: load the live sprint + backlog and render, or fail closed.
- * Any fetch/parse failure shows the error surface instead of a partial board.
- * The load panel renders independently — its data is optional telemetry.
+ * Entry point: probe every sprint, render the backlog, then render the selected
+ * sprint (URL ?sprint=N if known, else the default) and wire the switcher and
+ * History navigation. Any fetch/parse failure shows the error surface instead of
+ * a partial board. The load panel renders independently — it is optional telemetry.
  */
 async function init() {
   try {
-    const sprint = await loadLiveSprint();
-    if (sprint === null) {
-      byId(ELEMENT_IDS.sprintLine).textContent = 'No active sprint.';
-      const backlog = await loadBacklog();
-      fillLane(BACKLOG_LANE.body, BACKLOG_LANE.count, backlog, renderBacklogIssue);
+    const sprints = await probeSprints();
+    const backlog = await loadBacklog();
+    renderBacklogLane(backlog);
+    if (sprints.length === 0) {
+      byId(ELEMENT_IDS.sprintLine).textContent = 'No sprints yet.';
       byId(ELEMENT_IDS.board).hidden = false;
-    } else {
-      const backlog = await loadBacklog();
-      renderBoard(sprint, backlog);
+      await initLoadPanel();
+      return;
     }
+    for (const sprint of sprints) {
+      sprintsById.set(sprint.sprint_id, sprint);
+    }
+    defaultSprintId = defaultSprint(sprints).sprint_id;
+    buildSwitcher(sprints);
+    const initialId = sprintIdFromUrl();
+    selectSprint(initialId === null ? defaultSprintId : initialId, false);
+    byId(ELEMENT_IDS.sprintSelect).addEventListener('change', onSwitcherChange);
+    window.addEventListener('popstate', onPopState);
+    byId(ELEMENT_IDS.board).hidden = false;
     await initLoadPanel();
   } catch (err) {
     showLoadError(err.message);

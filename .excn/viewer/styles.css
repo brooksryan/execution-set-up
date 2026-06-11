@@ -16,6 +16,7 @@
   --not-shipped: #b26a00;
   --backlog: #5b5b62;
   --load: #6a1b9a;
+  --detail: #00695c;
   --error-bg: #fdecea;
   --error-ink: #8a1c12;
   --radius: 8px;
@@ -52,6 +53,31 @@ body {
   margin: 4px 0 0;
   color: var(--ink-muted);
   font-size: 0.95rem;
+}
+
+/* Sprint switcher (EXEC-071) — sits under the subtitle in the header. */
+.switcher {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.switcher-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+
+.switcher-select {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
 
 .load-error {
@@ -192,6 +218,30 @@ body {
   font-size: 0.82rem;
   color: var(--ink-muted);
   font-style: italic;
+}
+
+/* Sprint-detail region (EXEC-071) — full-width blocks below the board for the
+   selected sprint's decisions, retrospective notes, and step_log verdicts. */
+.detail {
+  max-width: var(--maxwidth);
+  margin: var(--gap) auto 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap);
+}
+
+.detail-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--detail);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* Teammate-load panel (EXEC-045) — same surface treatment as a lane, but a

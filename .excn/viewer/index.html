@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <!--
   .excn status viewer — at-a-glance team status over the work-tracking JSON.
-  Contract: read-only render of the live sprint (highest-N "active"), the
-  backlog, and per-Teammate load (optional load_progress.json, EXEC-045).
-  No build step; viewer.js fetches the .excn JSON client-side. Must be
-  served over http(s) — file:// blocks fetch() of sibling files (see README.md).
+  Contract: read-only render of a selectable sprint (the switcher lists every
+  probed sprint, active default; a closed sprint also shows its decisions,
+  retrospective notes, and step_log verdicts), the backlog, and per-Teammate
+  load (optional load_progress.json, EXEC-045). No build step; viewer.js fetches
+  the .excn JSON client-side. Must be served over http(s) — file:// blocks
+  fetch() of sibling files (see README.md).
 -->
 <html lang="en">
   <head>
@@ -19,6 +21,13 @@
     <header class="page-header">
       <h1>.excn status</h1>
       <p class="subtitle" id="sprint-line">Loading…</p>
+      <!-- Sprint switcher (EXEC-071): populated by viewer.js from the probed
+           sprint files, newest first, active sprint selected by default.
+           Hidden until there is at least one sprint to list. -->
+      <div class="switcher" id="switcher" hidden>
+        <label class="switcher-label" for="sprint-select">View sprint</label>
+        <select class="switcher-select" id="sprint-select"></select>
+      </div>
     </header>
 
     <!-- Surfaced when the JSON cannot be fetched (almost always: opened over file://). -->
@@ -45,6 +54,28 @@
         <div class="lane-body" id="lane-backlog"></div>
       </section>
     </main>
+
+    <!-- Sprint detail (EXEC-071): the selected sprint's decisions, retrospective
+         notes, and step_log gate verdicts. Each block is shown only when the
+         selected sprint carries entries for it (a closed sprint always does;
+         the active sprint shows whatever has accrued). The region itself is
+         hidden when no block has content. -->
+    <section id="sprint-detail" class="detail" hidden>
+      <section class="detail-block" id="block-decisions" hidden>
+        <h2 class="lane-title">Decisions <span class="count" id="count-decisions">0</span></h2>
+        <div class="detail-body" id="detail-decisions"></div>
+      </section>
+
+      <section class="detail-block" id="block-retro" hidden>
+        <h2 class="lane-title">Retrospective&nbsp;notes <span class="count" id="count-retro">0</span></h2>
+        <div class="detail-body" id="detail-retro"></div>
+      </section>
+
+      <section class="detail-block" id="block-steplog" hidden>
+        <h2 class="lane-title">Gate&nbsp;verdicts <span class="count" id="count-steplog">0</span></h2>
+        <div class="detail-body" id="detail-steplog"></div>
+      </section>
+    </section>
 
     <!-- Per-Teammate load (EXEC-045): rendered from .excn/load_progress.json.
          The file is optional — absent means load reporting is off, and the

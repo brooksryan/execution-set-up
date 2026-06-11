@@ -6,8 +6,13 @@ writes the JSON.
 
 ## What it shows
 
-- The **live sprint** (the highest-numbered `sprint_N.json` with status
-  `active`): its **Shipped / In progress / Not shipped** work items.
+- A **sprint switcher** over every probed `sprint_N.json`, newest first. The
+  **live sprint** (highest-numbered with status `active`, else the newest) is
+  selected by default; the selection round-trips through the URL (`?sprint=N`)
+  and browser back/forward.
+- The selected sprint's **Shipped / In progress / Not shipped** work items, plus
+  — for a closed sprint — its **Decisions**, **Retrospective notes**, and
+  **Gate verdicts** (`step_log`).
 - The open **Backlog** (`.excn/issues/backlog.json`).
 
 All sourced from the JSON — no manual data entry.
@@ -30,7 +35,7 @@ and the one command above — it fails closed rather than rendering a blank boar
 
 ## Files
 
-- `index.html` — page skeleton and the four status lanes.
+- `index.html` — page skeleton, the sprint switcher, the four status lanes, and the sprint-detail blocks.
 - `styles.css` — all presentation; system fonts, no web-font fetch.
 - `viewer.js` — fetches and renders the JSON; no dependencies, no build step.
 
