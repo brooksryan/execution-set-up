@@ -35,6 +35,12 @@ const {
   RUNTIME_HOME,
   LEGACY_RECORD_DIR,
   MIGRATION_ID,
+  HOOK_DIR,
+  HOOK_SETTINGS_FILE,
+  CJS_HOOK_EXTENSION,
+  HOOK_CJS_MIGRATION_ID,
+  HOOK_CONTENT_REWRITES,
+  HOOK_COMMAND_REWRITE,
 } = require('./migrate-policy');
 const {
   HOOK_FEATURES,
@@ -43,6 +49,7 @@ const {
   HOOKS_DIR,
   HOOKS_CONFIG_PATH,
   HOOKS_CONFIG_SCHEMA_PATH,
+  LEGACY_HOOK_EXTENSION,
   HEARTBEAT_FRESH_MS,
   VIEWER_HEALTH_HOST,
   VIEWER_HEALTH_PATH,
@@ -493,6 +500,13 @@ async function doctor(args) {
       : `record layout: ADR-0008 homes (no records at the ${LEGACY_RECORD_DIR} base)`
   );
 
+  const legacyHooks = legacyHookFiles(target);
+  lines.push(
+    legacyHooks.length > 0
+      ? `hook layout: MIGRATION-DUE — ${legacyHooks.length} hook(s) still on the .js layout (${legacyHooks.join(', ')}); a host package.json with "type":"module" mis-loads these as ESM. Run \`to-execution migrate\` to move them to .cjs (EXEC-076)`
+      : 'hook layout: .cjs (CommonJS-safe under "type":"module")'
+  );
+
   // Toggles are read straight from the file even when schema-invalid: the hooks
   // themselves fail safe to disabled in that case, and the per-feature verdict
   // below carries the broken-config reason instead of guessing intent.
@@ -536,7 +550,7 @@ function printUsage() {
       '  npx to-execution init [target]   stamp template/ into target (default: cwd)',
       '  npx to-execution init --force    overwrite existing files',
       '  npx to-execution update [target] re-stamp invariant files at the installed version',
-      '  npx to-execution migrate [target] relocate legacy *_progress.json records into their .excn homes',
+      '  npx to-execution migrate [target] relocate legacy records and move .js hooks to .cjs',
       '  npx to-execution doctor [target] report per-feature hook health and outdated status',
       '',
       'init stamps the .excn/ namespace; .excn/.gitignore keeps per-session *_progress.json out of git.',
@@ -544,8 +558,10 @@ function printUsage() {
       'update refreshes invariant files only: variant (grilled) files and work-tracking state',
       'are never touched, and a locally drifted invariant file is reported, not overwritten.',
       'migrate relocates legacy *_progress.json records into .excn/progress/ (agent/gate-written)',
-      'and .excn/runtime/ (hook-written) by writer class — location only, idempotent, content never',
-      'rewritten; doctor flags the legacy flat layout and names this command (ADR-0008).',
+      'and .excn/runtime/ (hook-written) by writer class (ADR-0008), and moves pre-EXEC-075 .js hooks',
+      'to .cjs so a host "type":"module" package.json cannot mis-load them as ESM. Idempotent; only',
+      'hooks byte-identical to their stamped form are renamed — locally modified hooks are reported,',
+      'never clobbered. doctor flags both legacy layouts and names this command.',
       'init wires a pointer block into existing CLAUDE.md / AGENTS.md (append-only,',
       'even under --force; both created if neither exists).',
       'init never overwrites an existing manifest file unless --force.',
@@ -757,14 +773,119 @@ function legacyRecords(target) {
 }
 
 /**
+ * List the legacy-layout hook files: scripts in the hooks dir still carrying the
+ * pre-EXEC-075 .js extension. Used by migrate to relocate them and by doctor to flag
+ * an Instance as migration-due. The .cjs files beside them are already-migrated, so the
+ * scan filters on the legacy extension only.
+ * @param {string} target - absolute Instance root.
+ * @returns {string[]} legacy hook basenames (empty when none or the dir is absent).
+ */
+function legacyHookFiles(target) {
+  try {
+    return fs
+      .readdirSync(path.join(target, HOOK_DIR), { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith(LEGACY_HOOK_EXTENSION))
+      .map((entry) => entry.name);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Apply the hook content-reference rewrites (migrate-policy) to a hook's text: fix the
+ * sibling references that a .js → .cjs rename would otherwise break (extensionless
+ * relative requires and the spawned-daemon path). Each rewrite is idempotent.
+ * @param {string} text - the hook file's UTF-8 content.
+ * @returns {string} the content with sibling references repointed at .cjs.
+ */
+function rewriteHookReferences(text) {
+  return HOOK_CONTENT_REWRITES.reduce(
+    (acc, { pattern, replacement }) => acc.replace(new RegExp(pattern, 'g'), replacement),
+    text
+  );
+}
+
+/**
+ * Migrate an Instance's hook layout from .js to .cjs (EXEC-076). For each legacy hook
+ * whose content is byte-identical to its recorded stamped-form hash (an unmodified
+ * framework hook), write the .cjs file with sibling references repointed, remove the
+ * .js copy, and re-key the marker entry. A hook with no marker record (untracked) or
+ * one that differs from its recorded hash (locally edited) is left untouched and
+ * reported, never clobbered. Then repoint the settings.json hook commands at the .cjs
+ * paths (surgical substring rewrite; other settings untouched). Idempotent: once no .js
+ * hooks remain and settings already name .cjs paths, a re-run changes nothing. The
+ * marker is rewritten (preserving its recorded framework version — migrate is not an
+ * update) only when something moved.
+ * @param {string} target - absolute Instance root.
+ * @returns {{migrated: string[], skipped: string[], settingsRewritten: boolean, markerMissing: boolean}}
+ */
+function migrateHookLayout(target) {
+  const result = { migrated: [], skipped: [], settingsRewritten: false, markerMissing: false };
+
+  let marker = null;
+  try {
+    marker = JSON.parse(fs.readFileSync(path.join(target, VERSION_MARKER_PATH), 'utf8'));
+  } catch {
+    marker = null;
+  }
+  const recordedHashes = (marker && marker.files) || {};
+  const nextHashes = { ...recordedHashes };
+
+  for (const name of legacyHookFiles(target)) {
+    const jsPosix = `${HOOK_DIR}/${name}`;
+    const jsPath = path.join(target, HOOK_DIR, name);
+    const content = fs.readFileSync(jsPath);
+    const recordedHash = recordedHashes[jsPosix];
+    if (recordedHash === undefined) {
+      result.skipped.push(`${name} (untracked — not a recorded framework hook; left in place)`);
+      continue;
+    }
+    if (recordedHash !== sha256(content)) {
+      result.skipped.push(`${name} (locally modified — differs from its stamped form; left in place)`);
+      continue;
+    }
+    const cjsName = `${name.slice(0, -LEGACY_HOOK_EXTENSION.length)}${CJS_HOOK_EXTENSION}`;
+    const cjsPosix = `${HOOK_DIR}/${cjsName}`;
+    const rewritten = rewriteHookReferences(content.toString('utf8'));
+    fs.writeFileSync(path.join(target, HOOK_DIR, cjsName), rewritten);
+    fs.rmSync(jsPath);
+    delete nextHashes[jsPosix];
+    nextHashes[cjsPosix] = sha256(rewritten);
+    result.migrated.push(`${name} → ${cjsName}`);
+  }
+
+  // Repoint settings.json hook commands. Done whatever the hook outcome: an Instance
+  // part-migrated by an interrupted run still needs its commands aligned. The marker's
+  // settings hash is left as-is (not re-anchored) so a later `update` still classifies
+  // a locally customized settings.json correctly rather than silently overwriting it.
+  const settingsPath = path.join(target, HOOK_SETTINGS_FILE);
+  if (fs.existsSync(settingsPath)) {
+    const before = fs.readFileSync(settingsPath, 'utf8');
+    const after = before.replace(new RegExp(HOOK_COMMAND_REWRITE.pattern, 'g'), HOOK_COMMAND_REWRITE.replacement);
+    if (after !== before) {
+      fs.writeFileSync(settingsPath, after);
+      result.settingsRewritten = true;
+    }
+  }
+
+  if (!marker) {
+    result.markerMissing = true;
+  } else if (result.migrated.length > 0) {
+    writeVersionMarker(target, marker.framework_version, nextHashes);
+  }
+
+  return result;
+}
+
+/**
  * Run the `migrate` command: relocate legacy flat-layout records into their ADR-0008
  * homes. Location only — each record is moved byte-identical (fs.rename, never a
  * rewrite). Every *_progress.json at the .excn base is classed by writer (recordHome)
  * and moved unless its name already exists at the destination, in which case it is left
  * in place and reported, never clobbered. Idempotent: a re-run (or an already-relocated
  * record) finds nothing at the base and is a no-op. update's never-touch-work-tracking
- * contract is unaffected — relocation is migrate's job alone (ADR-0008). Reports
- * moved/skipped to stdout.
+ * contract is unaffected — relocation is migrate's job alone (ADR-0008). Then migrates
+ * the hook layout from .js to .cjs (EXEC-076). Reports moved/skipped to stdout.
  * @param {string[]} args - args after the `migrate` command word (target only).
  * @returns {void}
  * @throws Exits non-zero (after a stderr message) when the target has no .excn directory.
@@ -793,12 +914,21 @@ function migrate(args) {
     moved.push(`${basename} → ${home}/`);
   }
 
+  const hooks = migrateHookLayout(target);
+
   process.stdout.write(
     [
       `Migrated legacy records in ${target} (${MIGRATION_ID})`,
       `  moved   ${moved.length} record(s)${moved.length ? `: ${moved.join(', ')}` : ''}`,
       `  skipped ${skipped.length} already-placed record(s)${skipped.length ? `: ${skipped.join(', ')}` : ''}`,
       '(location only — record content is never rewritten; update never touches work-tracking)',
+      `Migrated hook layout in ${target} (${HOOK_CJS_MIGRATION_ID})`,
+      `  renamed ${hooks.migrated.length} hook(s) to .cjs${hooks.migrated.length ? `: ${hooks.migrated.join(', ')}` : ''}`,
+      `  skipped ${hooks.skipped.length} hook(s)${hooks.skipped.length ? `: ${hooks.skipped.join(', ')}` : ''}`,
+      `  settings.json hook commands ${hooks.settingsRewritten ? 'repointed at .cjs' : 'already current'}`,
+      hooks.markerMissing
+        ? '  (no version marker — could not verify hooks against their stamped form; nothing renamed)'
+        : '(sibling references repointed at .cjs; locally modified hooks are reported, never clobbered)',
       '',
     ].join('\n')
   );

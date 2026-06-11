@@ -79,6 +79,13 @@ const HOOKS_DIR = '.claude/hooks';
 const HOOKS_CONFIG_PATH = '.excn/hooks.config.json';
 const HOOKS_CONFIG_SCHEMA_PATH = '.excn/schemas/hooks-config.schema.json';
 
+// EXEC-076: hooks ship as CommonJS .cjs (HOOK_FEATURES above) so a host package.json
+// with "type":"module" can't mis-load them as ESM. An Instance stamped before that
+// carries .js hooks and is migration-due: doctor scans HOOKS_DIR for this legacy
+// extension and points at `to-execution migrate`. The hook file is the authoritative
+// tell — settings.json commands move in lockstep, migrate rewrites both.
+const LEGACY_HOOK_EXTENSION = '.js';
+
 // Evidence newer than this counts as firing; an enabled feature whose heartbeat is
 // older (or absent) reads as stale. One day covers a normal working cadence without
 // flagging overnight gaps.
@@ -91,6 +98,7 @@ module.exports = {
   HOOKS_DIR,
   HOOKS_CONFIG_PATH,
   HOOKS_CONFIG_SCHEMA_PATH,
+  LEGACY_HOOK_EXTENSION,
   HEARTBEAT_FRESH_MS,
   VIEWER_HEALTH_HOST,
   VIEWER_HEALTH_PATH,
