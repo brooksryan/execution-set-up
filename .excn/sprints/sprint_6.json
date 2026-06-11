@@ -62,21 +62,21 @@
         "EXEC-065"
       ],
       "notes": "Commit 93f1489 (src/bin/cli.js only). Gates: code-standards PASS + package-qa PASS (step_log). Grill-skipping local bug fix pulled by Team Lead directive 2026-06-10. Dogfood-root marker re-anchor (8 stale anchors + 0.3.0->0.4.0) demonstrated but not committed — a live update also pulled in viewer's uncommitted src/template/viewer WIP, so builder reverted that side-effect; the code fix alone already makes those files report unchanged, so nothing is functionally pending."
-    }
-  ],
-  "in_progress": [],
-  "not_shipped": [
+    },
     {
       "id": "S6-2",
       "type": "INFRA",
       "title": "EXEC-066: Template ships .excn/progress/ and .excn/runtime/; stamp policy classes both work-tracking",
       "owner": "builder",
-      "summary": "The two ADR-0008 record homes ship on every fresh init: .excn/progress/ (agent/gate-written) and .excn/runtime/ (hook-written). Stamp policy classifies both as work-tracking so update never touches their contents; the existing *_progress.json gitignore line covers records at any depth with no edit. Src-First.",
+      "summary": "The Template ships the two ADR-0008 record homes on every fresh init via empty .gitkeep (adr/-style): .excn/progress/ (agent/gate-written) and .excn/runtime/ (hook-written). stamp-policy adds both prefixes to WORK_TRACKING_DIR_PREFIXES, so update classes them work-tracking and never touches records inside; the .gitkeep stamps without entering the version marker. .excn/.gitignore (*_progress.json) covers both homes at any depth — no gitignore edit. Verified end-to-end in a temp dir (11 checks).",
       "closes_issues": [
         "EXEC-066"
       ],
-      "notes": "PRD-009 slice 1 (dependency root). depends_on: none."
-    },
+      "notes": "Commit 7e4a7d8 (5 files: src/bin/stamp-policy.js + src/template/.excn/{progress,runtime}/.gitkeep + dogfood-root mirror). Gates: code-standards PASS + package-qa PASS (step_log). PRD-009 slice 1 (dependency root). depends_on: none."
+    }
+  ],
+  "in_progress": [],
+  "not_shipped": [
     {
       "id": "S6-3",
       "type": "REFACTOR",
@@ -170,6 +170,30 @@
       "at": "2026-06-10",
       "artifact": "EXEC-065 — Scaffolder update() false-positive drift fix in src/bin/cli.js",
       "summary": "PASS — 0 violations. All stamp-contract checks hold: manifest exact (46 files, gitignore rename correct), idempotency (0 writes on second init), all JSON parses, .excn/.gitignore contains exactly *_progress.json with no root .gitignore created, pack parity (un-dotted gitignore ships in tarball, no dotted form), skip-safety (pre-existing file preserved), pointer wiring (all 7 sub-cases pass including oversized AGENTS.md warning). EXEC-065 fix verified: a file byte-identical to the template but carrying a stale recorded hash is classified unchanged and re-anchored to the template hash, not reported as drifted."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-066 — src/bin/stamp-policy.js (two WORK_TRACKING_DIR_PREFIXES entries) + four .gitkeep files",
+      "summary": "PASS — 0 violations. New entries land in the data module under a named constant with a why-not-what comment citing ADR-0008; .gitkeep files are empty; all Structure and Commenting rules hold."
+    },
+    {
+      "step": "code_standards_fail",
+      "at": "2026-06-10",
+      "artifact": "src/template/.excn/viewer/{index.html,viewer.js,styles.css,README.md} + .excn/viewer mirrors / EXEC-071",
+      "summary": "FAIL — 1 violation. No dead code: ELEMENT_IDS.footerNote declared in viewer.js but never accessed anywhere in the script."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "src/template/.excn/viewer/{index.html,viewer.js,styles.css,README.md} + .excn/viewer mirrors / EXEC-071",
+      "summary": "PASS — 0 violations. Dead footerNote key removed from ELEMENT_IDS; all Structure and Commenting rules hold on the revised change."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-066 — Template ships .excn/progress/ and .excn/runtime/ with .gitkeep; stamp-policy adds both to WORK_TRACKING_DIR_PREFIXES",
+      "summary": "PASS — 0 violations. All stamp-contract checks hold: manifest exact (48 files, progress/.gitkeep and runtime/.gitkeep present, gitignore rename correct), idempotency (0 writes on second init, 48 skipped), all JSON parses, .excn/.gitignore contains exactly *_progress.json (16 bytes, no root .gitignore created), pack parity (both .gitkeep files ship in tarball as 0B entries, un-dotted gitignore ships, no dotted form), skip-safety (pre-existing file preserved), pointer wiring (all 7 sub-cases pass including oversized AGENTS.md warning). EXEC-066 specifics: progress/.gitkeep and runtime/.gitkeep stamped on init; neither appears in framework-version.json files map (work-tracking, not invariant); a *_progress.json placed in each home survives update byte-identical and is not listed in refreshed/drifted output; .excn/.gitignore unchanged at *_progress.json."
     }
   ],
   "retrospective_notes": [
