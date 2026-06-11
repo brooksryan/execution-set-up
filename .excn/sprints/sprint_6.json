@@ -42,7 +42,14 @@
   ],
   "goal": "Ship the update false-positive-drift fix (EXEC-065) and the sprint-6 scope set by the upcoming Work Grill (viewer improvements, progress-file organization/naming, guard hooks).",
   "issues_addressed": [
-    "EXEC-065"
+    "EXEC-065",
+    "EXEC-066",
+    "EXEC-067",
+    "EXEC-068",
+    "EXEC-069",
+    "EXEC-070",
+    "EXEC-071",
+    "EXEC-072"
   ],
   "shipped": [],
   "in_progress": [],
@@ -57,14 +64,103 @@
         "EXEC-065"
       ],
       "notes": "Grill-skipping local bug fix pulled by Team Lead directive 2026-06-10."
+    },
+    {
+      "id": "S6-2",
+      "type": "INFRA",
+      "title": "EXEC-066: Template ships .excn/progress/ and .excn/runtime/; stamp policy classes both work-tracking",
+      "owner": "builder",
+      "summary": "The two ADR-0008 record homes ship on every fresh init: .excn/progress/ (agent/gate-written) and .excn/runtime/ (hook-written). Stamp policy classifies both as work-tracking so update never touches their contents; the existing *_progress.json gitignore line covers records at any depth with no edit. Src-First.",
+      "closes_issues": [
+        "EXEC-066"
+      ],
+      "notes": "PRD-009 slice 1 (dependency root). depends_on: none."
+    },
+    {
+      "id": "S6-3",
+      "type": "REFACTOR",
+      "title": "EXEC-067: hooks, doctor, viewer-server read and write Runtime Records under .excn/runtime/",
+      "owner": "builder",
+      "summary": "Hook-written state becomes Runtime Records: invocation heartbeat ledger, viewer-server pid record, gate-watch state all move to .excn/runtime/. doctor heartbeat checks and the viewer-server daemon read the new home; no hook writes any *_progress.json at the .excn base. Src-First.",
+      "closes_issues": [
+        "EXEC-067"
+      ],
+      "notes": "PRD-009 slice 2. depends_on: EXEC-066."
+    },
+    {
+      "id": "S6-4",
+      "type": "INFRA",
+      "title": "EXEC-068: Verdict Ledger schema — gates' append shape validates strictly",
+      "owner": "builder",
+      "summary": "New verdict-ledger.schema.json defines the append-only array of gate verdicts (step, at, artifact, summary). The session Verdict Ledger and a sprint record's step_log share the entry shape; sprint.schema.json references it rather than duplicating. progress.schema.json unchanged for trackers. Src-First.",
+      "closes_issues": [
+        "EXEC-068"
+      ],
+      "notes": "PRD-009 slice 3. depends_on: none."
+    },
+    {
+      "id": "S6-5",
+      "type": "FEAT",
+      "title": "EXEC-069: migrate command relocates Progress/Runtime Records; doctor flags the legacy flat layout",
+      "owner": "builder",
+      "summary": "New Scaffolder migrate command relocates known records on an already-stamped Instance into their ADR-0008 homes: versioned migration table, idempotent re-run, location-only (byte-identical), every move reported. doctor detects the legacy flat layout and names migrate. update's never-touch-work-tracking contract unchanged. package-qa rubric extended (chartered, alignment-gated per ADR-0004). Dogfood root migrated as proof. Src-First.",
+      "closes_issues": [
+        "EXEC-069"
+      ],
+      "notes": "PRD-009 slice 4. depends_on: EXEC-066, EXEC-067."
+    },
+    {
+      "id": "S6-6",
+      "type": "FEAT",
+      "title": "EXEC-070: progress-location deny guard — misfiled Progress Record writes denied with a redirect",
+      "owner": "builder",
+      "summary": "PreToolUse guard in the spawn-guard pattern denies a *_progress.json write outside .excn/progress/ and .excn/runtime/, redirect reason naming the right home. Rules/decision split, hooks.config toggle, every firing invocation-logged, fail-safe on any error. Location only — schema and content stay the gates' job. Src-First.",
+      "closes_issues": [
+        "EXEC-070"
+      ],
+      "notes": "PRD-009 slice 5. depends_on: EXEC-066."
+    },
+    {
+      "id": "S6-7",
+      "type": "FEAT",
+      "title": "EXEC-071: viewer sprint switcher — past sprints readable from the status page",
+      "owner": "viewer",
+      "summary": "The viewer gains a sprint switcher over the sprint files it already probes: active sprint renders by default; selecting a closed sprint renders the same lanes plus its decisions, retrospective notes, and step_log gate verdicts. No server change; viewer stays read-only over .excn JSON. Src-First, verified on the live viewer server.",
+      "closes_issues": [
+        "EXEC-071"
+      ],
+      "notes": "PRD-009 slice 6. depends_on: none."
+    },
+    {
+      "id": "S6-8",
+      "type": "FEAT",
+      "title": "EXEC-072: viewer hook health — doctor-parity cards plus the invocation log",
+      "owner": "viewer",
+      "summary": "The viewer renders per-feature hook health cards mirroring doctor (firing / stale / disabled, last heartbeat) from the Runtime Record invocation ledger, with a collapsible recent-invocations table filterable by feature and outcome. Missing/empty ledger renders an explicit empty state. Src-First, verified on the live viewer server.",
+      "closes_issues": [
+        "EXEC-072"
+      ],
+      "notes": "PRD-009 slice 7. depends_on: EXEC-067."
     }
   ],
   "defects_discovered": [],
   "decisions": [],
+  "step_log": [
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": ".excn/adr/0008-progress-runtime-split.md, .excn/CONTEXT.md",
+      "summary": "PASS — 0 violations. ADR-0008 and CONTEXT.md grill-time additions conform to all Principles and project Philosophy."
+    }
+  ],
   "retrospective_notes": [
     {
       "title": "Sprint-6 scope is grill-pending; EXEC-065 pulled ahead of it",
       "body": "The Work Grill for the rest of sprint-6 scope (viewer improvements, progress-file organization/naming, guard hooks) has not run yet. EXEC-065 is a grill-skipping bug fix pulled into sprint 6 by Team Lead directive on 2026-06-10; the remaining scope is filed and pulled only after the grill runs."
+    },
+    {
+      "title": "npm 0.3.0 lagged HEAD at the same version number (PRD-009 grill)",
+      "body": "The published npm 0.3.0 lagged HEAD while carrying the same version number — template content changed without a version bump, so consumers on 0.3.0 silently missed it. Candidate: a preflight guard forcing a version bump when template content changes. Philosophy/process candidate carried for the Retro Loop."
     }
   ]
 }

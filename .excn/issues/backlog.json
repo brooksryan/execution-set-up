@@ -11,7 +11,7 @@
       ],
       "classification": "macro",
       "actionable_now": true,
-      "description": "Build a repeatable benchmark that runs a defined reference project (spec'd in advance) through agent execution and measures whether this framework earns its overhead. Three measures, per Brooks: (1) total token consumption, (2) % of project completed to spec, (3) wall-clock time. Design should compare scaffolded (to-execution Instance) vs unscaffolded baseline runs on the same spec. Needs its own grill \u2192 PRD before implementation.",
+      "description": "Build a repeatable benchmark that runs a defined reference project (spec'd in advance) through agent execution and measures whether this framework earns its overhead. Three measures, per Brooks: (1) total token consumption, (2) % of project completed to spec, (3) wall-clock time. Design should compare scaffolded (to-execution Instance) vs unscaffolded baseline runs on the same spec. Needs its own grill → PRD before implementation.",
       "prd": null,
       "acceptance_criteria": [
         "A reference spec exists against which % completion is mechanically assessable",
@@ -37,7 +37,7 @@
       ],
       "classification": "local",
       "actionable_now": false,
-      "description": "On the next real to-execution publish, confirm the RELEASE.md recipe publishes unattended (no OTP prompt / no E403). npm-personal-token may be a classic token that 2FA-gates writes; whoami can't prove write-2FA. If it OTP/E403s, overwrite the Keychain item (service npm-personal-token, account $USER) value with an automation/granular-automation token that bypasses 2FA \u2014 src/.npmrc and the recipe stay unchanged.",
+      "description": "On the next real to-execution publish, confirm the RELEASE.md recipe publishes unattended (no OTP prompt / no E403). npm-personal-token may be a classic token that 2FA-gates writes; whoami can't prove write-2FA. If it OTP/E403s, overwrite the Keychain item (service npm-personal-token, account $USER) value with an automation/granular-automation token that bypasses 2FA — src/.npmrc and the recipe stay unchanged.",
       "prd": null,
       "acceptance_criteria": [],
       "slice_type": "HITL",
@@ -62,7 +62,7 @@
       ],
       "classification": "macro",
       "actionable_now": true,
-      "description": "Once EXEC-054 validates the in-repo auto-run server, extract it into its own package installed globally (separate from the to-execution Scaffolder package). Individual execution repos/sessions check whether the global server exists and connect to it instead of each running their own \u2014 one server, many Instances. Same hard requirements: lightweight, fast-running, zero/near-zero dependencies. Needs design decisions (port/discovery convention, multi-repo serving, version skew between server and Instances) \u2014 grill before implementation.",
+      "description": "Once EXEC-054 validates the in-repo auto-run server, extract it into its own package installed globally (separate from the to-execution Scaffolder package). Individual execution repos/sessions check whether the global server exists and connect to it instead of each running their own — one server, many Instances. Same hard requirements: lightweight, fast-running, zero/near-zero dependencies. Needs design decisions (port/discovery convention, multi-repo serving, version skew between server and Instances) — grill before implementation.",
       "prd": "PRD-008",
       "acceptance_criteria": [
         "One globally-installed server on a well-known port serves every registered repo at a stable URL",
@@ -91,7 +91,7 @@
       ],
       "classification": "macro",
       "actionable_now": true,
-      "description": "Extend the status-page viewer from read-only to read-write for issues: add new issues and edit existing ones from the web page. Writes go through the server (EXEC-054/055) since a static page cannot write the .excn JSON; every write must remain schema-valid against issue.schema.json and respect the issue partitioning (backlog vs sprint partitions, scribe ownership of moves). Hard requirements: keep it as lightweight and fast as possible \u2014 no framework, minimal surface.",
+      "description": "Extend the status-page viewer from read-only to read-write for issues: add new issues and edit existing ones from the web page. Writes go through the server (EXEC-054/055) since a static page cannot write the .excn JSON; every write must remain schema-valid against issue.schema.json and respect the issue partitioning (backlog vs sprint partitions, scribe ownership of moves). Hard requirements: keep it as lightweight and fast as possible — no framework, minimal surface.",
       "prd": "PRD-008",
       "acceptance_criteria": [
         "Issues can be added and edited from the status page; writes validate against issue.schema.json and land atomically",
@@ -121,7 +121,7 @@
       ],
       "classification": "macro",
       "actionable_now": true,
-      "description": "Observed (Brooks): Team Lead sessions sometimes spawn agents inappropriately \u2014 a persistent Teammate gets spawned as a transient Invoked Agent/subagent, losing membership, continuity, and messaging addressability. CONTEXT.md draws the Teammate-vs-Invoked-Agent line by lifecycle, and sprint 4 defect D4-1 already forced a persistent-Teammate-spawning rule mid-sprint, so the failure mode is real here too. Explore how to make correct spawning systematic rather than remembered: candidates include a TEAM_DIRECTIVE/agent-def instruction sweep (roster members spawn via make-teammate/teams, gates spawn via the Agent tool), a remind-only hook on the spawn tool that flags a roster-named agent being spawned transiently (rides the per-feature hook plumbing, ADR-0006), and a doctor/health check that compares the live team roster against the directive roster. Spike first: characterize when and why leads get it wrong, then pick the enforcement. Src-First.",
+      "description": "Observed (Brooks): Team Lead sessions sometimes spawn agents inappropriately — a persistent Teammate gets spawned as a transient Invoked Agent/subagent, losing membership, continuity, and messaging addressability. CONTEXT.md draws the Teammate-vs-Invoked-Agent line by lifecycle, and sprint 4 defect D4-1 already forced a persistent-Teammate-spawning rule mid-sprint, so the failure mode is real here too. Explore how to make correct spawning systematic rather than remembered: candidates include a TEAM_DIRECTIVE/agent-def instruction sweep (roster members spawn via make-teammate/teams, gates spawn via the Agent tool), a remind-only hook on the spawn tool that flags a roster-named agent being spawned transiently (rides the per-feature hook plumbing, ADR-0006), and a doctor/health check that compares the live team roster against the directive roster. Spike first: characterize when and why leads get it wrong, then pick the enforcement. Src-First.",
       "prd": null,
       "acceptance_criteria": [
         "The failure mode is characterized: when a Team Lead spawns a roster Teammate transiently, what in the docs/tooling let it happen",
@@ -148,7 +148,7 @@
       ],
       "classification": "local",
       "actionable_now": true,
-      "description": "Gitignored progress records (gate verdicts, session logs, per-PRD progress) accumulate in .excn forever \u2014 a dozen-plus since June 6 on the dogfood Instance. Add pruning: doctor warns on aged records and/or a clerk-run chore archives or deletes records older than N closed sprints. Decide retention policy at implementation.",
+      "description": "Gitignored progress records (gate verdicts, session logs, per-PRD progress) accumulate in .excn forever — a dozen-plus since June 6 on the dogfood Instance. Add pruning: doctor warns on aged records and/or a clerk-run chore archives or deletes records older than N closed sprints. Decide retention policy at implementation.",
       "prd": null,
       "acceptance_criteria": [],
       "slice_type": "AFK",

@@ -28,6 +28,214 @@
       "assigned_sprint": 6,
       "closed_in_sprint": null,
       "notes": "Found dogfood-testing the upgrade path (2026-06-10). The one genuine drift in that test (_teammate.template.md missing the color line) is being caught up directly."
+    },
+    {
+      "status": "open",
+      "actionable_now": true,
+      "prd": "PRD-009",
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "related_tickets": [],
+      "assigned_sprint": 6,
+      "closed_in_sprint": null,
+      "notes": null,
+      "id": "EXEC-066",
+      "title": "Two homes stamped: Template ships .excn/progress/ and .excn/runtime/, stamp policy classes them work-tracking",
+      "severity": "P2",
+      "scope": [
+        "src/template",
+        "src/bin"
+      ],
+      "classification": "macro",
+      "description": "The Template ships the two Progress Record / Runtime Record homes of ADR-0008: .excn/progress/ (agent- and gate-written) and .excn/runtime/ (hook-written), present on every fresh init. The stamp policy classifies both as work-tracking so update never touches their contents. The stamped .excn gitignore continues to match *_progress.json at any depth with no change. End-to-end: init a temp dir, both homes exist, update leaves files placed in them untouched.",
+      "acceptance_criteria": [
+        "Fresh init stamps .excn/progress/ and .excn/runtime/",
+        "stamp policy classifies both directories as work-tracking (update never refreshes or drift-reports their contents)",
+        "Existing *_progress.json gitignore line covers records inside both homes with no gitignore edit",
+        "Src-First: lands in src/ first, dogfood root mirrors",
+        "package-qa and code-standards gates PASS"
+      ],
+      "depends_on": []
+    },
+    {
+      "status": "open",
+      "actionable_now": true,
+      "prd": "PRD-009",
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "related_tickets": [],
+      "assigned_sprint": 6,
+      "closed_in_sprint": null,
+      "notes": null,
+      "id": "EXEC-067",
+      "title": "Runtime Records move: hooks, doctor, and viewer-server read and write .excn/runtime/",
+      "severity": "P2",
+      "scope": [
+        "hooks",
+        "src/bin"
+      ],
+      "classification": "local",
+      "description": "Hook-written state becomes Runtime Records: the invocation heartbeat ledger, the viewer-server pid record, and gate-watch state are written to and read from .excn/runtime/. doctor heartbeat checks and the viewer-server daemon read the new home. End-to-end: a hook fires, its invocation lands in .excn/runtime/hook-invocations_progress.json, doctor reports the heartbeat from there.",
+      "acceptance_criteria": [
+        "All hook scripts write their Runtime Records under .excn/runtime/",
+        "doctor reads heartbeats and viewer-server state from .excn/runtime/ and reports feature health correctly",
+        "No hook writes any *_progress.json at the .excn base",
+        "Src-First: template hook sources first, dogfood root mirrors",
+        "package-qa and code-standards gates PASS"
+      ],
+      "depends_on": [
+        "EXEC-066"
+      ]
+    },
+    {
+      "status": "open",
+      "actionable_now": true,
+      "prd": "PRD-009",
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "related_tickets": [],
+      "assigned_sprint": 6,
+      "closed_in_sprint": null,
+      "notes": null,
+      "id": "EXEC-068",
+      "title": "Verdict Ledger schema: gates' append shape validates strictly",
+      "severity": "P2",
+      "scope": [
+        "schemas"
+      ],
+      "classification": "local",
+      "description": "A new verdict-ledger schema defines the append-only array of gate verdicts (step, at, artifact, summary). The session Verdict Ledger and a sprint record's step_log entries share the entry shape; the sprint schema references it rather than duplicating it. progress.schema.json remains the unit-of-work tracker shape. End-to-end: the live session ledger and sprint-6 step_log validate strictly against the new schema.",
+      "acceptance_criteria": [
+        "verdict-ledger.schema.json ships in the Template's schemas",
+        "session_progress.json validates against it as-is",
+        "sprint.schema.json step_log entries reference the same entry shape (no duplicated definition)",
+        "progress.schema.json unchanged for trackers",
+        "Src-First: template schemas first, dogfood root mirrors"
+      ],
+      "depends_on": []
+    },
+    {
+      "status": "open",
+      "actionable_now": true,
+      "prd": "PRD-009",
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "related_tickets": [],
+      "assigned_sprint": 6,
+      "closed_in_sprint": null,
+      "notes": null,
+      "id": "EXEC-069",
+      "title": "Migrate command relocates Progress and Runtime Records; doctor flags the legacy flat layout",
+      "severity": "P2",
+      "scope": [
+        "src/bin"
+      ],
+      "classification": "macro",
+      "description": "A new Scaffolder migrate command relocates known records on an already-stamped Instance into their ADR-0008 homes: versioned migration table, idempotent re-run, location-only (content byte-identical), every move reported. doctor detects the legacy flat layout and names the command. update's never-touch-work-tracking contract is unchanged. End-to-end: a temp Instance with the legacy flat layout migrates cleanly; re-run is a no-op; the dogfood root is migrated as proof.",
+      "acceptance_criteria": [
+        "migrate relocates known *_progress.json records into .excn/progress/ and .excn/runtime/ by writer class",
+        "Re-running migrate is a no-op; file content is byte-identical after relocation",
+        "doctor reports the legacy flat layout and names migrate; reports clean after migration",
+        "update behavior unchanged (never touches work-tracking)",
+        "package-qa rubric extended to exercise the migrate contract (chartered change, alignment-gated per ADR-0004)",
+        "Dogfood root migrated: no *_progress.json remains at .excn base; hooks and viewer keep working",
+        "package-qa and code-standards gates PASS"
+      ],
+      "depends_on": [
+        "EXEC-066",
+        "EXEC-067"
+      ]
+    },
+    {
+      "status": "open",
+      "actionable_now": true,
+      "prd": "PRD-009",
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "related_tickets": [],
+      "assigned_sprint": 6,
+      "closed_in_sprint": null,
+      "notes": null,
+      "id": "EXEC-070",
+      "title": "Progress-location deny guard: misfiled Progress Record writes are denied with a redirect",
+      "severity": "P2",
+      "scope": [
+        "hooks"
+      ],
+      "classification": "local",
+      "description": "A PreToolUse guard in the spawn-guard pattern denies a *_progress.json write outside .excn/progress/ and .excn/runtime/, with a redirect reason naming the right home. Rules/decision split, hooks.config toggle, every firing invocation-logged, fail-safe on any error (a broken guard never blocks legitimate writes). Location only — schema and content stay the gates' job. End-to-end: a simulated misfiled write is denied with the redirect; a correct-home write passes untouched.",
+      "acceptance_criteria": [
+        "Misfiled *_progress.json write denied with a reason naming .excn/progress/ or .excn/runtime/",
+        "Writes inside the two homes pass untouched; non-progress writes unaffected",
+        "Toggle in hooks.config.json; malformed config or payload fails safe (exit 0, no output)",
+        "Every firing logs one invocation record",
+        "Payload-simulation tests cover deny, pass, and fail-safe paths",
+        "Src-First: template hook source first, dogfood root mirrors; code-standards gate PASSes"
+      ],
+      "depends_on": [
+        "EXEC-066"
+      ]
+    },
+    {
+      "status": "open",
+      "actionable_now": true,
+      "prd": "PRD-009",
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "related_tickets": [],
+      "assigned_sprint": 6,
+      "closed_in_sprint": null,
+      "notes": null,
+      "id": "EXEC-071",
+      "title": "Viewer sprint switcher: past sprints readable from the status page",
+      "severity": "P2",
+      "scope": [
+        "viewer"
+      ],
+      "classification": "local",
+      "description": "The viewer gains a sprint switcher over the sprint files it already probes: the active sprint renders by default; selecting a closed sprint renders the same lanes plus its decisions, retrospective notes, and step_log gate verdicts. End-to-end: sprints 1 through 6 browsable on the live status page.",
+      "acceptance_criteria": [
+        "Switcher lists every probed sprint, newest first, active sprint default",
+        "A closed sprint shows lanes, decisions, retrospective notes, and step_log verdicts",
+        "No server change; viewer stays read-only over .excn JSON",
+        "Src-First: template viewer first, dogfood root mirrors; code-standards gate PASSes; verified on the live viewer server"
+      ],
+      "depends_on": []
+    },
+    {
+      "status": "open",
+      "actionable_now": true,
+      "prd": "PRD-009",
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "related_tickets": [],
+      "assigned_sprint": 6,
+      "closed_in_sprint": null,
+      "notes": null,
+      "id": "EXEC-072",
+      "title": "Viewer hook health: doctor-parity cards plus the invocation log",
+      "severity": "P2",
+      "scope": [
+        "viewer"
+      ],
+      "classification": "local",
+      "description": "The viewer renders per-feature hook health cards mirroring doctor (firing / stale / disabled, last heartbeat) from the Runtime Record invocation ledger, with a collapsible recent-invocations table filterable by feature and outcome. End-to-end: a stale or broken hook is visible on the status page at a glance, with the log entries to diagnose it.",
+      "acceptance_criteria": [
+        "Per-feature cards show doctor-parity status and last heartbeat from .excn/runtime/hook-invocations_progress.json",
+        "Collapsible table shows recent invocations, filterable by feature and outcome",
+        "Missing or empty ledger renders an explicit empty state, not an error",
+        "Src-First: template viewer first, dogfood root mirrors; code-standards gate PASSes; verified on the live viewer server"
+      ],
+      "depends_on": [
+        "EXEC-067"
+      ]
     }
   ]
 }
