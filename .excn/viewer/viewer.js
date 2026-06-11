@@ -35,10 +35,19 @@ const EXCN_ROOT = '/.excn';
 const SPRINT_PATH = (n) => `${EXCN_ROOT}/sprints/sprint_${n}.json`;
 const BACKLOG_PATH = `${EXCN_ROOT}/issues/backlog.json`;
 
-// Per-Teammate load telemetry (EXEC-045, load-progress.schema.json). Optional:
-// the load-report hook only creates this file when load reporting is enabled,
-// so a 404 means the feature is off — render an off state, never an error.
-const LOAD_PROGRESS_PATH = `${EXCN_ROOT}/load_progress.json`;
+// Per-Teammate load telemetry (EXEC-045, load-progress.schema.json). A Runtime
+// Record under .excn/runtime/ (ADR-0008, EXEC-067). Optional: the load-report
+// hook only creates this file when load reporting is enabled, so a 404 means the
+// feature is off — render an off state, never an error.
+const LOAD_PROGRESS_PATH = `${EXCN_ROOT}/runtime/load_progress.json`;
+
+// The unified hook invocation ledger (CODE_STANDARDS ## Hooks) — a Runtime
+// Record under .excn/runtime/ (ADR-0008). Every wired hook appends one
+// {ts, script, event, outcome} record per firing; the viewer reads it for the
+// hook-health panel (EXEC-072). Mirrors INVOCATION_LOG_PATH in health-policy.js.
+// Optional: an absent file means no hook has fired yet (or the daemon predates
+// the ledger) — render an empty state, never an error.
+const INVOCATION_LOG_PATH = `${EXCN_ROOT}/runtime/hook-invocations_progress.json`;
 
 // Probe ceiling — a hard stop so a misconfigured serve can never loop forever.
 // Far above any realistic sprint count; raise it only if sprints exceed it.
@@ -66,6 +75,19 @@ const ELEMENT_IDS = {
   board: 'board',
 };
 
+// Hook-health panel element ids (EXEC-072).
+const HOOK_IDS = {
+  panel: 'hooks-panel',
+  note: 'hooks-note',
+  count: 'count-hooks',
+  cards: 'hooks-cards',
+  log: 'hooks-log',
+  countInvocations: 'count-invocations',
+  filterFeature: 'filter-feature',
+  filterOutcome: 'filter-outcome',
+  table: 'hooks-table',
+};
+
 // Sprint-detail blocks (EXEC-071), in render order. `field` is the sprint-record
 // array each renders; `build` names the per-entry card builder (resolved in
 // renderDetail, since the builders are declared below the constants section).
@@ -91,6 +113,47 @@ const ONE_MINUTE_MS = 60 * 1000;
 const ONE_HOUR_MS = 60 * ONE_MINUTE_MS;
 const ONE_DAY_MS = 24 * ONE_HOUR_MS;
 
+// Hook health (EXEC-072) ----------------------------------------------------
+
+// A feature's heartbeat newer than this reads as "firing"; older (or absent)
+// reads as "stale". Mirrors HEARTBEAT_FRESH_MS in src/bin/health-policy.js so the
+// viewer's cards and doctor agree on the firing/stale line — one contract, two
+// packages (doctor is Node-side; the viewer cannot require() the policy module).
+const HEARTBEAT_FRESH_MS = ONE_DAY_MS;
+
+// The stamped hook features, in card order, mirroring HOOK_FEATURES in
+// src/bin/health-policy.js (key + scripts; the viewer adds a human `label`). A
+// feature's heartbeat is the latest invocation-ledger record across its scripts.
+// Keep this list in lockstep with health-policy.js when features are added.
+const HOOK_FEATURES = [
+  { key: 'gate_reminders', label: 'Gate reminders', scripts: ['gate-watch.js'] },
+  { key: 'message_nudge', label: 'Message nudge', scripts: ['message-nudge.js'] },
+  { key: 'load_reporting', label: 'Load reporting', scripts: ['load-report.js'] },
+  { key: 'viewer_server', label: 'Viewer server', scripts: ['viewer-server.js'] },
+  { key: 'spawn_guard', label: 'Spawn guard', scripts: ['spawn-guard.js'] },
+  { key: 'progress_location_guard', label: 'Progress-location guard', scripts: ['progress-location-guard.js'] },
+];
+
+// Doctor-parity health states the cards render (firing/stale derive from the
+// heartbeat age; disabled from the latest record's outcome). Each value is also
+// the CSS modifier suffix on the status pill (hook-status-<state>).
+const HOOK_STATUS_FIRING = 'firing';
+const HOOK_STATUS_STALE = 'stale';
+const HOOK_STATUS_DISABLED = 'disabled';
+
+// The invocation outcomes a hook records (CODE_STANDARDS ## Hooks) — the values
+// the outcome filter offers. OUTCOME_DISABLED is the one that maps a feature's
+// card to the disabled state (the hook fired but found its toggle off).
+const HOOK_OUTCOMES = ['ok', 'noop', 'disabled', 'error'];
+const OUTCOME_DISABLED = 'disabled';
+
+// The most recent invocations the log table renders (newest first) after any
+// filter; older rows are summarized as a count, never silently dropped.
+const RECENT_INVOCATIONS_MAX = 100;
+
+// The filter <select> sentinel meaning "no filter" (every feature / every outcome).
+const FILTER_ALL = 'all';
+
 // ---------------------------------------------------------------------------
 // Module state
 // ---------------------------------------------------------------------------
@@ -103,6 +166,10 @@ const sprintsById = new Map();
 // The default sprint id (highest "active", else newest), resolved once at load.
 // popstate and a bare or unknown ?sprint= URL fall back to it.
 let defaultSprintId = null;
+
+// The hook invocation-ledger records, kept once at load so the log-table filters
+// re-render without refetching (EXEC-072). Empty until the panel loads them.
+let invocationRecords = [];
 
 // ---------------------------------------------------------------------------
 // Fetch helpers (fail-closed)
@@ -255,6 +322,79 @@ function aggregateLoad(records, nowMs) {
     }
   }
   return Array.from(byTeammate.values()).sort((a, b) => b.total - a.total);
+}
+
+/**
+ * Load the hook invocation ledger, distinguishing "absent" from "broken".
+ * @returns {Promise<Array<object>|null>} the invocation records (possibly empty),
+ *   or null when the ledger is absent (no hook has fired yet).
+ * @throws {Error} if the ledger exists but cannot be fetched, parsed, or lacks
+ *   the records array (fail-closed on a present-but-broken file).
+ */
+async function loadInvocationLedger() {
+  const collection = await fetchOptionalJson(INVOCATION_LOG_PATH);
+  if (collection === null) {
+    return null;
+  }
+  if (!Array.isArray(collection.records)) {
+    throw new Error(`${INVOCATION_LOG_PATH} has no records array (invocation ledger)`);
+  }
+  return collection.records;
+}
+
+/**
+ * Find the hook feature that owns a script basename.
+ * @param {string} script - an invocation record's script basename.
+ * @returns {object|null} the HOOK_FEATURES entry, or null for a script no feature
+ *   claims (e.g. a renamed or legacy hook still present in the ledger).
+ */
+function featureForScript(script) {
+  for (const feature of HOOK_FEATURES) {
+    if (feature.scripts.includes(script)) {
+      return feature;
+    }
+  }
+  return null;
+}
+
+/**
+ * Derive one feature's doctor-parity health from the invocation ledger alone.
+ * The viewer cannot probe wiring or live pids the way doctor does, so health is
+ * read purely from the feature's latest record: a "disabled" outcome means the
+ * toggle is off; otherwise a heartbeat within HEARTBEAT_FRESH_MS is firing, and
+ * an older or absent heartbeat is stale.
+ * @param {object} feature - a HOOK_FEATURES entry.
+ * @param {Array<object>} records - all invocation records.
+ * @param {number} nowMs - reference time for the freshness window (epoch ms).
+ * @returns {object} {status, lastSeenMs, outcome, count}; lastSeenMs/outcome are
+ *   null when the feature has no records.
+ */
+function featureHealth(feature, records, nowMs) {
+  const scripts = new Set(feature.scripts);
+  let latest = null;
+  let count = 0;
+  for (const record of records) {
+    if (!scripts.has(record.script)) {
+      continue;
+    }
+    count += 1;
+    const tsMs = Date.parse(record.ts);
+    if (latest === null || tsMs > latest.tsMs) {
+      latest = { tsMs, outcome: record.outcome };
+    }
+  }
+  if (latest === null) {
+    return { status: HOOK_STATUS_STALE, lastSeenMs: null, outcome: null, count: 0 };
+  }
+  let status;
+  if (latest.outcome === OUTCOME_DISABLED) {
+    status = HOOK_STATUS_DISABLED;
+  } else if (nowMs - latest.tsMs <= HEARTBEAT_FRESH_MS) {
+    status = HOOK_STATUS_FIRING;
+  } else {
+    status = HOOK_STATUS_STALE;
+  }
+  return { status, lastSeenMs: latest.tsMs, outcome: latest.outcome, count };
 }
 
 // ---------------------------------------------------------------------------
@@ -527,6 +667,196 @@ function renderLoadPanel(records) {
   }
 }
 
+/**
+ * Build a doctor-parity health card for one hook feature: the feature name, a
+ * status pill (firing/stale/disabled), its last heartbeat, and a one-line detail
+ * (scripts, records logged, last outcome).
+ * @param {object} feature - a HOOK_FEATURES entry.
+ * @param {object} health - the featureHealth result for this feature.
+ * @param {number} nowMs - reference time for the last-seen phrase (epoch ms).
+ * @returns {HTMLElement} the card.
+ */
+function renderHookCard(feature, health, nowMs) {
+  const card = document.createElement('article');
+  card.className = 'card';
+
+  const head = document.createElement('div');
+  head.className = 'card-head';
+  head.appendChild(elementWithText('h3', 'card-title', feature.label));
+  const pill = spanWithText('hook-status', health.status);
+  pill.classList.add(`hook-status-${health.status}`);
+  head.appendChild(pill);
+  card.appendChild(head);
+
+  const heartbeat = health.lastSeenMs === null ? 'no heartbeat yet' : `last fired ${formatLastSeen(health.lastSeenMs, nowMs)}`;
+  card.appendChild(elementWithText('p', 'card-meta', heartbeat));
+
+  const detail = health.outcome === null
+    ? feature.scripts.join(', ')
+    : `${feature.scripts.join(', ')} · ${health.count} logged · last ${health.outcome}`;
+  card.appendChild(elementWithText('p', 'card-meta', detail));
+  return card;
+}
+
+/**
+ * Render one health card per hook feature, in HOOK_FEATURES order.
+ * @param {Array<object>} records - all invocation records.
+ * @param {number} nowMs - reference time (epoch ms).
+ */
+function renderHooksCards(records, nowMs) {
+  const cards = byId(HOOK_IDS.cards);
+  for (const feature of HOOK_FEATURES) {
+    cards.appendChild(renderHookCard(feature, featureHealth(feature, records, nowMs), nowMs));
+  }
+}
+
+/**
+ * Populate the feature and outcome filter <select>s, each led by an "all" option.
+ */
+function populateHookFilters() {
+  const featureSelect = byId(HOOK_IDS.filterFeature);
+  featureSelect.replaceChildren();
+  featureSelect.appendChild(makeOption(FILTER_ALL, 'All features'));
+  for (const feature of HOOK_FEATURES) {
+    featureSelect.appendChild(makeOption(feature.key, feature.label));
+  }
+  const outcomeSelect = byId(HOOK_IDS.filterOutcome);
+  outcomeSelect.replaceChildren();
+  outcomeSelect.appendChild(makeOption(FILTER_ALL, 'All outcomes'));
+  for (const outcome of HOOK_OUTCOMES) {
+    outcomeSelect.appendChild(makeOption(outcome, outcome));
+  }
+}
+
+/**
+ * Test whether an invocation record passes the current feature and outcome filters.
+ * @param {object} record - an invocation record ({ts, script, event, outcome}).
+ * @param {string} featureKey - a HOOK_FEATURES key, or FILTER_ALL.
+ * @param {string} outcome - a HOOK_OUTCOMES value, or FILTER_ALL.
+ * @returns {boolean} true when the record should be shown.
+ */
+function invocationMatches(record, featureKey, outcome) {
+  if (outcome !== FILTER_ALL && record.outcome !== outcome) {
+    return false;
+  }
+  if (featureKey !== FILTER_ALL) {
+    const feature = featureForScript(record.script);
+    if (feature === null || feature.key !== featureKey) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Build the invocation table header row.
+ * @returns {HTMLElement} the <thead>.
+ */
+function renderInvocationHead() {
+  const thead = document.createElement('thead');
+  const row = document.createElement('tr');
+  for (const label of ['Time', 'Feature', 'Event', 'Outcome']) {
+    row.appendChild(elementWithText('th', 'hooks-th', label));
+  }
+  thead.appendChild(row);
+  return thead;
+}
+
+/**
+ * Build a table row for one invocation record. The time cell carries the exact
+ * timestamp as its tooltip; the outcome cell is colour-coded by outcome.
+ * @param {object} record - an invocation record ({ts, script, event, outcome}).
+ * @param {number} nowMs - reference time for the relative time (epoch ms).
+ * @returns {HTMLElement} the <tr>.
+ */
+function renderInvocationRow(record, nowMs) {
+  const row = document.createElement('tr');
+  const feature = featureForScript(record.script);
+
+  const timeCell = elementWithText('td', 'hooks-cell', formatLastSeen(Date.parse(record.ts), nowMs));
+  timeCell.title = record.ts; // Exact ISO timestamp on hover; the cell shows the relative phrase.
+  row.appendChild(timeCell);
+
+  row.appendChild(elementWithText('td', 'hooks-cell', feature === null ? record.script : feature.label));
+  row.appendChild(elementWithText('td', 'hooks-cell', record.event));
+
+  const outcomeCell = elementWithText('td', 'hooks-cell', record.outcome);
+  outcomeCell.classList.add(`hook-outcome-${record.outcome}`);
+  row.appendChild(outcomeCell);
+  return row;
+}
+
+/**
+ * Render the recent-invocations table from the kept records under the current
+ * filters: newest first, capped at RECENT_INVOCATIONS_MAX with the remainder
+ * summarized (never silently dropped). Re-invoked on every filter change.
+ */
+function renderInvocationTable() {
+  const featureKey = byId(HOOK_IDS.filterFeature).value;
+  const outcome = byId(HOOK_IDS.filterOutcome).value;
+  const matched = invocationRecords.filter((record) => invocationMatches(record, featureKey, outcome));
+  byId(HOOK_IDS.countInvocations).textContent = String(matched.length);
+
+  const container = byId(HOOK_IDS.table);
+  container.replaceChildren(); // Idempotent: rebuild the table on every filter change.
+
+  if (matched.length === 0) {
+    container.appendChild(elementWithText('p', 'empty', 'No invocations match the current filter.'));
+    return;
+  }
+
+  // Records are appended oldest-first; reverse a copy for newest-first display.
+  const newestFirst = matched.slice().reverse();
+  const shown = newestFirst.slice(0, RECENT_INVOCATIONS_MAX);
+  const nowMs = Date.now();
+
+  const table = document.createElement('table');
+  table.className = 'hooks-table-el';
+  table.appendChild(renderInvocationHead());
+  const tbody = document.createElement('tbody');
+  for (const record of shown) {
+    tbody.appendChild(renderInvocationRow(record, nowMs));
+  }
+  table.appendChild(tbody);
+  container.appendChild(table);
+
+  if (matched.length > shown.length) {
+    container.appendChild(
+      elementWithText('p', 'hooks-truncated', `Showing the newest ${shown.length} of ${matched.length} matching invocations.`),
+    );
+  }
+}
+
+/**
+ * Render the hook-health panel: an explicit empty state when the ledger is absent
+ * (records null) or empty, otherwise the per-feature cards plus the collapsible,
+ * filterable invocation table.
+ * @param {Array<object>|null} records - invocation records, or null when the
+ *   ledger is absent.
+ */
+function renderHooksPanel(records) {
+  const note = byId(HOOK_IDS.note);
+  byId(HOOK_IDS.panel).hidden = false;
+  if (records === null) {
+    note.hidden = false;
+    note.textContent = 'No hook invocation ledger yet — no hook has fired, or this Instance predates the ledger.';
+    return;
+  }
+  byId(HOOK_IDS.count).textContent = String(records.length);
+  if (records.length === 0) {
+    note.hidden = false;
+    note.textContent = 'The invocation ledger is present but empty — no hook has fired yet.';
+    return;
+  }
+  invocationRecords = records;
+  renderHooksCards(records, Date.now());
+  populateHookFilters();
+  renderInvocationTable();
+  byId(HOOK_IDS.filterFeature).addEventListener('change', renderInvocationTable);
+  byId(HOOK_IDS.filterOutcome).addEventListener('change', renderInvocationTable);
+  byId(HOOK_IDS.log).hidden = false;
+}
+
 // ---------------------------------------------------------------------------
 // DOM utilities
 // ---------------------------------------------------------------------------
@@ -569,6 +899,19 @@ function spanWithText(className, text) {
   return elementWithText('span', className, text);
 }
 
+/**
+ * Create an <option> with a value and visible label.
+ * @param {string} value - the option value.
+ * @param {string} text - the visible label.
+ * @returns {HTMLOptionElement} the option.
+ */
+function makeOption(value, text) {
+  const option = document.createElement('option');
+  option.value = value;
+  option.textContent = text;
+  return option;
+}
+
 // ---------------------------------------------------------------------------
 // Error surface
 // ---------------------------------------------------------------------------
@@ -608,10 +951,7 @@ function buildSwitcher(sprints) {
   // Newest first: walk the ascending probe order in reverse.
   for (let i = sprints.length - 1; i >= 0; i -= 1) {
     const sprint = sprints[i];
-    const option = document.createElement('option');
-    option.value = String(sprint.sprint_id);
-    option.textContent = `Sprint ${sprint.sprint_id} — ${sprint.name} (${sprint.status})`;
-    select.appendChild(option);
+    select.appendChild(makeOption(String(sprint.sprint_id), `Sprint ${sprint.sprint_id} — ${sprint.name} (${sprint.status})`));
   }
   byId(ELEMENT_IDS.switcher).hidden = false;
 }
@@ -693,6 +1033,22 @@ async function initLoadPanel() {
 }
 
 /**
+ * Render the hook-health panel, containing its own failures: a broken invocation
+ * ledger names itself in the panel note instead of taking down the board (which
+ * renders from independent files).
+ */
+async function initHooksPanel() {
+  try {
+    renderHooksPanel(await loadInvocationLedger());
+  } catch (err) {
+    const note = byId(HOOK_IDS.note);
+    byId(HOOK_IDS.panel).hidden = false;
+    note.hidden = false;
+    note.textContent = `Could not load the hook invocation ledger: ${err.message}`;
+  }
+}
+
+/**
  * Entry point: probe every sprint, render the backlog, then render the selected
  * sprint (URL ?sprint=N if known, else the default) and wire the switcher and
  * History navigation. Any fetch/parse failure shows the error surface instead of
@@ -707,6 +1063,7 @@ async function init() {
       byId(ELEMENT_IDS.sprintLine).textContent = 'No sprints yet.';
       byId(ELEMENT_IDS.board).hidden = false;
       await initLoadPanel();
+      await initHooksPanel();
       return;
     }
     for (const sprint of sprints) {
@@ -720,6 +1077,7 @@ async function init() {
     window.addEventListener('popstate', onPopState);
     byId(ELEMENT_IDS.board).hidden = false;
     await initLoadPanel();
+    await initHooksPanel();
   } catch (err) {
     showLoadError(err.message);
   }

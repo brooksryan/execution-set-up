@@ -86,6 +86,26 @@
       <div class="load-body" id="load-body"></div>
     </section>
 
+    <!-- Hook health (EXEC-072): doctor-parity per-feature cards plus a
+         collapsible, filterable recent-invocations table, both read from the
+         Runtime Record invocation ledger (.excn/runtime/hook-invocations_progress.json).
+         An absent or empty ledger renders an explicit empty state, never an error. -->
+    <section id="hooks-panel" class="hooks-panel" hidden>
+      <h2 class="lane-title">Hook&nbsp;health <span class="count" id="count-hooks">0</span></h2>
+      <p class="hooks-note" id="hooks-note" hidden></p>
+      <div class="hooks-cards" id="hooks-cards"></div>
+      <details class="hooks-log" id="hooks-log" hidden>
+        <summary class="hooks-log-summary">Recent&nbsp;invocations <span class="count" id="count-invocations">0</span></summary>
+        <div class="hooks-filters">
+          <label class="switcher-label" for="filter-feature">Feature</label>
+          <select class="switcher-select" id="filter-feature"></select>
+          <label class="switcher-label" for="filter-outcome">Outcome</label>
+          <select class="switcher-select" id="filter-outcome"></select>
+        </div>
+        <div class="hooks-table" id="hooks-table"></div>
+      </details>
+    </section>
+
     <footer class="page-footer">
       <p id="footer-note">Read-only over the .excn work-tracking JSON.</p>
     </footer>

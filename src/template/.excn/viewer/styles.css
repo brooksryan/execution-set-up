@@ -17,6 +17,7 @@
   --backlog: #5b5b62;
   --load: #6a1b9a;
   --detail: #00695c;
+  --hooks: #00838f;
   --error-bg: #fdecea;
   --error-ink: #8a1c12;
   --radius: 8px;
@@ -278,6 +279,127 @@ body {
 .load-stats strong {
   color: var(--ink);
   font-variant-numeric: tabular-nums;
+}
+
+/* Hook-health panel (EXEC-072) — doctor-parity cards plus a collapsible,
+   filterable invocation-log table. Same full-width surface treatment as the
+   load panel, in its own role colour. */
+.hooks-panel {
+  max-width: var(--maxwidth);
+  margin: var(--gap) auto 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--hooks);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.hooks-note {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.hooks-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+/* Status pill on a feature card — colour-coded by doctor-parity state. */
+.hook-status {
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  margin-left: auto;
+}
+
+.hook-status-firing {
+  color: var(--shipped);
+  border-color: var(--shipped);
+}
+
+.hook-status-stale {
+  color: var(--not-shipped);
+  border-color: var(--not-shipped);
+}
+
+.hook-status-disabled {
+  color: var(--ink-muted);
+  border-color: var(--border);
+}
+
+/* Collapsible invocation log. */
+.hooks-log {
+  margin-top: var(--gap);
+}
+
+.hooks-log-summary {
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hooks-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.hooks-table-el {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.hooks-th {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hooks-cell {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+/* Outcome cell colour — ok/noop neutral, disabled muted, error emphasised. */
+.hook-outcome-ok {
+  color: var(--shipped);
+}
+
+.hook-outcome-disabled {
+  color: var(--ink-muted);
+}
+
+.hook-outcome-error {
+  color: var(--error-ink);
+  font-weight: 600;
+}
+
+.hooks-truncated {
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  font-style: italic;
 }
 
 .page-footer {

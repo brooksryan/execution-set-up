@@ -14,6 +14,12 @@ writes the JSON.
   — for a closed sprint — its **Decisions**, **Retrospective notes**, and
   **Gate verdicts** (`step_log`).
 - The open **Backlog** (`.excn/issues/backlog.json`).
+- **Hook health**: doctor-parity per-feature cards (firing / stale / disabled,
+  last heartbeat) plus a collapsible recent-invocations table filterable by
+  feature and outcome, read from the Runtime Record invocation ledger
+  (`.excn/runtime/hook-invocations_progress.json`). An absent or empty ledger
+  shows an explicit empty state.
+- **Teammate load** (`.excn/runtime/load_progress.json`), when load reporting is on.
 
 All sourced from the JSON — no manual data entry.
 
