@@ -6,8 +6,8 @@
 // gate-relevant paths and injects a gate-due reminder as additionalContext; `stop`
 // (Stop) blocks ONCE — guarded by stop_hook_active — when gated paths were edited
 // this session but no gate verdict has been recorded, naming the gates due. It never
-// spawns an agent. Session state lives in .excn/gate-watch_progress.json (the
-// *_progress.json ignore class, ADR-0005). Every firing logs one invocation record
+// spawns an agent. Session state is a Runtime Record at .excn/runtime/gate-watch_progress.json
+// (ADR-0008; still the *_progress.json ignore class, ADR-0005). Every firing logs one invocation record
 // via hook-lib (CODE_STANDARDS ## Hooks). FAIL SAFE: any missing/malformed config,
 // unexpected payload, or internal error exits 0 with no output (PRD-007) — this
 // intentionally inverts the fail-closed CLI rule; the health check surfaces decay.
@@ -34,9 +34,9 @@ const SCRIPT_NAME = path.basename(__filename);
 const MODE_EVENTS = { [MODE_POST_TOOL]: 'PostToolUse', [MODE_STOP]: 'Stop' };
 const EVENT_UNKNOWN = 'unknown';
 
-// Per-session pending-gate state, keyed by session_id; in the *_progress.json
-// ignore class so it never lands in git.
-const STATE_RELATIVE_PATH = path.join('.excn', 'gate-watch_progress.json');
+// Per-session pending-gate state, keyed by session_id: a Runtime Record under
+// .excn/runtime/ (ADR-0008), in the *_progress.json ignore class so it never lands in git.
+const STATE_RELATIVE_PATH = path.join('.excn', 'runtime', 'gate-watch_progress.json');
 const STATE_SCHEMA_VERSION = '1.0';
 
 // Sessions idle longer than this are pruned so the state file cannot grow unbounded

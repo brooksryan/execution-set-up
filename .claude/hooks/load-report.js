@@ -4,7 +4,8 @@
 // load-report — the per-Teammate load-reporting feature (EXEC-045, ADR-0006; default
 // OFF). Wired in settings.json as PostToolUse on every tool. When the toggle is on,
 // each firing appends one {ts, agent_type, agent_id?, tool_name} record to
-// .excn/load_progress.json (the *_progress.json ignore class, ADR-0005; schema at
+// .excn/runtime/load_progress.json (a Runtime Record, ADR-0008; still the
+// *_progress.json ignore class, ADR-0005; schema at
 // .excn/schemas/load-progress.schema.json) via atomic temp+rename, so the viewer can
 // render per-Teammate load. Bounded growth: the file keeps the newest MAX_RECORDS
 // records — older ones are dropped on append (a rolling window, not an archive; load
@@ -22,8 +23,9 @@ const FEATURE = 'load_reporting';
 const SCRIPT_NAME = path.basename(__filename);
 const HOOK_EVENT = 'PostToolUse';
 
-// Where the load records live; in the *_progress.json ignore class (ADR-0005).
-const RECORD_RELATIVE_PATH = path.join('.excn', 'load_progress.json');
+// Where the load records live: a Runtime Record under .excn/runtime/ (ADR-0008),
+// in the *_progress.json ignore class (ADR-0005).
+const RECORD_RELATIVE_PATH = path.join('.excn', 'runtime', 'load_progress.json');
 const RECORD_SCHEMA_VERSION = '1.0';
 
 // Rolling-window cap: at one record per tool event this covers days of heavy team

@@ -14,9 +14,9 @@
 // - Heartbeats come from the unified invocation log (INVOCATION_LOG_PATH; every
 //   wired hook appends a {ts, script, event, outcome} record per CODE_STANDARDS
 //   ## Hooks): a feature's latest record across its `scripts` is its heartbeat.
-// - `evidence` is the feature's own *_progress.json state file, kept as the
-//   fallback heartbeat for Instances stamped before the invocation log existed;
-//   null when the feature writes none.
+// - `evidence` is the feature's own *_progress.json Runtime Record (under
+//   .excn/runtime/, ADR-0008), kept as the fallback heartbeat for Instances stamped
+//   before the invocation log existed; null when the feature writes none.
 // - `spawnedScripts` (optional) are scripts the feature's hook spawns itself rather
 //   than settings invoking them — checked for disk presence only, never for wiring.
 // - `liveness` (optional) marks a feature whose evidence is a live-process discovery
@@ -27,7 +27,7 @@ const HOOK_FEATURES = [
   {
     key: 'gate_reminders',
     scripts: ['gate-watch.js'],
-    evidence: '.excn/gate-watch_progress.json',
+    evidence: '.excn/runtime/gate-watch_progress.json',
   },
   {
     key: 'message_nudge',
@@ -37,13 +37,13 @@ const HOOK_FEATURES = [
   {
     key: 'load_reporting',
     scripts: ['load-report.js'],
-    evidence: '.excn/load_progress.json',
+    evidence: '.excn/runtime/load_progress.json',
   },
   {
     key: 'viewer_server',
     scripts: ['viewer-server.js'],
     spawnedScripts: ['viewer-server-daemon.js'],
-    evidence: '.excn/viewer-server_progress.json',
+    evidence: '.excn/runtime/viewer-server_progress.json',
     liveness: true,
   },
   {
@@ -51,12 +51,17 @@ const HOOK_FEATURES = [
     scripts: ['spawn-guard.js'],
     evidence: null,
   },
+  {
+    key: 'progress_location_guard',
+    scripts: ['progress-location-guard.js'],
+    evidence: null,
+  },
 ];
 
 // The unified hook invocation log (CODE_STANDARDS ## Hooks) — doctor's primary
-// heartbeat source; mirrors INVOCATION_LOG_RELATIVE_PATH in the stamped hook-lib.js
-// (one contract, two packages).
-const INVOCATION_LOG_PATH = '.excn/hook-invocations_progress.json';
+// heartbeat source; a Runtime Record under .excn/runtime/ (ADR-0008). Mirrors
+// INVOCATION_LOG_RELATIVE_PATH in the stamped hook-lib.js (one contract, two packages).
+const INVOCATION_LOG_PATH = '.excn/runtime/hook-invocations_progress.json';
 
 // How doctor probes a viewer_server discovery record: the daemon's loopback health
 // endpoint (it echoes {repo, pid, version}), with a short budget so a wedged

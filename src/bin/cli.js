@@ -532,7 +532,7 @@ function printUsage() {
       'even under --force; both created if neither exists).',
       'init never overwrites an existing manifest file unless --force.',
       'doctor reports each hook feature as disabled, firing, stale, or broken (viewer_server:',
-      'running or stale record) — heartbeats read .excn/hook-invocations_progress.json — names',
+      'running or stale record) — heartbeats read .excn/runtime/hook-invocations_progress.json — names',
       'a broken toggle config, and flags an Instance stamped at an older framework version.',
       '',
     ].join('\n')

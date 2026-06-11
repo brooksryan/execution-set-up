@@ -15,8 +15,9 @@ const path = require('path');
 const CONFIG_RELATIVE_PATH = path.join('.excn', 'hooks.config.json');
 
 // The unified invocation log every wired hook appends to (CODE_STANDARDS ## Hooks).
-// In the *_progress.json ignore class (ADR-0005), so it never lands in git.
-const INVOCATION_LOG_RELATIVE_PATH = path.join('.excn', 'hook-invocations_progress.json');
+// A Runtime Record — hook-written state lives under .excn/runtime/ (ADR-0008); it
+// stays in the *_progress.json ignore class (ADR-0005), so it never lands in git.
+const INVOCATION_LOG_RELATIVE_PATH = path.join('.excn', 'runtime', 'hook-invocations_progress.json');
 const INVOCATION_LOG_SCHEMA_VERSION = '1.0';
 
 // Rolling-window cap on invocation records (same window shape as load-report's): at

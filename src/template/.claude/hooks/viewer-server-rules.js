@@ -29,8 +29,9 @@ const HTTP_OK = 200;
 const HEALTH_PATH = '/__viewer-server';
 
 // The discovery record ({port, pid, repo, started}) — the contract doctor and the
-// PRD-008 step-2 global server read. *_progress.json ignore class (ADR-0005).
-const RECORD_RELATIVE_PATH = '.excn/viewer-server_progress.json';
+// PRD-008 step-2 global server read. A Runtime Record under .excn/runtime/ (ADR-0008);
+// *_progress.json ignore class (ADR-0005).
+const RECORD_RELATIVE_PATH = '.excn/runtime/viewer-server_progress.json';
 const RECORD_SCHEMA_VERSION = '1.0';
 
 // Idle self-exit (ADR-0007: never a shutdown hook). The open page's polling counts
@@ -48,15 +49,18 @@ const SPAWN_POLL_INTERVAL_MS = 100;
 
 // Serving whitelist (ADR-0007): viewer assets (under the .excn namespace per
 // ADR-0002) plus the .excn JSON the page reads — top-level .excn/*.json,
-// .excn/schemas/*.json, and the sprint/backlog JSON viewer.js fetches from
-// .excn/sprints/ and .excn/issues/. Patterns match the root-relative POSIX
-// path of the *resolved* request; anything unmatched is a 404.
+// .excn/schemas/*.json, the sprint/backlog JSON viewer.js fetches from
+// .excn/sprints/ and .excn/issues/, and the Runtime Records under .excn/runtime/
+// (ADR-0008) the hook-health view reads (e.g. hook-invocations_progress.json,
+// load_progress.json). Patterns match the root-relative POSIX path of the
+// *resolved* request; anything unmatched is a 404.
 const PATH_WHITELIST = [
   /^\.excn\/viewer\/[^/]+$/,
   /^\.excn\/[^/]+\.json$/,
   /^\.excn\/schemas\/[^/]+\.json$/,
   /^\.excn\/sprints\/[^/]+\.json$/,
   /^\.excn\/issues\/[^/]+\.json$/,
+  /^\.excn\/runtime\/[^/]+\.json$/,
 ];
 
 // The page the bare URL lands on.
