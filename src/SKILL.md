@@ -9,7 +9,7 @@ Set up this project for autonomous, agent-driven work. Run four phases in order.
 
 ## 1. Preflight (hard gate)
 
-Confirm these global skills are installed (look in `~/.claude/skills/`): `make-teammate`, `async-questions`. If either is missing, **stop** and tell the user which to install. Do not proceed. The Lifecycle skills (`execution-grill-with-docs`, `execution-to-prd`, `execution-to-issues`) are not global — the Scaffolder stamps them into the Instance in step 2.
+Confirm this global skill is installed (look in `~/.claude/skills/`): `make-teammate`. If it is missing, **stop** and tell the user to install it. Do not proceed. The Lifecycle skills (`execution-grill-with-docs`, `execution-to-prd`, `execution-to-issues`) are not global — the Scaffolder stamps them into the Instance in step 2.
 
 ## 2. Stamp the invariant layout
 
@@ -35,6 +35,6 @@ Confirm the layout, then tell the user: **setup is done — exit, restart in a f
 - The split: the **Scaffolder** (npm) stamps invariant files; the **agent** writes only variant (grilled) files. If you find yourself hand-copying a file that is identical across projects, it belongs in the package, not in your output.
 - Read lightly. Defer to the bundled references (`principles.md`, `authoring-adherence-agents.md`, `PROCESS.md`) and to your judgment. Do not prescribe every step to the user.
 - The two universal Adherence Agents enforce invariant rubrics: `process-adherence` (rubric `.excn/PROCESS.md`) and `alignment` (rubric Principles + `.excn/PHILOSOPHY.md`). Variant rubrics get one-off agents the Team Lead authors.
-- Work-tracking lives flat in `.excn/` — `sprints/`, `issues/`, `prds/`, `retros/`, `*_progress.json` (ephemeral, gitignored). Durable conclusions are promoted out into the committed `.excn/` docs via the Retro Loop.
+- Work-tracking lives in `.excn/` and is version-controlled — `sprints/`, `issues/`, `prds/`, `retros/`. Only `*_progress.json` is gitignored: agent- and gate-written Progress Records in `.excn/progress/`, hook-written Runtime Records in `.excn/runtime/`. Durable conclusions are promoted out into the committed `.excn/` docs via the Retro Loop.
 
 </supporting-info>
