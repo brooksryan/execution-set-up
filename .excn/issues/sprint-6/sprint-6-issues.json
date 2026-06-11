@@ -4,7 +4,7 @@
     {
       "id": "EXEC-065",
       "title": "Scaffolder update: stop false-positive drift when a file matches the incoming template",
-      "status": "open",
+      "status": "closed",
       "severity": "P2",
       "scope": [
         "src/bin"
@@ -22,11 +22,11 @@
       ],
       "slice_type": "AFK",
       "root_cause": "update() orders the recorded-hash drift check before the template-content comparison, so lockstep-updated files with a stale anchor are misclassified",
-      "fix": null,
+      "fix": "update() reordered to test currentHash === templateHash before the recorded-hash drift check: a file byte-identical to the incoming template is classified unchanged and re-anchored to the template hash. Commit 93f1489 (src/bin/cli.js). code-standards + package-qa PASS.",
       "depends_on": [],
       "related_tickets": [],
       "assigned_sprint": 6,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 6,
       "notes": "Found dogfood-testing the upgrade path (2026-06-10). The one genuine drift in that test (_teammate.template.md missing the color line) is being caught up directly."
     },
     {

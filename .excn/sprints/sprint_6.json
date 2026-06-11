@@ -51,20 +51,21 @@
     "EXEC-071",
     "EXEC-072"
   ],
-  "shipped": [],
-  "in_progress": [],
-  "not_shipped": [
+  "shipped": [
     {
       "id": "S6-1",
       "type": "BUG",
       "title": "EXEC-065: Scaffolder update stops false-positive drift when a file matches the incoming template",
       "owner": "builder",
-      "summary": "update() classifies a file drifted whenever its current hash differs from the recorded stamped hash, even when byte-identical to the incoming template, and carries the stale anchor forward. Fix: when currentHash === templateHash, classify unchanged and record templateHash before the drift check. Dogfood: 8 of 9 reported-drifted files were identical to the template.",
+      "summary": "update() now tests currentHash === templateHash before the recorded-hash drift check, so a file byte-identical to the incoming template is classified unchanged and re-anchored to the template hash regardless of a stale recorded hash. Genuine drift still reported and left in place with its old anchor; clean-upgrade refresh path unchanged. Verified in a temp-dir test (all 6 checks) and a dogfood-root update re-run reporting drifted 0 (~8 prior false-positives now unchanged).",
       "closes_issues": [
         "EXEC-065"
       ],
-      "notes": "Grill-skipping local bug fix pulled by Team Lead directive 2026-06-10."
-    },
+      "notes": "Commit 93f1489 (src/bin/cli.js only). Gates: code-standards PASS + package-qa PASS (step_log). Grill-skipping local bug fix pulled by Team Lead directive 2026-06-10. Dogfood-root marker re-anchor (8 stale anchors + 0.3.0->0.4.0) demonstrated but not committed — a live update also pulled in viewer's uncommitted src/template/viewer WIP, so builder reverted that side-effect; the code fix alone already makes those files report unchanged, so nothing is functionally pending."
+    }
+  ],
+  "in_progress": [],
+  "not_shipped": [
     {
       "id": "S6-2",
       "type": "INFRA",
@@ -157,6 +158,18 @@
       "at": "2026-06-10",
       "artifact": "src/template/.claude/agents/nothing-new-under-the-sun.md",
       "summary": "PASS — 0 violations. Digest filename convention change (<prd-id> → <prd-id>-<prd-slug>) conforms to all Principles and project Philosophy; tied to a real retro observation."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "src/bin/cli.js update() function and docstring (EXEC-065)",
+      "summary": "PASS — 0 violations. Reordering, comment, and docstring changes conform to all Structure and Commenting rules."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-065 — Scaffolder update() false-positive drift fix in src/bin/cli.js",
+      "summary": "PASS — 0 violations. All stamp-contract checks hold: manifest exact (46 files, gitignore rename correct), idempotency (0 writes on second init), all JSON parses, .excn/.gitignore contains exactly *_progress.json with no root .gitignore created, pack parity (un-dotted gitignore ships in tarball, no dotted form), skip-safety (pre-existing file preserved), pointer wiring (all 7 sub-cases pass including oversized AGENTS.md warning). EXEC-065 fix verified: a file byte-identical to the template but carrying a stale recorded hash is classified unchanged and re-anchored to the template hash, not reported as drifted."
     }
   ],
   "retrospective_notes": [
