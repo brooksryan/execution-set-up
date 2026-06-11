@@ -204,6 +204,10 @@
     {
       "title": "npm 0.3.0 lagged HEAD at the same version number (PRD-009 grill)",
       "body": "The published npm 0.3.0 lagged HEAD while carrying the same version number — template content changed without a version bump, so consumers on 0.3.0 silently missed it. Candidate: a preflight guard forcing a version bump when template content changes. Philosophy/process candidate carried for the Retro Loop."
+    },
+    {
+      "title": "Mid-sprint root-restamp clobber (EXEC-065 x EXEC-071)",
+      "body": "Builder's dogfood `update` mirrored viewer's uncommitted template WIP into the root; builder's lane-isolation revert then wiped viewer's hand-mirror. Team Lead ruling for the rest of sprint 6: no update/migrate against the live dogfood root while lanes have WIP (temp-dir verification only; Team Lead sequences dogfood runs at clean-tree points), and never revert paths outside your own lane. Candidate durable rule for the Retro Loop (PROCESS.md or TEAM_DIRECTIVE Don'ts)."
     }
   ]
 }
