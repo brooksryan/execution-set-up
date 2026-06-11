@@ -128,22 +128,21 @@
         "EXEC-069"
       ],
       "notes": "Commit 813217e (4 files: migrate-policy.js new + cli.js migrate verb/doctor/dispatch + gate-watch.js + root mirror). Gates: code-standards PASS + package-qa PASS, which exercised the full migrate contract (24-check + 5-check fixtures). Two acceptance pieces deliberately deferred per the root-restamp ruling: (1) the live dogfood-root migration + marker re-anchor — Team Lead sequences it at a clean-tree point, proven here by temp-dir fixtures + sign-off; (2) the durable package-qa rubric extension (chartered, alignment-gated per ADR-0004) — builder handed Team Lead the exact check delta to fold into the package-qa definition. PRD-009 slice 4. depends_on: EXEC-066, EXEC-067."
-    }
-  ],
-  "in_progress": [],
-  "not_shipped": [
+    },
     {
       "id": "S6-8",
       "type": "FEAT",
       "title": "EXEC-072: viewer hook health — doctor-parity cards plus the invocation log",
       "owner": "viewer",
-      "summary": "The viewer renders per-feature hook health cards mirroring doctor (firing / stale / disabled, last heartbeat) from the Runtime Record invocation ledger, with a collapsible recent-invocations table filterable by feature and outcome. Missing/empty ledger renders an explicit empty state. Src-First, verified on the live viewer server.",
+      "summary": "Viewer gains a hook-health panel over the Runtime Record invocation ledger (.excn/runtime/hook-invocations_progress.json): per-feature doctor-parity cards (firing/stale/disabled + last heartbeat) plus a collapsible recent-invocations table filterable by feature and outcome, capped newest-first with the remainder summarized; absent/empty ledger renders an explicit empty state. Status is ledger-derived (HOOK_FEATURES/HEARTBEAT_FRESH_MS mirror health-policy.js). Read-only; Src-First + dogfood mirror; verified on the live viewer server.",
       "closes_issues": [
         "EXEC-072"
       ],
-      "notes": "PRD-009 slice 7. depends_on: EXEC-067."
+      "notes": "Commit 3bf5bbe (8 viewer files). Gate: code-standards PASS (step_log). Bundled the EXEC-067 viewer-side load-path follow-up (LOAD_PROGRESS_PATH -> .excn/runtime/load_progress.json) into the same commit — both are the viewer's ADR-0008 runtime-home reads. PRD-009 slice 7. depends_on: EXEC-067."
     }
   ],
+  "in_progress": [],
+  "not_shipped": [],
   "defects_discovered": [],
   "decisions": [],
   "step_log": [
@@ -254,6 +253,18 @@
       "at": "2026-06-10",
       "artifact": "EXEC-069 — new Scaffolder migrate command + migrate-policy.js data module + doctor record layout line",
       "summary": "PASS — 0 violations. Stamp contract: manifest exact (51 files, gitignore rename correct), idempotency (0 writes/51 skipped on second init), all 10 stamped JSON parse, .excn/.gitignore exactly *_progress.json (no root .gitignore), pack parity (migrate-policy.js ships in tarball at package/bin/, gitignore un-dotted, no .gitignore in tarball), skip-safety (existing file not overwritten without --force), pointer wiring (all sub-cases pass: both-create, preserve, no-double-append, force-preserves-pointer, one-exists-no-phantom, deleted-block-reappended, sentinel visible text not HTML comment, oversize warning). Migrate contract: seeded 4 runtime + 3 progress records at .excn base; migrate moved all 7 to correct homes (runtime records → .excn/runtime/, others → .excn/progress/), reported every move, exit 0; all 7 byte-identical at destination; no record remains at .excn base. Re-run is a no-op (moved 0, skipped 0). Clash: base record whose name exists at destination skipped (reported), home copy not clobbered, base copy left in place. Doctor before: LEGACY — 7 record(s); doctor after: ADR-0008 homes. No-.excn target: exit 1 with stderr message (fail-closed). Update: all 7 records in both homes byte-identical after update (work-tracking never touched)."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": ".claude/agents/package-qa.md",
+      "summary": "PASS — 0 violations. Migrate contract bullet (ADR-0008) added to step 2 checklist. Chartered change: traced PRD-009 → EXEC-069 → sprint 6, builder-drafted from ad-hoc checks, Team-Lead-authored per ADR-0004 and roster (one-off gate agents excluded from architect). Change is minimal (one bullet, instruction-only), keeps single responsibility (Scaffolder stamp contract), introduces no coaching or next-steps language, and is tied to the real EXEC-069 acceptance criterion in sprint_6.json S6-5 notes."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "src/template/.excn/viewer/{viewer.js,index.html,styles.css,README.md} + .excn/viewer mirrors / EXEC-072",
+      "summary": "PASS — 0 violations. All Structure and Commenting rules hold. Single responsibility: each new function (loadInvocationLedger, featureForScript, featureHealth, renderHookCard, renderHooksCards, populateHookFilters, invocationMatches, renderInvocationHead, renderInvocationRow, renderInvocationTable, renderHooksPanel, initHooksPanel, makeOption) has exactly one job. Named constants cover every meaningful literal (HEARTBEAT_FRESH_MS, HOOK_FEATURES, HOOK_STATUS_*, HOOK_OUTCOMES, OUTCOME_DISABLED, RECENT_INVOCATIONS_MAX, FILTER_ALL, HOOK_IDS, INVOCATION_LOG_PATH). Fail-closed: loadInvocationLedger throws on a present-but-broken ledger; initHooksPanel contains its own failures in the panel note mirroring initLoadPanel. No dead code: all new constants and functions are reachable; invocationRecords module state is written and read. Deterministic layout preserved. JSDoc on every new function with params/returns/failure modes. Why-not-what comments on HEARTBEAT_FRESH_MS one-contract-two-packages invariant, HOOK_FEATURES keep-in-lockstep note, featureHealth ledger-only derivation rationale, and newestFirst reversal reason. All comments truthful. No TODO/FIXME."
     }
   ],
   "retrospective_notes": [
