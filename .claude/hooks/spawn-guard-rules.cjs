@@ -1,8 +1,8 @@
 'use strict';
 
-// spawn-guard-rules — data for spawn-guard.js (EXEC-064). Which tool_input keys may
+// spawn-guard-rules — data for spawn-guard.cjs (EXEC-064). Which tool_input keys may
 // carry a spawn request's agent type, and the deny reason surfaced to the model.
-// Data only, no logic: spawn-guard.js owns the decision; this module owns the
+// Data only, no logic: spawn-guard.cjs owns the decision; this module owns the
 // vocabulary, so phrasing and payload-shape changes never touch the decision code.
 
 // tool_input keys that can carry the requested agent type on the one-shot spawn
@@ -16,7 +16,7 @@ const AGENT_TYPE_KEYS = ['subagent_type', 'agent_type'];
 // When BOTH carry a value the spawn is the legitimate rostered mechanism (the
 // Teammate runs with its .claude/agents definition), so the guard allows it even for
 // a rostered type; a bare one-shot spawn carries neither and stays denied. Decision
-// logic (require both present) lives in spawn-guard.js — this is the key vocabulary.
+// logic (require both present) lives in spawn-guard.cjs — this is the key vocabulary.
 const TEAM_SPAWN_KEYS = ['name', 'team_name'];
 
 // The deny reason the model sees (PreToolUse permissionDecisionReason doubles as an

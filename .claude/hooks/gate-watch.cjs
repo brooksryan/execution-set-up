@@ -14,14 +14,14 @@
 
 const fs = require('fs');
 const path = require('path');
-const lib = require('./hook-lib');
+const lib = require('./hook-lib.cjs');
 const {
   GATE_PATH_RULES,
   GATED_DOC_FILES,
   GATED_DOC_GATES,
   REMINDER_TEMPLATE,
   BLOCK_REASON_TEMPLATE,
-} = require('./gate-rules');
+} = require('./gate-rules.cjs');
 
 const FEATURE = 'gate_reminders';
 const MODE_POST_TOOL = 'post-tool';

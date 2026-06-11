@@ -5,7 +5,7 @@
 // ADR-0007 step 1; rides the ADR-0006 toggle plumbing, default OFF in the template).
 // On SessionStart it derives this repo's port from a hash of the repo path, probes
 // for an already-running instance of our daemon (identified by the health endpoint
-// echoing the repo path — idempotent start), spawns viewer-server-daemon.js detached
+// echoing the repo path — idempotent start), spawns viewer-server-daemon.cjs detached
 // when none answers, writes the {port, pid, repo, started} discovery record, and
 // surfaces the page URL as additionalContext. Every firing logs one invocation
 // record via hook-lib (CODE_STANDARDS ## Hooks). FAIL SAFE: any missing/malformed
@@ -15,11 +15,11 @@
 const http = require('http');
 const path = require('path');
 const { spawn } = require('child_process');
-const lib = require('./hook-lib');
-const rules = require('./viewer-server-rules');
+const lib = require('./hook-lib.cjs');
+const rules = require('./viewer-server-rules.cjs');
 
 const FEATURE = 'viewer_server';
-const DAEMON_SCRIPT = path.join(__dirname, 'viewer-server-daemon.js');
+const DAEMON_SCRIPT = path.join(__dirname, 'viewer-server-daemon.cjs');
 
 // Identity and event name for the invocation log (CODE_STANDARDS ## Hooks); the
 // event matches this script's settings.json wiring.

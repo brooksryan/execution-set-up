@@ -14,7 +14,7 @@
 // with no output (PRD-007).
 
 const path = require('path');
-const lib = require('./hook-lib');
+const lib = require('./hook-lib.cjs');
 
 const FEATURE = 'load_reporting';
 

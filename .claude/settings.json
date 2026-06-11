@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/spawn-guard.js\""
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/spawn-guard.cjs\""
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/progress-location-guard.js\""
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/progress-location-guard.cjs\""
           }
         ]
       }
@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/gate-watch.js\" post-tool"
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/gate-watch.cjs\" post-tool"
           }
         ]
       },
@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/message-nudge.js\""
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/message-nudge.cjs\""
           }
         ]
       },
@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/load-report.js\""
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/load-report.cjs\""
           }
         ]
       }
@@ -54,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/viewer-server.js\""
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/viewer-server.cjs\""
           }
         ]
       }
@@ -64,7 +64,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/gate-watch.js\" stop"
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/gate-watch.cjs\" stop"
           }
         ]
       }
