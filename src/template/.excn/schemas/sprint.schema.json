@@ -88,18 +88,8 @@
     },
     "step_log": {
       "type": "array",
-      "description": "Optional auditable ledger of QA-gate verdicts and lifecycle steps, appended by Adherence Agents as the sprint runs. Each entry records one step against one artifact.",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["step", "at", "artifact", "summary"],
-        "properties": {
-          "step": { "type": "string", "description": "Free-form step name, e.g. code_standards_pass." },
-          "at": { "type": "string", "format": "date" },
-          "artifact": { "type": "string", "description": "What was reviewed (paths, issue IDs, or a short label)." },
-          "summary": { "type": "string" }
-        }
-      }
+      "description": "Optional auditable ledger of QA-gate verdicts and lifecycle steps, appended by Adherence Agents as the sprint runs. Each entry records one step against one artifact, sharing the Verdict Ledger entry shape (defined once in verdict-ledger.schema.json).",
+      "items": { "$ref": "verdict-ledger.schema.json#/$defs/entry" }
     },
     "retrospective_notes": {
       "type": "array",

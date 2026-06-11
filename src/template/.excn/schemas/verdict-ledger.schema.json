@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "verdict-ledger.schema.json",
+  "title": "Verdict Ledger",
+  "description": "An append-only array of QA-gate verdicts and lifecycle steps, each entry recording one step against one artifact. The session Verdict Ledger (a Progress Record under .excn/progress/, ADR-0008) is one such array; a sprint record's step_log carries the same entries by referencing #/$defs/entry, so the shape is defined once. Distinct from progress.schema.json, which shapes a unit-of-work tracker (current_step, paused_at, blockers) rather than a bare verdict array.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/entry" },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step", "at", "artifact", "summary"],
+      "properties": {
+        "step": { "type": "string", "description": "Step name, e.g. code_standards_pass or alignment_review_fail." },
+        "at": { "type": "string", "format": "date" },
+        "artifact": { "type": "string", "description": "What was reviewed (paths, issue IDs, or a short label)." },
+        "summary": { "type": "string", "description": "The verdict and its reason, e.g. PASS — 0 violations." }
+      }
+    }
+  }
+}
