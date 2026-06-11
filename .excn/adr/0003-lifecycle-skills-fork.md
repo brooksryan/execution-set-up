@@ -19,3 +19,7 @@ The Work Grill's three steps depended on globally-installed skills (`grill-with-
 - `execution-to-prd` / `execution-to-issues` carry no markdown format templates; the stamped JSON schemas are their output contracts.
 - Philosophy candidates surfaced mid-grill route through the PRD's `notes` into the next sprint's `retrospective_notes` — the Retro Loop stays the sole path into PHILOSOPHY.md.
 - Preflight's required-global-skills gate shrinks accordingly (EXEC-010).
+
+## Amendment — 2026-06-10
+
+`make-teammate` joins the stamped skill set (EXEC-074), under its own name rather than an `execution-*` fork: it is generic with no framework-deviating conventions to fix, so the personal-over-project collision is benign — a personal copy is the same skill. With it stamped (and the never-invoked `async-questions` gate removed, EXEC-073), Preflight requires no global skills at all; its one remaining check is a working Node 18+ `npx`. This closes the external-dependency gap that blocked distributing the Setup Skill as a public plugin.

@@ -9,7 +9,7 @@ Set up this project for autonomous, agent-driven work. Run four phases in order.
 
 ## 1. Preflight (hard gate)
 
-Confirm this global skill is installed (look in `~/.claude/skills/`): `make-teammate`. If it is missing, **stop** and tell the user to install it. Do not proceed. The Lifecycle skills (`execution-grill-with-docs`, `execution-to-prd`, `execution-to-issues`) are not global — the Scaffolder stamps them into the Instance in step 2.
+Confirm `npx` runs with Node 18+ (`node --version`). If not, **stop** and tell the user. No global skills are required — the Scaffolder stamps everything the setup needs into the Instance in step 2: the Lifecycle skills (`execution-grill-with-docs`, `execution-to-prd`, `execution-to-issues`) and `make-teammate` (a personal copy, if installed, overrides the stamped one — same skill either way).
 
 ## 2. Stamp the invariant layout
 

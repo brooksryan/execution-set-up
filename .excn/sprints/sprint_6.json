@@ -277,6 +277,12 @@
       "at": "2026-06-10",
       "artifact": "src/template/.excn/viewer/{viewer.js,index.html,styles.css,README.md} + .excn/viewer mirrors / EXEC-072",
       "summary": "PASS — 0 violations. All Structure and Commenting rules hold. Single responsibility: each new function (loadInvocationLedger, featureForScript, featureHealth, renderHookCard, renderHooksCards, populateHookFilters, invocationMatches, renderInvocationHead, renderInvocationRow, renderInvocationTable, renderHooksPanel, initHooksPanel, makeOption) has exactly one job. Named constants cover every meaningful literal (HEARTBEAT_FRESH_MS, HOOK_FEATURES, HOOK_STATUS_*, HOOK_OUTCOMES, OUTCOME_DISABLED, RECENT_INVOCATIONS_MAX, FILTER_ALL, HOOK_IDS, INVOCATION_LOG_PATH). Fail-closed: loadInvocationLedger throws on a present-but-broken ledger; initHooksPanel contains its own failures in the panel note mirroring initLoadPanel. No dead code: all new constants and functions are reachable; invocationRecords module state is written and read. Deterministic layout preserved. JSDoc on every new function with params/returns/failure modes. Why-not-what comments on HEARTBEAT_FRESH_MS one-contract-two-packages invariant, HOOK_FEATURES keep-in-lockstep note, featureHealth ledger-only derivation rationale, and newestFirst reversal reason. All comments truthful. No TODO/FIXME."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": "src/template/.claude/skills/make-teammate/SKILL.md, src/SKILL.md (Preflight), .excn/adr/0003-lifecycle-skills-fork.md",
+      "summary": "PASS — 0 violations. EXEC-074 change set conforms to all Principles and project Philosophy. make-teammate stamped verbatim (byte-identical to global; Src-First; no added prose); Preflight gate removal is instruction-only with no coaching language; ADR amendment follows declared Amendment convention rather than rewriting history; all three changes are tied to the real plugin-marketplace publication observation and Team Lead ruling filed as EXEC-074 in backlog."
     }
   ],
   "retrospective_notes": [
