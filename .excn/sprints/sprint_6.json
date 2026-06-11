@@ -106,21 +106,21 @@
         "EXEC-070"
       ],
       "notes": "Commit e7f4cd5 (10 files: progress-location-guard{,-rules}.js + settings.json + hooks.config.json toggle + hooks-config.schema.json, all dogfood-mirrored). Gates: code-standards PASS + package-qa PASS, manifest 51 files (step_log); 15-check payload simulation (deny/pass/fail-safe). Scope note: the guard's doctor card (HOOK_FEATURES in src/bin/health-policy.js) ships with EXEC-067 to avoid splitting that shared file across two blocked commits — not an EXEC-070 acceptance criterion. PRD-009 slice 5. depends_on: EXEC-066."
-    }
-  ],
-  "in_progress": [],
-  "not_shipped": [
+    },
     {
       "id": "S6-3",
       "type": "REFACTOR",
       "title": "EXEC-067: hooks, doctor, viewer-server read and write Runtime Records under .excn/runtime/",
       "owner": "builder",
-      "summary": "Hook-written state becomes Runtime Records: invocation heartbeat ledger, viewer-server pid record, gate-watch state all move to .excn/runtime/. doctor heartbeat checks and the viewer-server daemon read the new home; no hook writes any *_progress.json at the .excn base. Src-First.",
+      "summary": "The four hook-written Runtime Records (invocation heartbeat ledger, viewer-server pid record, gate-watch state, load-report) move out of the .excn base into .excn/runtime/ (ADR-0008). doctor reads heartbeats + viewer-server state from the new home and lists all 6 features; the daemon PATH_WHITELIST serves .excn/runtime/*.json. Suffix + gitignore unchanged. gate-watch's verdict-evidence scan still reads the .excn base + sprints/ — those Progress Records relocate in EXEC-069, where the scan follows. Src-First + dogfood mirror; e2e temp-dir test green.",
       "closes_issues": [
         "EXEC-067"
       ],
-      "notes": "PRD-009 slice 2. depends_on: EXEC-066."
-    },
+      "notes": "Commit 2badcaa (10 files: hook-lib, load-report, gate-watch, viewer-server-rules + dogfood mirrors + cli.js doctor help + health-policy.js read-side). Gates: code-standards PASS (prior FAIL cleared by the CODE_STANDARDS ## Hooks rubric sweep 5f8111f) + package-qa PASS, manifest 51 files (step_log). The deferred EXEC-070 doctor card (progress_location_guard HOOK_FEATURES) landed here in health-policy.js, completing that deferral. PRD-009 slice 2. depends_on: EXEC-066."
+    }
+  ],
+  "in_progress": [],
+  "not_shipped": [
     {
       "id": "S6-5",
       "type": "FEAT",
@@ -230,6 +230,18 @@
       "at": "2026-06-10",
       "artifact": "EXEC-070 — two new stamped hook scripts (progress-location-guard.js + progress-location-guard-rules.js); settings.json PreToolUse second entry; hooks.config.json progress_location_guard toggle; hooks-config.schema.json optional property",
       "summary": "PASS — 0 violations. All stamp-contract checks hold: manifest exact (51 files, both new hook files stamped, gitignore rename correct), idempotency (0 writes/51 skipped on second init, both pointers already-present), all JSON parses (settings.json, hooks.config.json, hooks-config.schema.json all parse clean), .excn/.gitignore exactly *_progress.json (no root .gitignore created), pack parity (both hook files ship in tarball at template/.claude/hooks/, settings.json + hooks.config.json + hooks-config.schema.json all present), skip-safety (pre-existing hook file preserved without --force). Schema validation: hooks.config.json validates against hooks-config.schema.json (progress_location_guard present-and-boolean is valid; old config WITHOUT the key also validates — it is optional/not-required). Guard behavior end-to-end with feature enabled: misfiled .excn/session_progress.json write denied (stdout permissionDecision deny, exit 0); write to .excn/progress/ passes (no output, exit 0); write to .excn/runtime/ passes (no output, exit 0); malformed payload fails safe (no output, exit 0); malformed config fails safe (no output, exit 0); feature disabled — misfiled write passes (no output, exit 0). Doctor exits 0, toggle config valid, progress_location_guard not listed in HOOK_FEATURES (expected per EXEC-070 scope). Pointer wiring all sub-cases pass."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-067 (re-gate) — hook-lib, load-report, gate-watch, viewer-server-rules, health-policy, cli.js + dogfood mirrors (Runtime Records move to .excn/runtime/)",
+      "summary": "PASS — 0 violations. CODE_STANDARDS.md ## Hooks now reads .excn/runtime/hook-invocations_progress.json (commit 5f8111f, alignment PASS). All four hook scripts route to .excn/runtime/ via named constants; logInvocation called unconditionally on every exit path in every hook; no hook writes the log directly (all calls go through hook-lib); helper swallows its own failures. health-policy INVOCATION_LOG_PATH matches. New HOOK_FEATURES progress_location_guard entry is data-only and matches the established entry shape. All Structure and Commenting rules hold."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-10",
+      "artifact": "EXEC-067 — hook-written state becomes Runtime Records under .excn/runtime/ (ADR-0008) + health-policy HOOK_FEATURES gains progress_location_guard",
+      "summary": "PASS — 0 violations. Manifest exact (51 files, gitignore rename correct, .excn/runtime/.gitkeep present). Idempotency: 0 writes/51 skipped on second init, both pointers already-present. JSON: all 11 stamped JSON files parse clean. Gitignore: .excn/.gitignore exactly *_progress.json, root .gitignore not touched, pattern anchored in .excn/. Runtime contract: load-report.js wrote load_progress.json to .excn/runtime/ only (not .excn/ base); hook-lib logInvocation wrote hook-invocations_progress.json to .excn/runtime/ only; gate-watch.js wrote gate-watch_progress.json to .excn/runtime/ only. PATH_WHITELIST: .excn/runtime/*.json served, subdir traversal rejected. Doctor: heartbeat cited from .excn/runtime/hook-invocations_progress.json; all 6 features listed; progress_location_guard reports disabled (wired) with no wiring problem (script on disk + settings.json PreToolUse entry confirmed). Skip-safety, pointer wiring (both-create, preserve, no-double-append, force-preserves-pointer, one-exists, deleted-block-reappended, oversize-warning) all pass. Pack parity: 59 files in tarball, progress-location-guard.js + rules file both shipped."
     }
   ],
   "retrospective_notes": [

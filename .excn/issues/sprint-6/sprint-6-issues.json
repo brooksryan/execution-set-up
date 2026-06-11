@@ -59,15 +59,15 @@
       "depends_on": []
     },
     {
-      "status": "open",
+      "status": "closed",
       "actionable_now": true,
       "prd": "PRD-009",
       "slice_type": "AFK",
       "root_cause": null,
-      "fix": null,
+      "fix": "The four hook-written Runtime Records move out of the .excn base into .excn/runtime/ (ADR-0008); doctor reads heartbeats + viewer-server state from the new home and lists all 6 features; daemon PATH_WHITELIST serves .excn/runtime/*.json. gate-watch's Progress-Record scan relocates in EXEC-069. Commit 2badcaa (10 files). code-standards PASS (rubric sweep 5f8111f cleared the prior FAIL) + package-qa PASS.",
       "related_tickets": [],
       "assigned_sprint": 6,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 6,
       "notes": null,
       "id": "EXEC-067",
       "title": "Runtime Records move: hooks, doctor, and viewer-server read and write .excn/runtime/",
