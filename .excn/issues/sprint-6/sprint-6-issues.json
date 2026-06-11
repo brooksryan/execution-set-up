@@ -236,6 +236,32 @@
       "depends_on": [
         "EXEC-067"
       ]
+    },
+    {
+      "id": "EXEC-073",
+      "title": "Setup Skill: drop the unused async-questions Preflight gate and sweep stale work-tracking prose",
+      "status": "closed",
+      "severity": "P2",
+      "scope": [
+        "src skill content"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "The Setup Skill's Preflight hard-gates on the async-questions global skill, but nothing in the product invokes it — it would block every external adopter on a dependency nothing uses. Remove it; make-teammate remains the only global-skill gate. Same sweep: the supporting-info work-tracking line still describes the pre-ADR-0005 layout (all-gitignored, flat) and predates ADR-0008's progress/runtime homes — bring it to current truth. End-to-end: a fresh adopter with only make-teammate installed passes Preflight; the skill's own prose matches the stamped layout.",
+      "prd": null,
+      "acceptance_criteria": [
+        "Preflight requires only make-teammate; async-questions appears nowhere in src/",
+        "supporting-info describes committed work-tracking with only *_progress.json ignored (ADR-0005) and the .excn/progress/ + .excn/runtime/ homes (ADR-0008)",
+        "Ships in the next npm release"
+      ],
+      "slice_type": "AFK",
+      "root_cause": "Preflight list written before the skill body settled; prose never swept after ADR-0005/0008",
+      "fix": "Preflight gate on async-questions removed (make-teammate is the only global-skill gate); supporting-info work-tracking prose swept to current truth (ADR-0005 *_progress.json-only ignore + ADR-0008 .excn/progress/ and .excn/runtime/ homes). grep confirms async-questions absent from src/. Commit f8551d8; ships in npm 0.5.0.",
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 6,
+      "closed_in_sprint": 6,
+      "notes": "Surfaced 2026-06-10 while scoping plugin-marketplace publication: the Preflight dependency story is the real publish blocker."
     }
   ]
 }

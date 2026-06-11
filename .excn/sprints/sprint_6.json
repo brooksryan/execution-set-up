@@ -49,7 +49,8 @@
     "EXEC-069",
     "EXEC-070",
     "EXEC-071",
-    "EXEC-072"
+    "EXEC-072",
+    "EXEC-073"
   ],
   "shipped": [
     {
@@ -127,7 +128,7 @@
       "closes_issues": [
         "EXEC-069"
       ],
-      "notes": "Commit 813217e (4 files: migrate-policy.js new + cli.js migrate verb/doctor/dispatch + gate-watch.js + root mirror). Gates: code-standards PASS + package-qa PASS, which exercised the full migrate contract (24-check + 5-check fixtures). Two acceptance pieces deliberately deferred per the root-restamp ruling: (1) the live dogfood-root migration + marker re-anchor — Team Lead sequences it at a clean-tree point, proven here by temp-dir fixtures + sign-off; (2) the durable package-qa rubric extension (chartered, alignment-gated per ADR-0004) — builder handed Team Lead the exact check delta to fold into the package-qa definition. PRD-009 slice 4. depends_on: EXEC-066, EXEC-067."
+      "notes": "Commit 813217e (4 files: migrate-policy.js new + cli.js migrate verb/doctor/dispatch + gate-watch.js + root mirror). Gates: code-standards PASS + package-qa PASS, which exercised the full migrate contract (24-check + 5-check fixtures). Two acceptance pieces deliberately deferred per the root-restamp ruling, both since RESOLVED: (1) the live dogfood-root migration + marker re-anchor landed (commit a27883f: 11 records relocated to .excn/progress/, doctor reports the ADR-0008 homes, marker at 0.4.0, progress_location_guard ON); (2) the durable package-qa Migrate-contract rubric extension landed (commit 0a96a99, alignment PASS). PRD-009 slice 4. depends_on: EXEC-066, EXEC-067."
     },
     {
       "id": "S6-8",
@@ -139,6 +140,17 @@
         "EXEC-072"
       ],
       "notes": "Commit 3bf5bbe (8 viewer files). Gate: code-standards PASS (step_log). Bundled the EXEC-067 viewer-side load-path follow-up (LOAD_PROGRESS_PATH -> .excn/runtime/load_progress.json) into the same commit — both are the viewer's ADR-0008 runtime-home reads. PRD-009 slice 7. depends_on: EXEC-067."
+    },
+    {
+      "id": "S6-9",
+      "type": "DOCS",
+      "title": "EXEC-073: Setup Skill drops the unused async-questions Preflight gate; stale work-tracking prose swept",
+      "owner": "team-lead",
+      "summary": "The Setup Skill's Preflight hard-gated on the async-questions global skill, which nothing in the product invokes — it would block every external adopter on an unused dependency. Removed; make-teammate is now the only global-skill gate. Same sweep: the supporting-info work-tracking prose, still describing the pre-ADR-0005 all-gitignored flat layout, is brought to current truth (ADR-0005 *_progress.json-only ignore + ADR-0008 .excn/progress/ and .excn/runtime/ homes). grep confirms async-questions absent from src/.",
+      "closes_issues": [
+        "EXEC-073"
+      ],
+      "notes": "Commit f8551d8; ships in npm 0.5.0. Acceptance verified (grep clean, prose current). Late grill-skipping fix pulled by Team Lead directive 2026-06-10; surfaced while scoping plugin-marketplace publication (the Preflight dependency story was the real publish blocker)."
     }
   ],
   "in_progress": [],
