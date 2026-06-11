@@ -151,6 +151,12 @@
       "at": "2026-06-10",
       "artifact": ".excn/adr/0008-progress-runtime-split.md, .excn/CONTEXT.md",
       "summary": "PASS — 0 violations. ADR-0008 and CONTEXT.md grill-time additions conform to all Principles and project Philosophy."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-10",
+      "artifact": "src/template/.claude/agents/nothing-new-under-the-sun.md",
+      "summary": "PASS — 0 violations. Digest filename convention change (<prd-id> → <prd-id>-<prd-slug>) conforms to all Principles and project Philosophy; tied to a real retro observation."
     }
   ],
   "retrospective_notes": [
