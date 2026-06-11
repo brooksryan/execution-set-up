@@ -29,11 +29,17 @@ const VARIANT_FILES = [
 ];
 
 // Work-tracking state roots: everything beneath them belongs to the Instance.
+// progress/ and runtime/ are the two ADR-0008 record homes — Progress Records
+// (agent/gate-written) and Runtime Records (hook/machine-written); the template
+// ships them empty (a .gitkeep) so update never refreshes or drift-reports the
+// records placed inside.
 const WORK_TRACKING_DIR_PREFIXES = [
   '.excn/issues/',
   '.excn/sprints/',
   '.excn/prds/',
   '.excn/retros/',
+  '.excn/progress/',
+  '.excn/runtime/',
 ];
 
 // Per-session progress state matches by suffix wherever it lives (mirrors the
