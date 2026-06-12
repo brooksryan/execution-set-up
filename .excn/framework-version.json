@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "framework_version": "0.5.2",
-  "stamped": "2026-06-11T18:38:00.305Z",
+  "framework_version": "0.5.3",
+  "stamped": "2026-06-12T00:33:33.593Z",
   "files": {
     ".claude/agents/_adherence-agent.template.md": "0417f72a32ad1f26787421f76007c9d4017034fabc8da68a49337f986a2810f7",
     ".claude/agents/_teammate.template.md": "f1e1071831424d4f619cd16f777d72b0eea0d8887a9eb385e2c6dd1f84392e4d",
