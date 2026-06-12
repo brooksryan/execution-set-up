@@ -2,10 +2,10 @@
   "schema_version": "1.0",
   "sprint_id": 7,
   "name": "Sprint 7",
-  "status": "active",
+  "status": "closed",
   "dates": {
     "start": "2026-06-12",
-    "end": null,
+    "end": "2026-06-12",
     "duration_note": null
   },
   "team": [
@@ -71,10 +71,7 @@
         "EXEC-087"
       ],
       "notes": null
-    }
-  ],
-  "in_progress": [],
-  "not_shipped": [
+    },
     {
       "id": "S7-4",
       "type": "REFACTOR",
@@ -98,11 +95,25 @@
       "notes": null
     }
   ],
+  "in_progress": [],
+  "not_shipped": [],
   "defects_discovered": [],
   "decisions": [
     {
       "title": "S7-3 execution routing: team-lead ownership of src/template content",
       "summary": "S7-3 (EXEC-082, src/template content) was executed by team-lead although the item's owner field reads builder, because TEAM_DIRECTIVE.md's roster forbids builder from src/template content and owns it to the Team Lead. Date 2026-06-12."
+    },
+    {
+      "title": "EXEC-083 acceptance-criteria ruling: AC-1 and AC-3 read together",
+      "summary": "EXEC-083 AC-1 ('no longer invokes or references execution-grill-with-docs') and AC-3 ('references the stamped CONTEXT-FORMAT.md by explicit path' — a path inside that skill's directory) conflict on a strict reading. Team Lead ruled them read-together: no skill invocations, and the two mandated format-doc paths (CONTEXT-FORMAT.md, ADR-FORMAT.md) are required citations. Alignment upheld the ruling at the S7-4 SKILL.md gate. Date 2026-06-12."
+    },
+    {
+      "title": "S7-4 gate routing: code-standards skipped, alignment as the content gate",
+      "summary": "S7-4 edited src/SKILL.md (skill content, not code), so code-standards — whose rubric is .excn/CODE_STANDARDS.md, scoped to code — was skipped; package-qa (stamp/pack contract) and alignment ran instead, with alignment applied as the universal content gate for sprint-significant skill-doc edits. Date 2026-06-12."
+    },
+    {
+      "title": "Gate sequencing: package-qa held for a quiet tree, combined-tree gating",
+      "summary": "package-qa runs were held until the working tree was quiet (no in-flight builder edits) and gated combined trees — S7-1+S7-3 together; the S7-4 run re-verified the EXEC-086/087 contract checks still green — following the sprint-5/6 combined-gating precedent. Date 2026-06-12."
     }
   ],
   "step_log": [
@@ -147,7 +158,58 @@
       "at": "2026-06-12",
       "artifact": "S7-2/EXEC-087 doctor hook-health detection (combined S7-1+S7-2+S7-3 tree)",
       "summary": "PASS — 0 violations. 53-file manifest, idempotent re-init, pack parity; EXEC-087 checks green: custom dead command BROKEN naming command+path, deleted stamped hook BROKEN, .js/.cjs twin TWINS naming invoked extension, existing custom .js not flagged, healthy Instance neither finding exit 0; EXEC-086 contract still green; verdict in session_progress.json."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-12",
+      "artifact": "src/SKILL.md (EXEC-083 Setup Grill inline)",
+      "summary": "PASS — 0 violations. Every clause load-bearing; single responsibility tighter; format-doc path citations are paths not invocations per Team Lead ruling on AC-1 vs AC-3; chartered per EXEC-083 (ADR-0004); Team Lead approved; verdict in session_progress.json."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-12",
+      "artifact": "S7-4/EXEC-083 src/SKILL.md Setup Grill inline",
+      "summary": "PASS — 0 violations. 53-file manifest unchanged; pack parity (SKILL.md 3.1kB in tarball); execution-grill-with-docs/ zero diff vs HEAD; CONTEXT-FORMAT.md + ADR-FORMAT.md stamp so every path step 3 names resolves; EXEC-086/087 contract checks still green; verdict in session_progress.json."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-12",
+      "artifact": ".excn/CONTEXT.md (EXEC-084 grill-separation sweep)",
+      "summary": "PASS — 0 violations. Three surgical glossary edits (Setup Skill Preflight parenthetical, orchestrator-analogy replacement, Setup Grill end-to-end sentence) verified factually accurate against src/SKILL.md; chartered per EXEC-084 (ADR-0004); PROCESS.md + template seeds verified already correct; Team Lead approved; verdict in session_progress.json."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-12",
+      "artifact": ".excn/PROCESS.md + src/template/.excn/PROCESS.md (Retro Loop: in_progress/direct-to-shipped convention)",
+      "summary": "PASS — 0 violations. One-sentence In-flight clause pinning record-move timing; Src-First byte-aligned pair; tied to sprint-7 retro observation 3; Team Lead approved; verdict in session_progress.json."
+    },
+    {
+      "step": "process_review_pass",
+      "at": "2026-06-12",
+      "artifact": "close sprint 7",
+      "summary": "PASS — 0 violations. All five items shipped, companion issues closed (closed_in_sprint 7), four decisions + five retrospective notes recorded with no next-steps language, nine PASS gate runs verified; verdict in session_progress.json."
     }
   ],
-  "retrospective_notes": []
+  "retrospective_notes": [
+    {
+      "title": "Issue owners were filed against a single role, not the directive roster",
+      "body": "All five sprint items carried owner 'builder' at filing, but TEAM_DIRECTIVE.md forbids builder from src/template content (S7-3/EXEC-082) and persistent docs (S7-5/EXEC-084); two of five were rerouted mid-sprint (S7-3 to team-lead, S7-5 to scribe). The gap is that owner fields were set without reference to the directive roster's ownership boundaries at filing time."
+    },
+    {
+      "title": "EXEC-083's acceptance criteria contradicted each other",
+      "body": "EXEC-083 AC-1 (no longer references execution-grill-with-docs) and AC-3 (reference the stamped CONTEXT-FORMAT.md by a path inside that skill's directory) conflicted on a strict reading and required a Team Lead ruling mid-gate to reconcile. The conflict was present in the authored criteria, unsurfaced at breakdown review."
+    },
+    {
+      "title": "Record-move timing drifted behind the work",
+      "body": "S7-2 and S7-4 began before their in_progress moves landed, and S7-5 went not_shipped→shipped without an in_progress beat. Work outpaced the tracker; every item landed in its correct terminal state and nothing broke, but the convention for when an issue moves to in_progress (and whether a direct not_shipped→shipped move is sanctioned) is pinned in no document."
+    },
+    {
+      "title": "Gate-reminder hooks assume the editor runs the gate",
+      "body": "Builder's Stop-hook gate-reminder fired repeatedly for gates that were Team-Lead-run this sprint, and the PostToolUse:Edit reminder fired on each scribe CONTEXT.md edit mid-batch. Both hooks assume the agent making the edit also runs the gate; when gating is centralized on the Team Lead the reminders are accurate about the gate being due but misattribute who runs it, producing harmless repeated noise."
+    },
+    {
+      "title": "Every gate run passed first-submission; the consumer P1 closed same-day",
+      "body": "Every gate run this sprint returned PASS with zero violations on first submission — nine recorded passes (alignment x4, code-standards x2, package-qa x3), no revision cycles all sprint. The consumer-reported P1 (EXEC-086) moved repro→fix→contract-check→shipped same-day, and the stale-twins hypothesis was confirmed in the repro and recorded in the issue's fix field."
+    }
+  ]
 }

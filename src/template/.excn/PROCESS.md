@@ -30,7 +30,7 @@ Each sprint is one JSON file at `.excn/sprints/sprint_<N>.json`, conforming to `
 Issues are partitioned by lifecycle location: open, unpulled issues live in `.excn/issues/backlog.json`; a sprint's pulled issues live in its companion `.excn/issues/sprint-<N>/sprint-<N>-issues.json`, which becomes that sprint's archive once it closes. An issue's file IS its state; ids stay globally unique across all partitions. scribe moves issues at sprint boundaries.
 
 - **Open:** scribe creates the JSON with `status: "active"`, a one-sentence goal, the team, and items in `not_shipped`, and moves the pulled issues from `backlog.json` into the sprint's companion partition.
-- **In flight:** Teammates work items. When one ships, they message scribe with what shipped; scribe moves it to `shipped`.
+- **In flight:** Teammates work items. An item moves to `in_progress` when its owner starts work; when one ships, they message scribe with what shipped and scribe moves it to `shipped` — a gated item whose work completed before its `in_progress` move landed goes straight to `shipped`.
 - **Closed:** scribe sets `status: "closed"`, adds decisions and retrospective notes, returns any unresolved issues to `backlog.json` (closed issues stay in the companion file as the archive), then runs the Retro Loop.
 
 A sprint is **complete** when every item is in `shipped` or `not_shipped` (none `in_progress`), decisions and retrospective notes are recorded, and any mandatory QA gates passed. `process-adherence` reads the sprint record plus its companion issues file and checks this before a sprint may close.

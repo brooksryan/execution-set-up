@@ -89,7 +89,7 @@
     {
       "id": "EXEC-083",
       "title": "Setup Grill content moves into the Setup Skill bundle; execution-grill-with-docs serves the Work Grill only",
-      "status": "open",
+      "status": "closed",
       "severity": "P2",
       "scope": [
         "src skill content"
@@ -108,17 +108,17 @@
       ],
       "slice_type": "AFK",
       "root_cause": "The Setup Grill reused the Work Grill's first-step skill for its context layer, so one skill carried two conflicting rule sets selected by a caller it cannot see",
-      "fix": null,
+      "fix": "Setup Grill interview inlined into src/SKILL.md step 3 (build the glossary from scratch: sharpen terms, scenario-test boundaries, cross-reference code, write each term as it resolves, format per the stamped CONTEXT-FORMAT.md path; ADRs sparingly per the stamped ADR-FORMAT.md path). Step 3 preamble distinguishes the Setup Grill from the Work Grill; step 1 reframes the stamped Lifecycle skills as the later Work Grill's and states setup runs from this file alone. Inline fit Precise Minimalism (SKILL.md 41→40 lines) so no bundled reference file was added — npm files manifest unchanged. src/template/.claude/skills/execution-grill-with-docs/ byte-unchanged.",
       "depends_on": [],
       "related_tickets": [],
       "assigned_sprint": 7,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 7,
       "notes": "Resolved in the 2026-06-12 Work Grill (Brooks). Sentinel-hook + config.json variants were considered and descoped by the lead; ADR-0009 was drafted for the config rename and withdrawn with the descope."
     },
     {
       "id": "EXEC-084",
       "title": "Doc sweep: the two grills' descriptions stop implying a shared skill",
-      "status": "open",
+      "status": "closed",
       "severity": "P3",
       "scope": [
         "docs"
@@ -135,13 +135,13 @@
       ],
       "slice_type": "AFK",
       "root_cause": null,
-      "fix": null,
+      "fix": "Three surgical edits to .excn/CONTEXT.md: Setup Skill entry's Preflight parenthetical corrected (Node 18+, no global skills — Scaffolder stamps setup's needs and the later Work Grill's); the 'reads lightly, like grill-with-docs: a thin orchestrator' analogy replaced (carries its own Setup Grill interview, Grill phase runs from the skill file, no stamped skill invoked); Setup Grill / Work Grill entry states the Setup Grill runs inside the to-execution skill end-to-end. Work Grill sentence untouched. PROCESS.md and template seeds verified already correct — no other persistent doc implies the Setup Grill runs execution-grill-with-docs; root CONTEXT.md is variant with no template counterpart (Src-First imposes no mirror).",
       "depends_on": [
         "EXEC-083"
       ],
       "related_tickets": [],
       "assigned_sprint": 7,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 7,
       "notes": "Split from EXEC-083 at breakdown review (Brooks, 2026-06-12)."
     }
   ]
