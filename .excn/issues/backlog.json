@@ -248,6 +248,39 @@
       "assigned_sprint": null,
       "closed_in_sprint": null,
       "notes": null
+    },
+    {
+      "id": "EXEC-085",
+      "title": "Publish the Setup Skill to an official skill/plugin surface",
+      "status": "open",
+      "severity": "P3",
+      "scope": [
+        "packaging",
+        "src skill content"
+      ],
+      "classification": "macro",
+      "actionable_now": false,
+      "description": "Fresh adoption currently rides path 3: npm install to-execution, then telling the agent to read and follow node_modules/to-execution/SKILL.md. Make the skill official: publish to a plugin/skill surface (Claude Code plugin marketplace or equivalent) so installing the plugin registers the to-execution Setup Skill by name and 'set up execution' invokes it with no manual file pointing. EXEC-073/074 removed the external-dependency blockers (Preflight needs no global skills); EXEC-083 makes SKILL.md self-sufficient for any invocation path. Surface choice, packaging format, and versioning against the npm package decided at implementation — grill if the surface forces hard-to-reverse choices.",
+      "prd": null,
+      "acceptance_criteria": [
+        "Installing the published plugin/skill registers to-execution in the agent's skill list",
+        "Invoking the registered skill runs the same SKILL.md content the npm package ships (one source, no fork)",
+        "The npm path-3 flow keeps working unchanged for users who never install the plugin",
+        "CONTEXT.md's Setup Skill entry drops the 'tracked as EXEC-085' pointer once published"
+      ],
+      "slice_type": "HITL",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [
+        "EXEC-083"
+      ],
+      "related_tickets": [
+        "EXEC-073",
+        "EXEC-074"
+      ],
+      "assigned_sprint": null,
+      "closed_in_sprint": null,
+      "notes": "Filed 2026-06-12 (Brooks): 'file an issue to make the skill official at some point.' Not sprint-targeted; actionable_now false until the plugin surface is chosen."
     }
   ]
 }

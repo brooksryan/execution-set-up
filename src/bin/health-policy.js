@@ -86,6 +86,14 @@ const HOOKS_CONFIG_SCHEMA_PATH = '.excn/schemas/hooks-config.schema.json';
 // tell — settings.json commands move in lockstep, migrate rewrites both.
 const LEGACY_HOOK_EXTENSION = '.js';
 
+// Recognizer for a hook-script path inside a settings.json command string: the
+// .claude/hooks/<basename> token, any extension (EXEC-087). doctor extracts each
+// command's target this way to flag a command whose hook file is missing — a dead
+// enforcement hook — covering custom commands the Instance added, not just the stamped
+// HOOK_FEATURES. $1 is the <basename> (name + extension) doctor joins under HOOKS_DIR
+// to test for presence. Mirrors HOOK_DIR in migrate-policy (one hooks-dir contract).
+const HOOK_COMMAND_SCRIPT_PATTERN = String.raw`\.claude/hooks/([\w-]+\.\w+)`;
+
 // Evidence newer than this counts as firing; an enabled feature whose heartbeat is
 // older (or absent) reads as stale. One day covers a normal working cadence without
 // flagging overnight gaps.
@@ -99,6 +107,7 @@ module.exports = {
   HOOKS_CONFIG_PATH,
   HOOKS_CONFIG_SCHEMA_PATH,
   LEGACY_HOOK_EXTENSION,
+  HOOK_COMMAND_SCRIPT_PATTERN,
   HEARTBEAT_FRESH_MS,
   VIEWER_HEALTH_HOST,
   VIEWER_HEALTH_PATH,

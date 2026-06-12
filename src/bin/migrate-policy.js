@@ -72,12 +72,16 @@ const HOOK_CONTENT_REWRITES = [
   { pattern: String.raw`(__dirname,\s*['"])([\w-]+)\.js(['"])`, replacement: '$1$2.cjs$3' },
 ];
 
-// Rewrite applied to settings.json: every stamped hook command points node at a
-// .claude/hooks/<name>.js path; the migration repoints it at the .cjs file. Surgical
-// (only the hook-path substring moves), so an Instance's other settings are untouched.
+// Recognizer for a stamped hook command in settings.json: node is pointed at a
+// .claude/hooks/<name>.js path. cli.js scopes the rewrite per match (EXEC-086) — it
+// repoints only commands whose target hook migrate actually renamed (this run, or a
+// completed prior run leaving the .cjs with no .js twin), and reports — never rewrites —
+// a command naming a hook left as .js (a skipped or untracked hook), so a custom hook's
+// command keeps firing instead of being repointed at a .cjs that does not exist. The
+// match exposes two groups for that decision: $1 the path stem (.claude/hooks/<name>),
+// $2 the bare hook <name> cli.js tests against the renamed set and the on-disk files.
 const HOOK_COMMAND_REWRITE = {
-  pattern: String.raw`(\.claude/hooks/[\w-]+)\.js`,
-  replacement: '$1.cjs',
+  pattern: String.raw`(\.claude/hooks/([\w-]+))\.js`,
 };
 
 module.exports = {

@@ -10,9 +10,10 @@
 // invariant files at the installed version: variant files and work-tracking state are
 // never touched, and an invariant file that drifted from its recorded stamped form is
 // reported and left in place. `doctor [target]` reports per-feature hook health
-// (enabled / firing / stale / broken), toggle-config validity, and outdated detection
-// (recorded vs installed framework version); it exits non-zero only on an unstamped
-// target — a degraded Instance is a report, not a failure. Diagnostics to stderr,
+// (enabled / firing / stale / broken), toggle-config validity, dead settings commands
+// and .js/.cjs hook twins (EXEC-087), and outdated detection (recorded vs installed
+// framework version); it exits non-zero only on an unstamped target — a degraded
+// Instance is a report, not a failure. Diagnostics to stderr,
 // results to stdout, non-zero exit on any failure. Node builtins only, except the
 // `validate` verb, which uses ajv (a real dependency, EXEC-081) lazily required so the
 // other verbs stay builtin-only; pointer-block content, the update file-policy, the
@@ -52,6 +53,7 @@ const {
   HOOKS_CONFIG_PATH,
   HOOKS_CONFIG_SCHEMA_PATH,
   LEGACY_HOOK_EXTENSION,
+  HOOK_COMMAND_SCRIPT_PATTERN,
   HEARTBEAT_FRESH_MS,
   VIEWER_HEALTH_HOST,
   VIEWER_HEALTH_PATH,
@@ -286,24 +288,20 @@ function checkHooksConfig(target) {
 }
 
 /**
- * Check one feature's wiring: every script it rides is both referenced by a hook
- * command in the stamped settings and present on disk.
+ * Read and flatten every hook command string configured in the stamped settings. The
+ * settings shape is event → matcher groups → hooks; for command-level checks (is a
+ * script wired, does its file exist) only the command strings matter.
  * @param {string} target - absolute path of the target project root.
- * @param {object} feature - a HOOK_FEATURES entry.
- * @returns {string[]} wiring problems (empty when fully wired).
+ * @returns {{readable: boolean, commands: string[]}} readable is false when settings
+ * is missing or unparseable; commands is the flat list of hook command strings.
  */
-function wiringProblems(target, feature) {
-  const problems = [];
-  const settings = (() => {
-    try {
-      return JSON.parse(fs.readFileSync(path.join(target, SETTINGS_PATH), 'utf8'));
-    } catch {
-      return null;
-    }
-  })();
-  // Flatten every configured hook command; the entry shape is event → matcher
-  // groups → hooks, but for "is this script wired at all" the command strings are
-  // the only thing that matters.
+function readHookCommands(target) {
+  let settings;
+  try {
+    settings = JSON.parse(fs.readFileSync(path.join(target, SETTINGS_PATH), 'utf8'));
+  } catch {
+    return { readable: false, commands: [] };
+  }
   const commands = [];
   if (settings && settings.hooks && typeof settings.hooks === 'object') {
     for (const groups of Object.values(settings.hooks)) {
@@ -315,8 +313,21 @@ function wiringProblems(target, feature) {
       }
     }
   }
+  return { readable: true, commands };
+}
+
+/**
+ * Check one feature's wiring: every script it rides is both referenced by a hook
+ * command in the stamped settings and present on disk.
+ * @param {string} target - absolute path of the target project root.
+ * @param {object} feature - a HOOK_FEATURES entry.
+ * @returns {string[]} wiring problems (empty when fully wired).
+ */
+function wiringProblems(target, feature) {
+  const problems = [];
+  const { readable, commands } = readHookCommands(target);
   for (const script of feature.scripts) {
-    if (settings === null) problems.push(`${SETTINGS_PATH} missing or unparseable`);
+    if (!readable) problems.push(`${SETTINGS_PATH} missing or unparseable`);
     else if (!commands.some((command) => command.includes(script))) {
       problems.push(`no hook entry in ${SETTINGS_PATH} invokes ${script}`);
     }
@@ -333,6 +344,81 @@ function wiringProblems(target, feature) {
   }
   // settings-missing repeats per script when a feature rides several; report once.
   return [...new Set(problems)];
+}
+
+/**
+ * Find settings.json hook commands whose target script is missing from the hooks dir —
+ * a dead command, the worst failure mode (an enforcement hook that silently never
+ * fires, EXEC-087). Scans every command, so a custom command the Instance added is
+ * covered, not just the stamped HOOK_FEATURES.
+ * @param {string} target - absolute path of the target project root.
+ * @returns {Array<{command: string, missing: string}>} each dead command paired with
+ * the hooks-relative path it names that does not exist on disk.
+ */
+function deadHookCommands(target) {
+  const { commands } = readHookCommands(target);
+  const scriptPattern = new RegExp(HOOK_COMMAND_SCRIPT_PATTERN, 'g');
+  const dead = [];
+  for (const command of commands) {
+    for (const match of command.matchAll(scriptPattern)) {
+      const basename = match[1];
+      if (!fs.existsSync(path.join(target, HOOKS_DIR, basename))) {
+        dead.push({ command, missing: `${HOOKS_DIR}/${basename}` });
+      }
+    }
+  }
+  return dead;
+}
+
+/**
+ * Name which extension the settings commands invoke for a twinned hook base name.
+ * @param {string[]} commands - the flat settings hook command strings.
+ * @param {string} base - the hook base name (no extension).
+ * @returns {string} the invoked file name, "both …" when commands name each extension,
+ * or a note when no command names the hook at all.
+ */
+function invokedHookExtension(commands, base) {
+  const jsName = `${base}${LEGACY_HOOK_EXTENSION}`;
+  const cjsName = `${base}${CJS_HOOK_EXTENSION}`;
+  const invokesJs = commands.some((command) => command.includes(jsName));
+  const invokesCjs = commands.some((command) => command.includes(cjsName));
+  if (invokesJs && invokesCjs) return `both ${jsName} and ${cjsName}`;
+  if (invokesCjs) return cjsName;
+  if (invokesJs) return jsName;
+  return 'neither — no command names it';
+}
+
+/**
+ * Find hooks present under both the legacy .js and the migrated .cjs extension — the
+ * twin a hash-less marker leaves behind (every hook classed untracked, so migrate
+ * renames nothing and a later update stamps a fresh .cjs beside the orphaned .js,
+ * EXEC-086/087). For each twin, name which extension the settings commands invoke so
+ * the live copy is unambiguous.
+ * @param {string} target - absolute path of the target project root.
+ * @returns {Array<{name: string, invoked: string}>} each twinned base name with the
+ * extension settings invokes.
+ */
+function hookExtensionTwins(target) {
+  let present;
+  try {
+    present = new Set(
+      fs
+        .readdirSync(path.join(target, HOOKS_DIR), { withFileTypes: true })
+        .filter((entry) => entry.isFile())
+        .map((entry) => entry.name)
+    );
+  } catch {
+    return [];
+  }
+  const { commands } = readHookCommands(target);
+  const twins = [];
+  for (const fileName of present) {
+    if (!fileName.endsWith(LEGACY_HOOK_EXTENSION)) continue;
+    const base = fileName.slice(0, -LEGACY_HOOK_EXTENSION.length);
+    if (!present.has(`${base}${CJS_HOOK_EXTENSION}`)) continue;
+    twins.push({ name: base, invoked: invokedHookExtension(commands, base) });
+  }
+  return twins;
 }
 
 /**
@@ -706,9 +792,12 @@ async function viewStatus(args) {
  * config invalid), `disabled`, `firing` (enabled with a fresh heartbeat in the
  * unified invocation log, or its legacy state-file fallback), or `stale` (enabled,
  * no recent evidence). Liveness features (viewer_server) report `running` or
- * `stale record` from pid/port probing instead. A degraded Instance still exits 0 —
- * doctor's job is the report; only an unstamped target (no version marker) is a
- * non-zero failure.
+ * `stale record` from pid/port probing instead. Two Instance-wide hook checks run
+ * alongside (EXEC-087): every settings command is resolved against disk so a command
+ * naming a missing hook file is reported BROKEN (custom commands included), and the
+ * hooks dir is scanned for a hook present as both .js and .cjs (a twin), naming which
+ * extension settings invokes. A degraded Instance still exits 0 — doctor's job is the
+ * report; only an unstamped target (no version marker) is a non-zero failure.
  * @param {string[]} args - args after the `doctor` command word (target only).
  * @returns {Promise<void>}
  * @throws Exits non-zero (after a stderr message) when the target is unstamped.
@@ -752,6 +841,20 @@ async function doctor(args) {
     legacyHooks.length > 0
       ? `hook layout: MIGRATION-DUE — ${legacyHooks.length} hook(s) still on the .js layout (${legacyHooks.join(', ')}); a host package.json with "type":"module" mis-loads these as ESM. Run \`to-execution migrate\` to move them to .cjs (EXEC-076)`
       : 'hook layout: .cjs (CommonJS-safe under "type":"module")'
+  );
+
+  const deadCommands = deadHookCommands(target);
+  lines.push(
+    deadCommands.length > 0
+      ? `hook commands: BROKEN — ${deadCommands.length} command(s) name a hook file that is absent: ${deadCommands.map((dead) => `\`${dead.command}\` → ${dead.missing} missing`).join('; ')} (the command silently never fires)`
+      : 'hook commands: every settings command resolves to a present hook file'
+  );
+
+  const twins = hookExtensionTwins(target);
+  lines.push(
+    twins.length > 0
+      ? `hook files: TWINS — ${twins.length} hook(s) present as both .js and .cjs: ${twins.map((twin) => `${twin.name} (settings invokes ${twin.invoked})`).join('; ')}`
+      : 'hook files: no .js/.cjs twins'
   );
 
   // Toggles are read straight from the file even when schema-invalid: the hooks
@@ -816,7 +919,9 @@ function printUsage() {
       'init never overwrites an existing manifest file unless --force.',
       'doctor reports each hook feature as disabled, firing, stale, or broken (viewer_server:',
       'running or stale record) — heartbeats read .excn/runtime/hook-invocations_progress.json — names',
-      'a broken toggle config, and flags an Instance stamped at an older framework version.',
+      'a broken toggle config, flags a settings command pointing at a missing hook file (custom commands',
+      'included) and any hook present as both .js and .cjs, and flags an Instance stamped at an older',
+      'framework version.',
       'view-status reuses a running viewer server (per the discovery record, doctor\'s staleness logic)',
       'or starts the stamped daemon, prints the URL, and opens the default browser; doctor stays the',
       'health authority. validate auto-detects the schema (backlog/sprint-issues, sprint, PRD, progress,',
@@ -1060,21 +1165,66 @@ function rewriteHookReferences(text) {
 }
 
 /**
+ * Decide whether a legacy hook named in a settings.json command is one migrate renamed,
+ * so its command may be repointed at the .cjs file. True when the hook was renamed this
+ * run, or a completed prior run already left the .cjs in place with no .js twin (an
+ * interrupted earlier migrate that renamed the file but never reached the settings
+ * rewrite). False when the .js still exists (a skipped or untracked hook migrate left
+ * alone) or neither extension exists (a dead command migrate must not invent a target
+ * for) — those commands keep naming the file they already name.
+ * @param {string} target - absolute Instance root (for the on-disk existence checks).
+ * @param {string} name - the bare hook name from the command (no extension).
+ * @param {Set<string>} renamedThisRun - bare hook names migrate renamed in this run.
+ * @returns {boolean} whether the command's `.js` may be rewritten to `.cjs`.
+ */
+function hookCommandMigrated(target, name, renamedThisRun) {
+  if (renamedThisRun.has(name)) return true;
+  const jsExists = fs.existsSync(path.join(target, HOOK_DIR, `${name}${LEGACY_HOOK_EXTENSION}`));
+  const cjsExists = fs.existsSync(path.join(target, HOOK_DIR, `${name}${CJS_HOOK_EXTENSION}`));
+  return cjsExists && !jsExists;
+}
+
+/**
+ * Rewrite only the settings.json hook commands migrate actually renamed, and report the
+ * rest. A command whose target hook was renamed (this run or a completed prior run) is
+ * repointed at .cjs; a command naming a hook migrate left as .js (skipped or untracked)
+ * is left untouched so it keeps firing against the existing file, and its name is
+ * collected for migrate to report (EXEC-086 — the unconditional rewrite silently killed
+ * such commands by pointing them at a .cjs that does not exist).
+ * @param {string} settingsText - the settings.json UTF-8 content.
+ * @param {string} target - absolute Instance root (for the on-disk existence checks).
+ * @param {Set<string>} renamedThisRun - bare hook names migrate renamed in this run.
+ * @returns {{text: string, reported: string[]}} the rewritten text and the commands left as .js.
+ */
+function rewriteHookCommands(settingsText, target, renamedThisRun) {
+  const reported = [];
+  const text = settingsText.replace(new RegExp(HOOK_COMMAND_REWRITE.pattern, 'g'), (match, stem, name) => {
+    if (hookCommandMigrated(target, name, renamedThisRun)) return `${stem}${CJS_HOOK_EXTENSION}`;
+    if (fs.existsSync(path.join(target, HOOK_DIR, `${name}${LEGACY_HOOK_EXTENSION}`))) {
+      reported.push(`${name}${LEGACY_HOOK_EXTENSION} (hook not migrated — command left pointing at the existing .js)`);
+    }
+    return match;
+  });
+  return { text, reported };
+}
+
+/**
  * Migrate an Instance's hook layout from .js to .cjs (EXEC-076). For each legacy hook
  * whose content is byte-identical to its recorded stamped-form hash (an unmodified
  * framework hook), write the .cjs file with sibling references repointed, remove the
  * .js copy, and re-key the marker entry. A hook with no marker record (untracked) or
  * one that differs from its recorded hash (locally edited) is left untouched and
- * reported, never clobbered. Then repoint the settings.json hook commands at the .cjs
- * paths (surgical substring rewrite; other settings untouched). Idempotent: once no .js
- * hooks remain and settings already name .cjs paths, a re-run changes nothing. The
- * marker is rewritten (preserving its recorded framework version — migrate is not an
- * update) only when something moved.
+ * reported, never clobbered. Then repoint the settings.json hook commands scoped to
+ * exactly the hooks migrate renamed (this run or a completed prior run); a command
+ * naming a hook left as .js is reported and left untouched so it keeps firing (EXEC-086).
+ * Idempotent: once no .js hooks remain and settings already name .cjs paths, a re-run
+ * changes nothing. The marker is rewritten (preserving its recorded framework version —
+ * migrate is not an update) only when something moved.
  * @param {string} target - absolute Instance root.
- * @returns {{migrated: string[], skipped: string[], settingsRewritten: boolean, markerMissing: boolean}}
+ * @returns {{migrated: string[], skipped: string[], settingsRewritten: boolean, settingsReported: string[], markerMissing: boolean}}
  */
 function migrateHookLayout(target) {
-  const result = { migrated: [], skipped: [], settingsRewritten: false, markerMissing: false };
+  const result = { migrated: [], skipped: [], settingsRewritten: false, settingsReported: [], markerMissing: false };
 
   let marker = null;
   try {
@@ -1084,6 +1234,7 @@ function migrateHookLayout(target) {
   }
   const recordedHashes = (marker && marker.files) || {};
   const nextHashes = { ...recordedHashes };
+  const renamedThisRun = new Set();
 
   for (const name of legacyHookFiles(target)) {
     const jsPosix = `${HOOK_DIR}/${name}`;
@@ -1098,7 +1249,8 @@ function migrateHookLayout(target) {
       result.skipped.push(`${name} (locally modified — differs from its stamped form; left in place)`);
       continue;
     }
-    const cjsName = `${name.slice(0, -LEGACY_HOOK_EXTENSION.length)}${CJS_HOOK_EXTENSION}`;
+    const baseName = name.slice(0, -LEGACY_HOOK_EXTENSION.length);
+    const cjsName = `${baseName}${CJS_HOOK_EXTENSION}`;
     const cjsPosix = `${HOOK_DIR}/${cjsName}`;
     const rewritten = rewriteHookReferences(content.toString('utf8'));
     fs.writeFileSync(path.join(target, HOOK_DIR, cjsName), rewritten);
@@ -1106,16 +1258,22 @@ function migrateHookLayout(target) {
     delete nextHashes[jsPosix];
     nextHashes[cjsPosix] = sha256(rewritten);
     result.migrated.push(`${name} → ${cjsName}`);
+    renamedThisRun.add(baseName);
   }
 
-  // Repoint settings.json hook commands. Done whatever the hook outcome: an Instance
-  // part-migrated by an interrupted run still needs its commands aligned. The marker's
-  // settings hash is left as-is (not re-anchored) so a later `update` still classifies
-  // a locally customized settings.json correctly rather than silently overwriting it.
+  // Repoint settings.json hook commands, scoped to the hooks migrate renamed. A command
+  // pointing at a skipped or untracked hook is reported and left naming its existing .js
+  // (EXEC-086): a dead enforcement hook is the worst failure mode, so migrate never
+  // repoints a command at a .cjs that does not exist. The scope still covers an Instance
+  // part-migrated by an interrupted run — a completed-rename whose settings never caught
+  // up — because hookCommandMigrated also accepts a .cjs-present/.js-absent hook. The
+  // marker's settings hash is left as-is (not re-anchored) so a later `update` still
+  // classifies a locally customized settings.json correctly rather than overwriting it.
   const settingsPath = path.join(target, HOOK_SETTINGS_FILE);
   if (fs.existsSync(settingsPath)) {
     const before = fs.readFileSync(settingsPath, 'utf8');
-    const after = before.replace(new RegExp(HOOK_COMMAND_REWRITE.pattern, 'g'), HOOK_COMMAND_REWRITE.replacement);
+    const { text: after, reported } = rewriteHookCommands(before, target, renamedThisRun);
+    result.settingsReported = reported;
     if (after !== before) {
       fs.writeFileSync(settingsPath, after);
       result.settingsRewritten = true;
@@ -1180,6 +1338,9 @@ function migrate(args) {
       `  renamed ${hooks.migrated.length} hook(s) to .cjs${hooks.migrated.length ? `: ${hooks.migrated.join(', ')}` : ''}`,
       `  skipped ${hooks.skipped.length} hook(s)${hooks.skipped.length ? `: ${hooks.skipped.join(', ')}` : ''}`,
       `  settings.json hook commands ${hooks.settingsRewritten ? 'repointed at .cjs' : 'already current'}`,
+      hooks.settingsReported.length
+        ? `  left ${hooks.settingsReported.length} command(s) pointing at unmigrated hooks (still firing): ${hooks.settingsReported.join(', ')}`
+        : '  all settings commands align with the on-disk hooks',
       hooks.markerMissing
         ? '  (no version marker — could not verify hooks against their stamped form; nothing renamed)'
         : '(sibling references repointed at .cjs; locally modified hooks are reported, never clobbered)',

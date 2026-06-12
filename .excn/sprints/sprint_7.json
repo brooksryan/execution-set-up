@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": 7,
+  "name": "Sprint 7",
+  "status": "active",
+  "dates": {
+    "start": "2026-06-12",
+    "end": null,
+    "duration_note": null
+  },
+  "team": [
+    {
+      "name": "team-lead",
+      "role": "Team Lead",
+      "owns": "arbitration, src/template, final approval"
+    },
+    {
+      "name": "scribe",
+      "role": "Scribe",
+      "owns": "work-tracking JSON + Retro Loop"
+    },
+    {
+      "name": "builder",
+      "role": "Builder",
+      "owns": "src/bin + hooks"
+    },
+    {
+      "name": "packager",
+      "role": "Packager",
+      "owns": "npm release"
+    }
+  ],
+  "goal": "Fix the migrate settings-rewrite defect a consumer Instance hit (EXEC-086/087), split the Setup Grill out of the Work Grill (EXEC-083/084), and stamp a CLI quick-reference README into the invariant layout (EXEC-082).",
+  "issues_addressed": [
+    "EXEC-086",
+    "EXEC-087",
+    "EXEC-082",
+    "EXEC-083",
+    "EXEC-084"
+  ],
+  "shipped": [
+    {
+      "id": "S7-1",
+      "type": "BUG",
+      "title": "EXEC-086: scope migrate's settings.json rewrite to files it renamed; report dead commands instead of repointing them",
+      "owner": "builder",
+      "summary": "Scope migrateHookLayout's HOOK_COMMAND_REWRITE to exactly the hooks migrate renamed (this or a prior run); report — never rewrite — settings commands pointing at skipped or untracked .js hooks. Confirm or refute the stale-twins hypothesis in the repro. P1 live defect in published 0.5.3 silently killing consumer custom hooks; leads the sprint.",
+      "closes_issues": [
+        "EXEC-086"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S7-3",
+      "type": "DOCS",
+      "title": "EXEC-082: stamp a CLI quick-reference README into the invariant layout",
+      "owner": "builder",
+      "summary": "Add src/template/.excn/README.md (≤30 lines): one line per CLI verb (init, update, migrate, doctor, view-status, validate) leading with the npm-install-stamps-nothing gotcha. Stamped by init, delivered by update, root mirrored Src-First.",
+      "closes_issues": [
+        "EXEC-082"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S7-2",
+      "type": "FEAT",
+      "title": "EXEC-087: doctor names dead settings commands and .js/.cjs hook twins",
+      "owner": "builder",
+      "summary": "Extend doctor's per-feature hook health to report each settings.json command whose target file is missing (BROKEN) and each hook present under both .js and .cjs (naming which one settings invokes), covering custom commands too. depends_on EXEC-086.",
+      "closes_issues": [
+        "EXEC-087"
+      ],
+      "notes": null
+    }
+  ],
+  "in_progress": [],
+  "not_shipped": [
+    {
+      "id": "S7-4",
+      "type": "REFACTOR",
+      "title": "EXEC-083: Setup Grill content moves into the Setup Skill bundle; execution-grill-with-docs serves the Work Grill only",
+      "owner": "builder",
+      "summary": "Move the setup-interview content into src/SKILL.md's own npm bundle so the Setup Skill stops invoking the Work-Grill-specific execution-grill-with-docs; SKILL.md works standalone for an npm-path adopter. execution-grill-with-docs stays byte-unchanged.",
+      "closes_issues": [
+        "EXEC-083"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S7-5",
+      "type": "DOCS",
+      "title": "EXEC-084: doc sweep — the two grills' descriptions stop implying a shared skill",
+      "owner": "builder",
+      "summary": "After EXEC-083, sweep CONTEXT.md, PROCESS.md, and their template seeds so each grill's docs name only its own skill(s); chartered persistent-doc edits travel the alignment gate. depends_on EXEC-083.",
+      "closes_issues": [
+        "EXEC-084"
+      ],
+      "notes": null
+    }
+  ],
+  "defects_discovered": [],
+  "decisions": [
+    {
+      "title": "S7-3 execution routing: team-lead ownership of src/template content",
+      "summary": "S7-3 (EXEC-082, src/template content) was executed by team-lead although the item's owner field reads builder, because TEAM_DIRECTIVE.md's roster forbids builder from src/template content and owns it to the Team Lead. Date 2026-06-12."
+    }
+  ],
+  "step_log": [
+    {
+      "step": "term_resolution_ratified",
+      "at": "2026-06-12",
+      "artifact": ".excn/CONTEXT.md (Setup Skill entry)",
+      "summary": "Ratified at sprint-7 open — the grill-time Setup Skill glossary addition (npm fresh-install path: `npm install to-execution` then read/follow node_modules/to-execution/SKILL.md; official skill/plugin-surface publication tracked as EXEC-085) stays as written. alignment cycle-2 PASS (2026-06-12, session_progress.json): grill-time term resolution under the SKILL.md pen rule, no open sprint at the time (sprint 6 closed 2026-06-11)."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-12",
+      "artifact": ".claude/agents/package-qa.md (EXEC-086 migrate-contract check)",
+      "summary": "PASS — 0 violations. Chartered definition change per EXEC-086 acceptance criteria (ADR-0004 path, EXEC-069 precedent); Team Lead approved; verdict in session_progress.json."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-12",
+      "artifact": "src/bin/cli.js + src/bin/migrate-policy.js (S7-1/EXEC-086)",
+      "summary": "PASS — 0 violations. hookCommandMigrated/rewriteHookCommands helpers single-purpose; CJS_HOOK_EXTENSION/LEGACY_HOOK_EXTENSION named constants; dead HOOK_COMMAND_REWRITE.replacement removed; JSDoc + truthful comments hold; verdict in session_progress.json."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-12",
+      "artifact": "Combined S7-1/EXEC-086 (migrate hook-command scope) + S7-3/EXEC-082 (template README)",
+      "summary": "PASS — 0 violations. 53-file manifest with .excn/README.md; idempotent re-init; pack parity; EXEC-086 contract check green (clean repointed, modified+custom reported and left .js, every command targets an on-disk file, permissions byte-preserved, idempotent, interrupted-run repoint, healthy no-op, hash-less marker yields no .cjs twin from migrate); EXEC-082 init stamps + update restores + root mirror byte-identical; verdict in session_progress.json."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-12",
+      "artifact": ".claude/agents/package-qa.md (EXEC-087 doctor hook-health check)",
+      "summary": "PASS — 0 violations. Chartered definition change per EXEC-087 acceptance criteria (ADR-0004 path); Team Lead approved; verdict in session_progress.json."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-12",
+      "artifact": "src/bin/cli.js + src/bin/health-policy.js (S7-2/EXEC-087)",
+      "summary": "PASS — 0 violations. readHookCommands/deadHookCommands/hookExtensionTwins/invokedHookExtension single-purpose with JSDoc; HOOK_COMMAND_SCRIPT_PATTERN in the data module; fail-closed paths hold; verdict in session_progress.json."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-12",
+      "artifact": "S7-2/EXEC-087 doctor hook-health detection (combined S7-1+S7-2+S7-3 tree)",
+      "summary": "PASS — 0 violations. 53-file manifest, idempotent re-init, pack parity; EXEC-087 checks green: custom dead command BROKEN naming command+path, deleted stamped hook BROKEN, .js/.cjs twin TWINS naming invoked extension, existing custom .js not flagged, healthy Instance neither finding exit 0; EXEC-086 contract still green; verdict in session_progress.json."
+    }
+  ],
+  "retrospective_notes": []
+}
