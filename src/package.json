@@ -8,6 +8,10 @@
   "scripts": {
     "prepublishOnly": "node ../scripts/preflight.js"
   },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
   "files": [
     "bin/",
     "template/",

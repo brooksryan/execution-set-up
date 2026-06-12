@@ -11,7 +11,7 @@
       ],
       "classification": "macro",
       "actionable_now": true,
-      "description": "Build a repeatable benchmark that runs a defined reference project (spec'd in advance) through agent execution and measures whether this framework earns its overhead. Three measures, per Brooks: (1) total token consumption, (2) % of project completed to spec, (3) wall-clock time. Design should compare scaffolded (to-execution Instance) vs unscaffolded baseline runs on the same spec. Needs its own grill \u2192 PRD before implementation.",
+      "description": "Build a repeatable benchmark that runs a defined reference project (spec'd in advance) through agent execution and measures whether this framework earns its overhead. Three measures, per Brooks: (1) total token consumption, (2) % of project completed to spec, (3) wall-clock time. Design should compare scaffolded (to-execution Instance) vs unscaffolded baseline runs on the same spec. Needs its own grill → PRD before implementation.",
       "prd": null,
       "acceptance_criteria": [
         "A reference spec exists against which % completion is mechanically assessable",
@@ -37,7 +37,7 @@
       ],
       "classification": "local",
       "actionable_now": false,
-      "description": "On the next real to-execution publish, confirm the RELEASE.md recipe publishes unattended (no OTP prompt / no E403). npm-personal-token may be a classic token that 2FA-gates writes; whoami can't prove write-2FA. If it OTP/E403s, overwrite the Keychain item (service npm-personal-token, account $USER) value with an automation/granular-automation token that bypasses 2FA \u2014 src/.npmrc and the recipe stay unchanged.",
+      "description": "On the next real to-execution publish, confirm the RELEASE.md recipe publishes unattended (no OTP prompt / no E403). npm-personal-token may be a classic token that 2FA-gates writes; whoami can't prove write-2FA. If it OTP/E403s, overwrite the Keychain item (service npm-personal-token, account $USER) value with an automation/granular-automation token that bypasses 2FA — src/.npmrc and the recipe stay unchanged.",
       "prd": null,
       "acceptance_criteria": [],
       "slice_type": "HITL",
@@ -62,7 +62,7 @@
       ],
       "classification": "macro",
       "actionable_now": true,
-      "description": "Once EXEC-054 validates the in-repo auto-run server, extract it into its own package installed globally (separate from the to-execution Scaffolder package). Individual execution repos/sessions check whether the global server exists and connect to it instead of each running their own \u2014 one server, many Instances. Same hard requirements: lightweight, fast-running, zero/near-zero dependencies. Needs design decisions (port/discovery convention, multi-repo serving, version skew between server and Instances) \u2014 grill before implementation.",
+      "description": "Once EXEC-054 validates the in-repo auto-run server, extract it into its own package installed globally (separate from the to-execution Scaffolder package). Individual execution repos/sessions check whether the global server exists and connect to it instead of each running their own — one server, many Instances. Same hard requirements: lightweight, fast-running, zero/near-zero dependencies. Needs design decisions (port/discovery convention, multi-repo serving, version skew between server and Instances) — grill before implementation.",
       "prd": "PRD-008",
       "acceptance_criteria": [
         "One globally-installed server on a well-known port serves every registered repo at a stable URL",
@@ -91,7 +91,7 @@
       ],
       "classification": "macro",
       "actionable_now": true,
-      "description": "Extend the status-page viewer from read-only to read-write for issues: add new issues and edit existing ones from the web page. Writes go through the server (EXEC-054/055) since a static page cannot write the .excn JSON; every write must remain schema-valid against issue.schema.json and respect the issue partitioning (backlog vs sprint partitions, scribe ownership of moves). Hard requirements: keep it as lightweight and fast as possible \u2014 no framework, minimal surface.",
+      "description": "Extend the status-page viewer from read-only to read-write for issues: add new issues and edit existing ones from the web page. Writes go through the server (EXEC-054/055) since a static page cannot write the .excn JSON; every write must remain schema-valid against issue.schema.json and respect the issue partitioning (backlog vs sprint partitions, scribe ownership of moves). Hard requirements: keep it as lightweight and fast as possible — no framework, minimal surface.",
       "prd": "PRD-008",
       "acceptance_criteria": [
         "Issues can be added and edited from the status page; writes validate against issue.schema.json and land atomically",
@@ -121,7 +121,7 @@
       ],
       "classification": "macro",
       "actionable_now": true,
-      "description": "Observed (Brooks): Team Lead sessions sometimes spawn agents inappropriately \u2014 a persistent Teammate gets spawned as a transient Invoked Agent/subagent, losing membership, continuity, and messaging addressability. CONTEXT.md draws the Teammate-vs-Invoked-Agent line by lifecycle, and sprint 4 defect D4-1 already forced a persistent-Teammate-spawning rule mid-sprint, so the failure mode is real here too. Explore how to make correct spawning systematic rather than remembered: candidates include a TEAM_DIRECTIVE/agent-def instruction sweep (roster members spawn via make-teammate/teams, gates spawn via the Agent tool), a remind-only hook on the spawn tool that flags a roster-named agent being spawned transiently (rides the per-feature hook plumbing, ADR-0006), and a doctor/health check that compares the live team roster against the directive roster. Spike first: characterize when and why leads get it wrong, then pick the enforcement. Src-First.",
+      "description": "Observed (Brooks): Team Lead sessions sometimes spawn agents inappropriately — a persistent Teammate gets spawned as a transient Invoked Agent/subagent, losing membership, continuity, and messaging addressability. CONTEXT.md draws the Teammate-vs-Invoked-Agent line by lifecycle, and sprint 4 defect D4-1 already forced a persistent-Teammate-spawning rule mid-sprint, so the failure mode is real here too. Explore how to make correct spawning systematic rather than remembered: candidates include a TEAM_DIRECTIVE/agent-def instruction sweep (roster members spawn via make-teammate/teams, gates spawn via the Agent tool), a remind-only hook on the spawn tool that flags a roster-named agent being spawned transiently (rides the per-feature hook plumbing, ADR-0006), and a doctor/health check that compares the live team roster against the directive roster. Spike first: characterize when and why leads get it wrong, then pick the enforcement. Src-First.",
       "prd": null,
       "acceptance_criteria": [
         "The failure mode is characterized: when a Team Lead spawns a roster Teammate transiently, what in the docs/tooling let it happen",
@@ -148,7 +148,7 @@
       ],
       "classification": "local",
       "actionable_now": true,
-      "description": "Gitignored progress records (gate verdicts, session logs, per-PRD progress) accumulate in .excn forever \u2014 a dozen-plus since June 6 on the dogfood Instance. Add pruning: doctor warns on aged records and/or a clerk-run chore archives or deletes records older than N closed sprints. Decide retention policy at implementation.",
+      "description": "Gitignored progress records (gate verdicts, session logs, per-PRD progress) accumulate in .excn forever — a dozen-plus since June 6 on the dogfood Instance. Add pruning: doctor warns on aged records and/or a clerk-run chore archives or deletes records older than N closed sprints. Decide retention policy at implementation.",
       "prd": null,
       "acceptance_criteria": [],
       "slice_type": "AFK",
@@ -171,7 +171,7 @@
       ],
       "classification": "local",
       "actionable_now": true,
-      "description": "make-teammate is generic and identical across projects, so per the framework's own invariant rule it belongs in the package: the Template ships it beside the stamped Lifecycle skills and init stamps it into every Instance's .claude/skills/. The Setup Skill's Preflight stops requiring any global skill (the make-teammate gate goes; the only remaining prerequisite is a working node/npx). Personal-level copies override the stamped one on collision \u2014 benign, same content family. Removes the last external dependency blocking plugin-marketplace publication. End-to-end: a fresh adopter with no personal skills installs the plugin, runs the Setup Skill, and Preflight passes; init stamps make-teammate; the Team step of the Setup Grill works.",
+      "description": "make-teammate is generic and identical across projects, so per the framework's own invariant rule it belongs in the package: the Template ships it beside the stamped Lifecycle skills and init stamps it into every Instance's .claude/skills/. The Setup Skill's Preflight stops requiring any global skill (the make-teammate gate goes; the only remaining prerequisite is a working node/npx). Personal-level copies override the stamped one on collision — benign, same content family. Removes the last external dependency blocking plugin-marketplace publication. End-to-end: a fresh adopter with no personal skills installs the plugin, runs the Setup Skill, and Preflight passes; init stamps make-teammate; the Team step of the Setup Grill works.",
       "prd": null,
       "acceptance_criteria": [
         "src/template ships make-teammate; init stamps it into .claude/skills/",
@@ -192,7 +192,7 @@
     },
     {
       "id": "EXEC-075",
-      "title": "Stamped hooks break under host \"type\":\"module\" \u2014 ship template hooks as .cjs",
+      "title": "Stamped hooks break under host \"type\":\"module\" — ship template hooks as .cjs",
       "status": "closed",
       "severity": "P1",
       "scope": [
@@ -201,7 +201,7 @@
       ],
       "classification": "macro",
       "actionable_now": true,
-      "description": "All hooks in src/template/.claude/hooks/ are CommonJS .js files. When a host project's package.json declares \"type\":\"module\" (observed live in evo-gnit), Node treats every .js hook as ESM and each throws ReferenceError: require is not defined in ES module scope \u2014 gate-watch, spawn-guard, message-nudge, viewer-server, load-report, hook-lib, and every rules file silently or visibly fail. Rename the stamped hook and rules files to .cjs, update intra-hook require paths (e.g. require('./hook-lib') \u2192 './hook-lib.cjs'), and update every hook command in src/template/.claude/settings.json to point at the .cjs filenames. The Scaffolder must stamp the .cjs layout for new Instances.",
+      "description": "All hooks in src/template/.claude/hooks/ are CommonJS .js files. When a host project's package.json declares \"type\":\"module\" (observed live in evo-gnit), Node treats every .js hook as ESM and each throws ReferenceError: require is not defined in ES module scope — gate-watch, spawn-guard, message-nudge, viewer-server, load-report, hook-lib, and every rules file silently or visibly fail. Rename the stamped hook and rules files to .cjs, update intra-hook require paths (e.g. require('./hook-lib') → './hook-lib.cjs'), and update every hook command in src/template/.claude/settings.json to point at the .cjs filenames. The Scaffolder must stamp the .cjs layout for new Instances.",
       "prd": null,
       "acceptance_criteria": [
         "Every file in src/template/.claude/hooks/ uses the .cjs extension; no .js hook or rules file remains in the template.",
@@ -234,7 +234,7 @@
       "prd": null,
       "acceptance_criteria": [
         "Running the Migrate command on an Instance stamped with the old .js hooks leaves it on the .cjs layout: hooks renamed, settings.json commands updated, no stale .js hook files.",
-        "Migration is idempotent \u2014 a second run is a no-op.",
+        "Migration is idempotent — a second run is a no-op.",
         "Health check reports the .js layout as decayed/migration-due.",
         "Verified end-to-end on evo-gnit: Stop hook runs without the ESM ReferenceError."
       ],
@@ -260,7 +260,7 @@
       ],
       "classification": "local",
       "actionable_now": true,
-      "description": "Persistent Teammates spawned for a sprint outlive sprint close, bloating context with idle-notification traffic and stale team/task dirs (~/.claude/teams, ~/.claude/tasks). Add a remind-only hook (gate-watch pattern, fail-safe exit 0) that fires when an edit closes a sprint \u2014 Write/Edit on .excn/sprints/sprint_<N>.json setting status to closed, or an equivalently clear close trigger \u2014 and injects a reminder to tear the team down: shutdown_request each Teammate, then TeamDelete. Remind-only; never tears down itself.",
+      "description": "Persistent Teammates spawned for a sprint outlive sprint close, bloating context with idle-notification traffic and stale team/task dirs (~/.claude/teams, ~/.claude/tasks). Add a remind-only hook (gate-watch pattern, fail-safe exit 0) that fires when an edit closes a sprint — Write/Edit on .excn/sprints/sprint_<N>.json setting status to closed, or an equivalently clear close trigger — and injects a reminder to tear the team down: shutdown_request each Teammate, then TeamDelete. Remind-only; never tears down itself.",
       "prd": null,
       "acceptance_criteria": [
         "A hook detects a sprint-close edit (sprint JSON status flipped to closed, or an equivalently unambiguous trigger) and injects a teardown reminder naming the steps: shutdown_request each persistent Teammate, await responses, TeamDelete.",
@@ -288,7 +288,7 @@
       ],
       "classification": "local",
       "actionable_now": true,
-      "description": "The status-page viewer lists issues but clicking one gives no readable detail view. Add an issue-detail view: clicking an issue in the viewer opens a formatted panel/page showing title, id, status/severity/scope badges, description, acceptance criteria, root_cause/fix, depends_on (linked to their issues), and sprint fields. Render description, acceptance_criteria items, root_cause, fix, and notes as markdown so bullets, code spans, and emphasis display properly \u2014 these are already free-text strings in issue.schema.json, so richer text means authoring markdown in them, no schema change. Document in the schema descriptions (or CONTEXT) that these fields support markdown.",
+      "description": "The status-page viewer lists issues but clicking one gives no readable detail view. Add an issue-detail view: clicking an issue in the viewer opens a formatted panel/page showing title, id, status/severity/scope badges, description, acceptance criteria, root_cause/fix, depends_on (linked to their issues), and sprint fields. Render description, acceptance_criteria items, root_cause, fix, and notes as markdown so bullets, code spans, and emphasis display properly — these are already free-text strings in issue.schema.json, so richer text means authoring markdown in them, no schema change. Document in the schema descriptions (or CONTEXT) that these fields support markdown.",
       "prd": null,
       "acceptance_criteria": [
         "Clicking an issue anywhere it appears in the viewer opens its detail view.",
@@ -307,6 +307,6 @@
       "assigned_sprint": null,
       "closed_in_sprint": null,
       "notes": null
-    },
+    }
   ]
 }

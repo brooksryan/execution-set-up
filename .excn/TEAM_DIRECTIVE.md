@@ -41,6 +41,8 @@ Sprint slices route to the rostered persistent Teammates; Invoked Agents are for
 
 One-off agents this project needs: `package-qa`, `code-standards` (rubric `.excn/CODE_STANDARDS.md`).
 
+Gate agents and `clerk` validate work-tracking JSON with `npx to-execution validate <file>` (it auto-detects the schema, or takes `--schema <path>`) — never an ad-hoc `npm install ajv`, which the next install prunes.
+
 ## Escalation
 
 Blocked or in disagreement → Team Lead decides.

@@ -291,6 +291,64 @@
       "assigned_sprint": 6,
       "closed_in_sprint": 6,
       "notes": null
+    },
+    {
+      "id": "EXEC-080",
+      "title": "view-status command: start the viewer server if needed and open the browser to the status page",
+      "status": "in_progress",
+      "severity": "P2",
+      "scope": [
+        "cli",
+        "viewer"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "Ship a `to-execution view-status [target]` CLI verb. It checks the viewer-server Runtime Record (.excn/runtime pid record): if the server is running, reuse its port; if absent/stale, start the stamped viewer-server daemon the same way the SessionStart hook does. Then open the user's default browser to the status page URL (macOS `open`, with linux/win fallbacks). Prints the URL either way. Fail-closed CLI semantics (non-zero on a target with no stamped .excn), consistent with existing verbs and usage text; doctor's viewer_server card stays the health authority.",
+      "prd": null,
+      "acceptance_criteria": [
+        "`to-execution view-status` on a stamped Instance with no running server starts the daemon, prints the URL, and opens the browser to it.",
+        "With a server already running, it reuses the existing port (no second daemon) and opens the browser.",
+        "A stale pid record is treated as not-running (matches doctor's logic).",
+        "Non-stamped target exits non-zero with a clear message; usage/help text updated.",
+        "Works from the npm-installed package (node_modules/.bin/to-execution view-status).",
+        "Passes code-standards and package-qa gates; ships in the next npm version."
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 6,
+      "closed_in_sprint": null,
+      "notes": null
+    },
+    {
+      "id": "EXEC-081",
+      "title": "validate verb + ajv shipped as a real dependency",
+      "status": "in_progress",
+      "severity": "P3",
+      "scope": [
+        "cli"
+      ],
+      "classification": "local",
+      "actionable_now": true,
+      "description": "Gate agents and clerk validate work-tracking JSON against .excn/schemas/ with ajv, but the package ships no validator, so every agent ad-hoc-installs ajv into the host (and npm prunes those modules on the next install — observed on the dogfood root 2026-06-11). Ship `to-execution validate <file> [--schema <path>]` that auto-detects the schema from the file's location/shape (issues partitions, sprint, PRD, progress, hooks config, verdict ledger) and validates with ajv; add ajv (+ ajv-formats if needed) to src/package.json dependencies so the npm install carries it. Exit 0 on valid, non-zero with violation listing on invalid (fail-closed CLI rule).",
+      "prd": null,
+      "acceptance_criteria": [
+        "ajv is a dependency in src/package.json; npm-installed package validates without any ad-hoc install.",
+        "`to-execution validate` auto-detects the right schema for backlog/sprint-issues, sprint, PRD, progress, hooks-config, and verdict-ledger files; --schema overrides.",
+        "Valid file exits 0; invalid exits non-zero listing each violation with JSON path.",
+        "Usage/help text updated; passes code-standards and package-qa gates.",
+        "Gate-agent/clerk guidance (CONTEXT or TEAM_DIRECTIVE) points at the verb instead of ad-hoc ajv installs."
+      ],
+      "slice_type": "AFK",
+      "root_cause": null,
+      "fix": null,
+      "depends_on": [],
+      "related_tickets": [],
+      "assigned_sprint": 6,
+      "closed_in_sprint": null,
+      "notes": null
     }
   ]
 }

@@ -13,11 +13,13 @@
 // (enabled / firing / stale / broken), toggle-config validity, and outdated detection
 // (recorded vs installed framework version); it exits non-zero only on an unstamped
 // target — a degraded Instance is a report, not a failure. Diagnostics to stderr,
-// results to stdout, non-zero exit on any failure. Node builtins only; pointer-block
-// content, the update file-policy, and the health-check policy live in the sibling
-// data modules.
+// results to stdout, non-zero exit on any failure. Node builtins only, except the
+// `validate` verb, which uses ajv (a real dependency, EXEC-081) lazily required so the
+// other verbs stay builtin-only; pointer-block content, the update file-policy, the
+// health-check policy, and the schema-detection rules live in the sibling data modules.
 
 const crypto = require('crypto');
+const { spawn } = require('child_process');
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
@@ -56,6 +58,7 @@ const {
   VIEWER_PROBE_TIMEOUT_MS,
   VIEWER_HEALTH_OK_STATUS,
 } = require('./health-policy');
+const { SCHEMA_DIR_RELATIVE, DETECTION_RULES } = require('./validate-policy');
 
 // Package root is one level up from bin/; the template ships beside it.
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
@@ -73,6 +76,12 @@ const MS_PER_HOUR = 60 * MS_PER_MINUTE;
 // First positional arg that is not a flag selects the target; this prefix marks a flag.
 const FLAG_PREFIX = '-';
 const FORCE_FLAG = '--force';
+const SCHEMA_FLAG = '--schema';
+
+// Where the canonical schemas ship inside the package (beside the template the bin
+// stamps); validate resolves auto-detected schemas here, so the npm-installed package
+// validates without locating the Instance or ad-hoc-installing anything.
+const SCHEMAS_DIR = path.join(TEMPLATE_DIR, SCHEMA_DIR_RELATIVE);
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -387,33 +396,69 @@ function firingEvidence(target, feature) {
 }
 
 /**
- * Probe a viewer-server discovery record's health endpoint.
+ * Probe a health endpoint and classify the listener. Shared by doctor's liveness
+ * check and view-status's server discovery so the two can never disagree on what
+ * "our server" means.
+ * @param {{host: string, port: number, healthPath: string, timeoutMs: number, okStatus: number}} options
+ * @returns {Promise<{state: 'ours', body: object}|{state: 'foreign'}|{state: 'free'}>}
+ * 'ours' when our daemon answers (body is its health JSON), 'foreign' when something
+ * else answers (or accepts but stays silent), 'free' when nothing answers.
+ */
+function probeHealthEndpoint({ host, port, healthPath, timeoutMs, okStatus }) {
+  return new Promise((resolve) => {
+    const request = http.get({ host, port, path: healthPath, timeout: timeoutMs }, (response) => {
+      let raw = '';
+      response.on('data', (chunk) => { raw += chunk; });
+      response.on('end', () => {
+        try {
+          const body = JSON.parse(raw);
+          if (response.statusCode === okStatus && body && typeof body.repo === 'string') {
+            resolve({ state: 'ours', body });
+            return;
+          }
+        } catch {
+          // Non-JSON answer: some other process owns the port.
+        }
+        resolve({ state: 'foreign' });
+      });
+      response.on('error', () => resolve({ state: 'foreign' }));
+    });
+    // A listener that accepts but never answers within the budget reads as foreign.
+    request.on('timeout', () => { request.destroy(); resolve({ state: 'foreign' }); });
+    request.on('error', () => resolve({ state: 'free' }));
+  });
+}
+
+/**
+ * Probe a viewer-server discovery record's health endpoint (doctor's view).
  * @param {number} port - the recorded port, probed on the loopback host.
  * @returns {Promise<object|null>} the daemon's health body ({repo, pid, version})
  * when our server answers, or null when nothing ours answers (refused, timeout,
  * non-JSON, or wrong shape).
  */
-function probeViewerHealth(port) {
-  return new Promise((resolve) => {
-    const request = http.get(
-      { host: VIEWER_HEALTH_HOST, port, path: VIEWER_HEALTH_PATH, timeout: VIEWER_PROBE_TIMEOUT_MS },
-      (response) => {
-        let raw = '';
-        response.on('data', (chunk) => { raw += chunk; });
-        response.on('end', () => {
-          try {
-            const body = JSON.parse(raw);
-            resolve(response.statusCode === VIEWER_HEALTH_OK_STATUS && body && typeof body.repo === 'string' ? body : null);
-          } catch {
-            resolve(null); // a non-JSON answer is a foreign listener, not our server
-          }
-        });
-        response.on('error', () => resolve(null));
-      }
-    );
-    request.on('timeout', () => { request.destroy(); resolve(null); });
-    request.on('error', () => resolve(null));
+async function probeViewerHealth(port) {
+  const probe = await probeHealthEndpoint({
+    host: VIEWER_HEALTH_HOST,
+    port,
+    healthPath: VIEWER_HEALTH_PATH,
+    timeoutMs: VIEWER_PROBE_TIMEOUT_MS,
+    okStatus: VIEWER_HEALTH_OK_STATUS,
   });
+  return probe.state === 'ours' ? probe.body : null;
+}
+
+/**
+ * Is a pid alive? signal 0 is an existence check that sends nothing.
+ * @param {number} pid - the process id to test.
+ * @returns {boolean} true when the process exists (and is signalable).
+ */
+function pidAlive(pid) {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -435,15 +480,7 @@ async function livenessVerdict(target, feature) {
   if (!record || !Number.isInteger(record.pid) || !Number.isInteger(record.port)) {
     return `stale — enabled but no usable discovery record at ${feature.evidence} (starts at next SessionStart)`;
   }
-  const pidAlive = (() => {
-    try {
-      process.kill(record.pid, 0); // signal 0: existence check only, nothing is sent
-      return true;
-    } catch {
-      return false;
-    }
-  })();
-  if (!pidAlive) {
+  if (!pidAlive(record.pid)) {
     return `stale record — pid ${record.pid} not running (server idle-exited or died; next SessionStart restarts it)`;
   }
   const health = await probeViewerHealth(record.port);
@@ -451,6 +488,216 @@ async function livenessVerdict(target, feature) {
     return `stale record — pid ${record.pid} alive but port ${record.port} not answering as this repo's server (possible orphan; next SessionStart re-resolves)`;
   }
   return `running (http://${VIEWER_HEALTH_HOST}:${record.port}/ — pid ${record.pid})`;
+}
+
+/**
+ * Resolve a stamped viewer asset in the target's hooks dir, preferring the .cjs
+ * layout (EXEC-075) and falling back to a pre-migration .js Instance.
+ * @param {string} target - absolute Instance root.
+ * @param {string} basename - asset basename without extension.
+ * @returns {string|null} absolute path, or null when neither extension exists.
+ */
+function resolveViewerAsset(target, basename) {
+  for (const extension of [CJS_HOOK_EXTENSION, LEGACY_HOOK_EXTENSION]) {
+    const candidate = path.join(target, HOOKS_DIR, `${basename}${extension}`);
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
+/**
+ * Derive a repo's home port: djb2 over the absolute path into the rules' quiet range.
+ * Mirrors homePort in the stamped viewer-server hook so the CLI lands on the same port
+ * the SessionStart hook would.
+ * @param {string} repoPath - absolute Instance root.
+ * @param {object} rules - the Instance's stamped viewer-server-rules module.
+ * @returns {number} a port in [PORT_RANGE_START, PORT_RANGE_START + PORT_RANGE_SIZE).
+ */
+function viewerHomePort(repoPath, rules) {
+  let hash = rules.DJB2_SEED;
+  for (let i = 0; i < repoPath.length; i += 1) {
+    hash = ((hash * rules.DJB2_MULTIPLIER) ^ repoPath.charCodeAt(i)) >>> 0; // eslint-disable-line no-bitwise
+  }
+  return rules.PORT_RANGE_START + (hash % rules.PORT_RANGE_SIZE);
+}
+
+/**
+ * Probe a viewer port with the Instance's stamped rules constants.
+ * @param {number} port - port to probe on the loopback host.
+ * @param {object} rules - the Instance's stamped viewer-server-rules module.
+ * @returns {Promise<{state: 'ours', body: object}|{state: 'foreign'}|{state: 'free'}>}
+ */
+function probeViewerPort(port, rules) {
+  return probeHealthEndpoint({
+    host: rules.BIND_HOST,
+    port,
+    healthPath: rules.HEALTH_PATH,
+    timeoutMs: rules.PROBE_TIMEOUT_MS,
+    okStatus: rules.HTTP_OK,
+  });
+}
+
+/**
+ * Reuse a running viewer server from the discovery record, applying doctor's exact
+ * staleness logic: a usable record whose pid is alive and whose port answers our
+ * health endpoint as this repo's server.
+ * @param {string} target - absolute Instance root.
+ * @param {object} rules - the Instance's stamped viewer-server-rules module.
+ * @returns {Promise<{port: number, pid: number}|null>} the live server, or null when
+ * no record, a stale record, or a non-answering/foreign port.
+ */
+async function runningViewerFromRecord(target, rules) {
+  let record;
+  try {
+    record = JSON.parse(fs.readFileSync(path.join(target, rules.RECORD_RELATIVE_PATH), 'utf8'));
+  } catch {
+    return null;
+  }
+  if (!record || !Number.isInteger(record.pid) || !Number.isInteger(record.port) || !pidAlive(record.pid)) {
+    return null;
+  }
+  const probe = await probeViewerPort(record.port, rules);
+  return probe.state === 'ours' && probe.body.repo === target ? { port: record.port, pid: record.pid } : null;
+}
+
+/**
+ * Spawn the stamped daemon detached on a port and poll its health endpoint until it
+ * answers. Mirrors the SessionStart hook's spawnDaemon.
+ * @param {string} target - absolute Instance root the daemon will serve.
+ * @param {number} port - port to bind.
+ * @param {object} rules - the Instance's stamped viewer-server-rules module.
+ * @param {string} daemonPath - absolute path to the stamped viewer-server-daemon.
+ * @returns {Promise<number|null>} the daemon's pid once healthy, or null when it never
+ * answered within the poll budget (bind lost to a foreign listener, or startup failed).
+ */
+async function spawnViewerDaemon(target, port, rules, daemonPath) {
+  const child = spawn(process.execPath, [daemonPath, '--root', target, '--port', String(port)], {
+    detached: true,
+    stdio: 'ignore',
+  });
+  child.on('error', () => {}); // a spawn failure surfaces as a never-healthy poll below
+  child.unref(); // the daemon outlives this command; idle self-exit reaps it later
+  for (let attempt = 0; attempt < rules.SPAWN_POLL_ATTEMPTS; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, rules.SPAWN_POLL_INTERVAL_MS));
+    const probe = await probeViewerPort(port, rules);
+    if (probe.state === 'ours' && probe.body.repo === target) return probe.body.pid;
+    if (probe.state === 'foreign') return null; // lost the port race to someone else
+  }
+  return null;
+}
+
+/**
+ * Ensure this repo has a running server: walk up from the home port past foreign
+ * listeners, reuse our own live daemon when one answers, spawn on the first free port
+ * otherwise. Mirrors the SessionStart hook's ensureServer.
+ * @param {string} target - absolute Instance root.
+ * @param {object} rules - the Instance's stamped viewer-server-rules module.
+ * @param {string} daemonPath - absolute path to the stamped viewer-server-daemon.
+ * @returns {Promise<{port: number, pid: number}|null>} the live server, or null when
+ * the probe budget ran out.
+ */
+async function ensureViewerServer(target, rules, daemonPath) {
+  let port = viewerHomePort(target, rules);
+  for (let attempt = 0; attempt < rules.PORT_PROBE_LIMIT; attempt += 1) {
+    const probe = await probeViewerPort(port, rules);
+    if (probe.state === 'ours' && probe.body.repo === target) return { port, pid: probe.body.pid };
+    if (probe.state === 'free') {
+      const pid = await spawnViewerDaemon(target, port, rules, daemonPath);
+      if (pid !== null) return { port, pid };
+    }
+    port += 1; // foreign listener, our daemon for another repo, or a lost race: next port
+  }
+  return null;
+}
+
+/**
+ * Write the viewer discovery record (mirrors the hook's announce, minus the session
+ * additionalContext): records the live server so doctor and a later view-status find it.
+ * @param {string} target - absolute Instance root.
+ * @param {object} rules - the Instance's stamped viewer-server-rules module.
+ * @param {number} port - the port the daemon serves on.
+ * @param {number} pid - the daemon's pid.
+ * @returns {void}
+ */
+function writeViewerRecord(target, rules, port, pid) {
+  const recordPath = path.join(target, rules.RECORD_RELATIVE_PATH);
+  fs.mkdirSync(path.dirname(recordPath), { recursive: true });
+  const record = {
+    schema_version: rules.RECORD_SCHEMA_VERSION,
+    port,
+    pid,
+    repo: target,
+    started: new Date().toISOString(),
+  };
+  fs.writeFileSync(recordPath, `${JSON.stringify(record, null, 2)}\n`);
+}
+
+/**
+ * Open the default browser at a URL, best-effort: macOS `open`, Windows `start`, else
+ * `xdg-open`. A missing opener never fails view-status (the URL was already printed).
+ * @param {string} url - the URL to open.
+ * @returns {void}
+ */
+function openBrowser(url) {
+  const byPlatform = {
+    darwin: ['open', [url]],
+    win32: ['cmd', ['/c', 'start', '', url]],
+  };
+  const [command, commandArgs] = byPlatform[process.platform] || ['xdg-open', [url]];
+  try {
+    const child = spawn(command, commandArgs, { detached: true, stdio: 'ignore' });
+    child.on('error', () => {}); // opener absent (e.g. headless): swallow, URL is printed
+    child.unref();
+  } catch {
+    // never fatal — the URL is on stdout regardless
+  }
+}
+
+/**
+ * Run the `view-status` command: ensure this Instance's viewer server is running
+ * (reusing a live one per the discovery record, else starting the stamped daemon the
+ * way SessionStart does), print the status-page URL, and open the default browser to
+ * it. Fail-closed: a non-stamped target, or one missing the stamped viewer assets,
+ * exits non-zero. doctor's viewer_server card stays the health authority.
+ * @param {string[]} args - args after the command word (target only).
+ * @returns {Promise<void>}
+ * @throws Exits non-zero (after a stderr message) on a non-stamped/asset-less target
+ * or an exhausted port-probe budget.
+ */
+async function viewStatus(args) {
+  const target = path.resolve(args.find((arg) => !arg.startsWith(FLAG_PREFIX)) || '.');
+  if (!fs.existsSync(path.join(target, VERSION_MARKER_PATH))) {
+    process.stderr.write(
+      `error: not a stamped Instance — no version marker at ${path.join(target, VERSION_MARKER_PATH)}; run \`to-execution init\` first\n`
+    );
+    process.exit(1);
+  }
+  const rulesPath = resolveViewerAsset(target, 'viewer-server-rules');
+  const daemonPath = resolveViewerAsset(target, 'viewer-server-daemon');
+  if (!rulesPath || !daemonPath) {
+    process.stderr.write(
+      `error: viewer assets not stamped in ${target} (${HOOKS_DIR}/viewer-server-{rules,daemon}); run \`to-execution update\`\n`
+    );
+    process.exit(1);
+  }
+  const rules = require(rulesPath); // eslint-disable-line global-require, import/no-dynamic-require
+
+  let server = await runningViewerFromRecord(target, rules);
+  if (!server) {
+    server = await ensureViewerServer(target, rules, daemonPath);
+    if (server) writeViewerRecord(target, rules, server.port, server.pid);
+  }
+  if (!server) {
+    process.stderr.write(
+      `error: could not start the viewer server for ${target} (port range busy); see \`to-execution doctor\`\n`
+    );
+    process.exit(1);
+  }
+
+  const url = `http://${rules.BIND_HOST}:${server.port}/`;
+  process.stdout.write(`${url}\n`);
+  openBrowser(url);
+  process.exit(0);
 }
 
 /**
@@ -552,6 +799,8 @@ function printUsage() {
       '  npx to-execution update [target] re-stamp invariant files at the installed version',
       '  npx to-execution migrate [target] relocate legacy records and move .js hooks to .cjs',
       '  npx to-execution doctor [target] report per-feature hook health and outdated status',
+      '  npx to-execution view-status [target]  start the viewer server if needed and open the status page',
+      '  npx to-execution validate <file> [--schema <path>]  validate a work-tracking JSON file against its schema',
       '',
       'init stamps the .excn/ namespace; .excn/.gitignore keeps per-session *_progress.json out of git.',
       'init records the framework version and stamped-form hashes in .excn/framework-version.json.',
@@ -568,6 +817,11 @@ function printUsage() {
       'doctor reports each hook feature as disabled, firing, stale, or broken (viewer_server:',
       'running or stale record) — heartbeats read .excn/runtime/hook-invocations_progress.json — names',
       'a broken toggle config, and flags an Instance stamped at an older framework version.',
+      'view-status reuses a running viewer server (per the discovery record, doctor\'s staleness logic)',
+      'or starts the stamped daemon, prints the URL, and opens the default browser; doctor stays the',
+      'health authority. validate auto-detects the schema (backlog/sprint-issues, sprint, PRD, progress,',
+      'hooks-config, verdict-ledger) from the file shape, or takes --schema; exit 0 valid, non-zero lists',
+      'each violation with its JSON path. Both verbs exit non-zero on a non-stamped target.',
       '',
     ].join('\n')
   );
@@ -935,10 +1189,134 @@ function migrate(args) {
 }
 
 /**
+ * Auto-detect which schema a parsed work-tracking file should validate against, by
+ * the shape signatures in validate-policy (first match wins).
+ * @param {*} data - the parsed JSON.
+ * @returns {string|null} the schema basename, or null when nothing matched.
+ */
+function detectSchema(data) {
+  for (const rule of DETECTION_RULES) {
+    if (rule.topLevelArray) {
+      if (Array.isArray(data)) return rule.schema;
+      continue;
+    }
+    if (data && typeof data === 'object' && !Array.isArray(data) && rule.requiredKeys.every((key) => key in data)) {
+      return rule.schema;
+    }
+  }
+  return null;
+}
+
+/**
+ * Build an Ajv instance with every shipped schema registered, so cross-file $refs
+ * (e.g. sprint → verdict-ledger) resolve and any detected schema can be compiled.
+ * ajv + ajv-formats are required lazily here (EXEC-081) so the other verbs stay
+ * builtin-only and a missing install only ever affects `validate`.
+ * @returns {object} a configured Ajv instance.
+ * @throws Exits non-zero (after a stderr message) when ajv is not installed.
+ */
+function buildAjv() {
+  let Ajv;
+  let addFormats;
+  try {
+    Ajv = require('ajv'); // eslint-disable-line global-require
+    addFormats = require('ajv-formats'); // eslint-disable-line global-require
+  } catch (cause) {
+    process.stderr.write(`error: validate needs ajv — reinstall the package (${cause.message})\n`);
+    process.exit(1);
+  }
+  const ajv = new Ajv({ allErrors: true, strict: false });
+  addFormats(ajv);
+  for (const file of fs.readdirSync(SCHEMAS_DIR)) {
+    if (!file.endsWith('.json')) continue;
+    const schema = JSON.parse(fs.readFileSync(path.join(SCHEMAS_DIR, file), 'utf8'));
+    // Key each schema by its basename so a cross-file $ref by filename resolves; a
+    // schema carrying its own $id keeps that too (ajv accepts both as lookup keys).
+    ajv.addSchema(schema, file);
+  }
+  return ajv;
+}
+
+/**
+ * Run the `validate` command: validate a work-tracking JSON file against its schema —
+ * auto-detected from the file shape (validate-policy) or named by --schema. Exit 0 on
+ * a valid file; non-zero with each violation (JSON path + message) on an invalid one.
+ * Fail-closed: an unreadable/unparseable file, an undetectable schema, or a missing
+ * schema all exit non-zero.
+ * @param {string[]} args - args after the command word: the file, optional --schema <path>.
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) on any failure above.
+ */
+function validate(args) {
+  const schemaFlagIndex = args.indexOf(SCHEMA_FLAG);
+  const schemaOverride = schemaFlagIndex !== -1 ? args[schemaFlagIndex + 1] : null;
+  if (schemaFlagIndex !== -1 && !schemaOverride) {
+    process.stderr.write(`error: ${SCHEMA_FLAG} needs a schema path\n`);
+    process.exit(1);
+  }
+  const schemaValueIndex = schemaFlagIndex === -1 ? -1 : schemaFlagIndex + 1;
+  const positional = args.filter((arg, index) => !arg.startsWith(FLAG_PREFIX) && index !== schemaValueIndex);
+  const file = positional[0];
+  if (!file) {
+    process.stderr.write('error: validate needs a file path — usage: to-execution validate <file> [--schema <path>]\n');
+    process.exit(1);
+  }
+
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(path.resolve(file), 'utf8'));
+  } catch (cause) {
+    process.stderr.write(`error: cannot read or parse ${file}: ${cause.message}\n`);
+    process.exit(1);
+  }
+
+  const ajv = buildAjv();
+  let validateFn;
+  let schemaLabel;
+  if (schemaOverride) {
+    let schema;
+    try {
+      schema = JSON.parse(fs.readFileSync(path.resolve(schemaOverride), 'utf8'));
+    } catch (cause) {
+      process.stderr.write(`error: cannot read or parse schema ${schemaOverride}: ${cause.message}\n`);
+      process.exit(1);
+    }
+    // Drop $id before compiling: the override may be one of the shipped schemas (already
+    // registered by id in buildAjv), and ajv refuses a duplicate id. Its $refs still
+    // resolve against the registered schemas by their filename keys.
+    const { $id, ...schemaBody } = schema; // eslint-disable-line no-unused-vars
+    validateFn = ajv.compile(schemaBody);
+    schemaLabel = schemaOverride;
+  } else {
+    const detected = detectSchema(data);
+    if (!detected) {
+      process.stderr.write(
+        `error: could not auto-detect a schema for ${file} (unrecognized shape); pass ${SCHEMA_FLAG} <path>\n`
+      );
+      process.exit(1);
+    }
+    validateFn = ajv.getSchema(detected);
+    schemaLabel = detected;
+  }
+
+  if (validateFn(data)) {
+    process.stdout.write(`valid: ${file} conforms to ${schemaLabel}\n`);
+    return;
+  }
+  process.stderr.write(`invalid: ${file} violates ${schemaLabel}\n`);
+  for (const error of validateFn.errors) {
+    const jsonPath = error.instancePath || '(root)';
+    process.stderr.write(`  ${jsonPath} ${error.message}\n`);
+  }
+  process.exit(1);
+}
+
+/**
  * Entry point: dispatch on the first CLI argument. `init` stamps; `update`
  * re-stamps invariants; `migrate` relocates legacy records into their ADR-0008 homes;
- * `doctor` reports hook health; no command or -h/--help prints usage and exits zero;
- * any other word fails non-zero with usage.
+ * `doctor` reports hook health; `view-status` opens the status page; `validate`
+ * checks a work-tracking file against its schema; no command or -h/--help prints usage
+ * and exits zero; any other word fails non-zero with usage.
  * @returns {void}
  * @throws Exits non-zero (after usage on stderr+stdout) on an unrecognized command.
  */
@@ -953,6 +1331,10 @@ function main() {
       return migrate(args);
     case 'doctor':
       return doctor(args);
+    case 'view-status':
+      return viewStatus(args);
+    case 'validate':
+      return validate(args);
     case undefined:
     case '-h':
     case '--help':
