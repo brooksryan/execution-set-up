@@ -165,9 +165,7 @@
         "EXEC-079"
       ],
       "notes": "Commit e5bcf81 (4 files: template spawn-guard{,-rules}.cjs + dogfood .js mirrors). Gates: code-standards PASS + package-qa PASS (step_log). Ships in npm 0.5.2."
-    }
-  ],
-  "in_progress": [
+    },
     {
       "id": "S6-11",
       "type": "FEAT",
@@ -176,7 +174,8 @@
       "summary": "CLI verb that reuses or starts the viewer-server daemon from its Runtime Record and opens the default browser to the status page URL.",
       "closes_issues": [
         "EXEC-080"
-      ]
+      ],
+      "notes": "Commit 487cdcf. Gates: code-standards PASS + package-qa PASS (step_log; alignment PASS on the TEAM_DIRECTIVE edit). Ships in npm 0.5.3."
     },
     {
       "id": "S6-12",
@@ -186,9 +185,11 @@
       "summary": "to-execution validate auto-detects the .excn schema for a work-tracking file and validates with ajv, now a real package dependency, replacing agents' ad-hoc ajv installs.",
       "closes_issues": [
         "EXEC-081"
-      ]
+      ],
+      "notes": "Commit 487cdcf. Gates: code-standards PASS + package-qa PASS (step_log; alignment PASS on the TEAM_DIRECTIVE edit). Ships in npm 0.5.3."
     }
   ],
+  "in_progress": [],
   "not_shipped": [],
   "defects_discovered": [],
   "decisions": [],

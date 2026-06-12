@@ -295,7 +295,7 @@
     {
       "id": "EXEC-080",
       "title": "view-status command: start the viewer server if needed and open the browser to the status page",
-      "status": "in_progress",
+      "status": "closed",
       "severity": "P2",
       "scope": [
         "cli",
@@ -315,17 +315,17 @@
       ],
       "slice_type": "AFK",
       "root_cause": null,
-      "fix": null,
+      "fix": "view-status verb reuses-or-starts the viewer-server daemon from its pid Runtime Record (doctor-matching staleness) and opens the default browser to the status URL. Commit 487cdcf; gates PASS.",
       "depends_on": [],
       "related_tickets": [],
       "assigned_sprint": 6,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 6,
       "notes": null
     },
     {
       "id": "EXEC-081",
       "title": "validate verb + ajv shipped as a real dependency",
-      "status": "in_progress",
+      "status": "closed",
       "severity": "P3",
       "scope": [
         "cli"
@@ -342,12 +342,12 @@
         "Gate-agent/clerk guidance (CONTEXT or TEAM_DIRECTIVE) points at the verb instead of ad-hoc ajv installs."
       ],
       "slice_type": "AFK",
-      "root_cause": null,
-      "fix": null,
+      "root_cause": "Package shipped no validator, so gate agents ad-hoc-installed ajv into hosts; the next npm install pruned those modules.",
+      "fix": "validate verb auto-detects the .excn schema by location/shape and validates with ajv, now a real dependency; TEAM_DIRECTIVE points gates/clerk at the verb. Commit 487cdcf; gates PASS incl. alignment on the directive edit.",
       "depends_on": [],
       "related_tickets": [],
       "assigned_sprint": 6,
-      "closed_in_sprint": null,
+      "closed_in_sprint": 6,
       "notes": null
     }
   ]
