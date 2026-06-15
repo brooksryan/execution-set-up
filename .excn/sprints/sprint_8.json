@@ -2,10 +2,10 @@
   "schema_version": "1.0",
   "sprint_id": 8,
   "name": "Sprint 8",
-  "status": "active",
+  "status": "closed",
   "dates": {
     "start": "2026-06-14",
-    "end": null,
+    "end": "2026-06-14",
     "duration_note": null
   },
   "team": [
@@ -105,8 +105,42 @@
   "in_progress": [],
   "not_shipped": [],
   "defects_discovered": [],
-  "decisions": [],
-  "retrospective_notes": [],
+  "decisions": [
+    {
+      "title": "Grill family keyed by writer-home (ADR-0009)",
+      "summary": "Three grills, each owning one artifact: setup-grill (scaffold/seeds), execution-context-grill (CONTEXT.md + PHILOSOPHY seed), execution-epic-grill (PRD/ADRs via requirements + optional type pass). The rename from execution-grill-with-docs to execution-epic-grill is a breaking consumer migration accepted at near-zero adoption."
+    },
+    {
+      "title": "PHILOSOPHY seed-once via stamped sentinel (ADR-0010)",
+      "summary": "context-grill may append to PHILOSOPHY.md only while the sentinel '<!-- principles: unestablished -->' is present; the first established edit removes it. Positive in-file signal avoids the phantom-wipe failure class."
+    },
+    {
+      "title": "Format-doc homes follow writer-home",
+      "summary": "CONTEXT-FORMAT.md to execution-context-grill (which owns CONTEXT.md), ADR-FORMAT.md to execution-epic-grill (the primary ADR producer). Cross-skill references by relative path."
+    },
+    {
+      "title": "migrate gains skill retirement; doctor gains orphan detection",
+      "summary": "migrate detects and retires the orphaned old grill skill on existing Instances (versioned, idempotent, safety-checked against frontmatter). doctor flags the orphan and names migrate. Both verified end-to-end by package-qa."
+    }
+  ],
+  "retrospective_notes": [
+    {
+      "title": "Linter file-reverts silently undo edits on Bash error exit",
+      "body": "A Bash command that exits non-zero triggered a linter/hook that reverted multiple edited files to their git state \u2014 silently undoing CONTEXT.md, PROCESS.md, README, cli.js, migrate-policy.js, health-policy.js, and execution-to-prd SKILL.md edits. The reverts were invisible until alignment gates read stale content and FAILed. Three alignment re-gates and one code-standards re-gate were needed. Workaround: avoid combining smoke-test Bash commands with '&&' chains that can fail partway; use separate commands or tolerate non-zero exits."
+    },
+    {
+      "title": "Alignment gates can read stale file content across re-submissions",
+      "body": "Two alignment re-gates read stale file content from prior runs even after edits were re-applied on disk. The fix was explicit instructions to read fresh from disk. The root cause is unclear \u2014 possibly agent-level caching or the files being reverted between submission and execution."
+    },
+    {
+      "title": "Adversarial gap-hunt on retros added real value",
+      "body": "The adversarial agent grounded in all 7 sprint retros found 3 P1 gaps (rename orphan, seed clobber, stale-name sweep) and 3 P2 gaps, producing EXEC-096 as a new slice and enriching acceptance criteria across 092/094/095. The phantom-wipe postmortem and the sprint-7 EXEC-083 contradiction were the two most productive retro sources."
+    },
+    {
+      "title": "Code-standards gate caught a real doc-comment splice bug",
+      "body": "Inserting retireOrphanedSkill between migrateHookLayout's doc comment and its function body split the doc \u2014 the first half was prepended to the new function, the second half orphaned on the old. code-standards caught it as a truthful-comments violation."
+    }
+  ],
   "step_log": [
     {
       "step": "package_qa_pass",
