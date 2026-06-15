@@ -44,6 +44,11 @@ const {
   HOOK_CJS_MIGRATION_ID,
   HOOK_CONTENT_REWRITES,
   HOOK_COMMAND_REWRITE,
+  SKILLS_DIR,
+  RETIRED_SKILL_DIR,
+  REPLACEMENT_SKILL_DIR,
+  RETIRED_SKILL_FRONTMATTER_NAME,
+  SKILL_RETIREMENT_MIGRATION_ID,
 } = require('./migrate-policy');
 const {
   HOOK_FEATURES,
@@ -59,6 +64,9 @@ const {
   VIEWER_HEALTH_PATH,
   VIEWER_PROBE_TIMEOUT_MS,
   VIEWER_HEALTH_OK_STATUS,
+  ORPHAN_SKILL_DIR,
+  ORPHAN_SKILL_REPLACEMENT_DIR,
+  ORPHAN_SKILL_SKILLS_DIR,
 } = require('./health-policy');
 const { SCHEMA_DIR_RELATIVE, DETECTION_RULES } = require('./validate-policy');
 
@@ -857,6 +865,17 @@ async function doctor(args) {
       : 'hook files: no .js/.cjs twins'
   );
 
+  // ADR-0009 / EXEC-096: flag the orphaned old grill skill after the rename.
+  const orphanSkillPath = path.join(target, ORPHAN_SKILL_SKILLS_DIR, ORPHAN_SKILL_DIR);
+  const replacementSkillPath = path.join(target, ORPHAN_SKILL_SKILLS_DIR, ORPHAN_SKILL_REPLACEMENT_DIR);
+  if (fs.existsSync(orphanSkillPath) && fs.existsSync(replacementSkillPath)) {
+    lines.push(`skill layout: ORPHAN — ${ORPHAN_SKILL_DIR}/ still present alongside its replacement ${ORPHAN_SKILL_REPLACEMENT_DIR}/; run \`to-execution migrate\` to retire it (ADR-0009)`);
+  } else if (fs.existsSync(orphanSkillPath)) {
+    lines.push(`skill layout: ${ORPHAN_SKILL_DIR}/ present but replacement not yet stamped — run \`to-execution update\` first`);
+  } else {
+    lines.push('skill layout: current (no orphaned grill skill)');
+  }
+
   // Toggles are read straight from the file even when schema-invalid: the hooks
   // themselves fail safe to disabled in that case, and the per-feature verdict
   // below carries the broken-config reason instead of guessing intent.
@@ -1209,6 +1228,43 @@ function rewriteHookCommands(settingsText, target, renamedThisRun) {
 }
 
 /**
+ * ADR-0009 / EXEC-096: retire the orphaned old grill skill after a rename. Detects
+ * execution-grill-with-docs/ in the Instance's skills dir and removes it if (a) the
+ * replacement execution-epic-grill/ already exists and (b) the orphan's SKILL.md
+ * confirms it is the stamped original via frontmatter name match. Location-only,
+ * idempotent: a second run finds nothing to retire. Returns a refusal string when the
+ * orphan has no readable SKILL.md or when its frontmatter does not match (may be
+ * user-authored).
+ * @param {string} target - absolute Instance root.
+ * @returns {string} human-readable one-line result for migrate's report.
+ */
+function retireOrphanedSkill(target) {
+  const orphanDir = path.join(target, SKILLS_DIR, RETIRED_SKILL_DIR);
+  const replacementDir = path.join(target, SKILLS_DIR, REPLACEMENT_SKILL_DIR);
+
+  if (!fs.existsSync(orphanDir)) {
+    return `no orphaned ${RETIRED_SKILL_DIR}/ found — nothing to retire`;
+  }
+  if (!fs.existsSync(replacementDir)) {
+    return `${RETIRED_SKILL_DIR}/ present but replacement ${REPLACEMENT_SKILL_DIR}/ missing — run \`to-execution update\` first`;
+  }
+
+  const skillMdPath = path.join(orphanDir, 'SKILL.md');
+  let skillContent;
+  try {
+    skillContent = fs.readFileSync(skillMdPath, 'utf8');
+  } catch {
+    return `${RETIRED_SKILL_DIR}/ has no readable SKILL.md — refusing to retire (may be user-authored)`;
+  }
+  if (!skillContent.includes(`name: ${RETIRED_SKILL_FRONTMATTER_NAME}`)) {
+    return `${RETIRED_SKILL_DIR}/SKILL.md does not match the stamped frontmatter — refusing to retire (may be user-authored)`;
+  }
+
+  fs.rmSync(orphanDir, { recursive: true, force: true });
+  return `retired ${RETIRED_SKILL_DIR}/ (replaced by ${REPLACEMENT_SKILL_DIR}/)`;
+}
+
+/**
  * Migrate an Instance's hook layout from .js to .cjs (EXEC-076). For each legacy hook
  * whose content is byte-identical to its recorded stamped-form hash (an unmodified
  * framework hook), write the .cjs file with sibling references repointed, remove the
@@ -1327,6 +1383,7 @@ function migrate(args) {
   }
 
   const hooks = migrateHookLayout(target);
+  const skillRetirement = retireOrphanedSkill(target);
 
   process.stdout.write(
     [
@@ -1344,6 +1401,8 @@ function migrate(args) {
       hooks.markerMissing
         ? '  (no version marker — could not verify hooks against their stamped form; nothing renamed)'
         : '(sibling references repointed at .cjs; locally modified hooks are reported, never clobbered)',
+      `Skill retirement (${SKILL_RETIREMENT_MIGRATION_ID})`,
+      `  ${skillRetirement}`,
       '',
     ].join('\n')
   );

@@ -84,6 +84,13 @@ const HOOK_COMMAND_REWRITE = {
   pattern: String.raw`(\.claude/hooks/([\w-]+))\.js`,
 };
 
+// --- ADR-0009 / EXEC-096: the skill-retirement migration -----------------------
+const SKILLS_DIR = '.claude/skills';
+const RETIRED_SKILL_DIR = 'execution-grill-with-docs';
+const REPLACEMENT_SKILL_DIR = 'execution-epic-grill';
+const RETIRED_SKILL_FRONTMATTER_NAME = 'execution-grill-with-docs';
+const SKILL_RETIREMENT_MIGRATION_ID = 'adr-0009-grill-family-skill-retirement';
+
 module.exports = {
   RUNTIME_RECORD_BASENAMES,
   PROGRESS_HOME,
@@ -96,4 +103,9 @@ module.exports = {
   HOOK_CJS_MIGRATION_ID,
   HOOK_CONTENT_REWRITES,
   HOOK_COMMAND_REWRITE,
+  SKILLS_DIR,
+  RETIRED_SKILL_DIR,
+  REPLACEMENT_SKILL_DIR,
+  RETIRED_SKILL_FRONTMATTER_NAME,
+  SKILL_RETIREMENT_MIGRATION_ID,
 };

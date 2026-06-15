@@ -1,6 +1,6 @@
 # <Project> Domain Context
 
-A pure glossary of this project's domain terms and its team roster — one context, nothing else: no specs, no scratch, no implementation decisions. The Setup Grill seeds it; `execution-grill-with-docs` and scribe add terms as they resolve; deletions need Team Lead approval. Format authority: `.claude/skills/execution-grill-with-docs/CONTEXT-FORMAT.md`.
+A pure glossary of this project's domain terms and its team roster — one context, nothing else: no specs, no scratch, no implementation decisions. The Setup Grill seeds it; `execution-context-grill` and scribe add terms as they resolve; deletions need Team Lead approval. Format authority: `.claude/skills/execution-context-grill/CONTEXT-FORMAT.md`.
 
 ## Glossary
 

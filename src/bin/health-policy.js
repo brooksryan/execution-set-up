@@ -99,6 +99,11 @@ const HOOK_COMMAND_SCRIPT_PATTERN = String.raw`\.claude/hooks/([\w-]+\.\w+)`;
 // flagging overnight gaps.
 const HEARTBEAT_FRESH_MS = 24 * 60 * 60 * 1000;
 
+// ADR-0009 / EXEC-096: skill-retirement orphan check.
+const ORPHAN_SKILL_DIR = 'execution-grill-with-docs';
+const ORPHAN_SKILL_REPLACEMENT_DIR = 'execution-epic-grill';
+const ORPHAN_SKILL_SKILLS_DIR = '.claude/skills';
+
 module.exports = {
   HOOK_FEATURES,
   INVOCATION_LOG_PATH,
@@ -113,4 +118,7 @@ module.exports = {
   VIEWER_HEALTH_PATH,
   VIEWER_PROBE_TIMEOUT_MS,
   VIEWER_HEALTH_OK_STATUS,
+  ORPHAN_SKILL_DIR,
+  ORPHAN_SKILL_REPLACEMENT_DIR,
+  ORPHAN_SKILL_SKILLS_DIR,
 };

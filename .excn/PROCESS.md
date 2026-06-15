@@ -10,7 +10,7 @@ Work moves through a fixed sequence:
 grill → PRD → issues → sprint → retro → edits of persistent docs & Teammate definitions
 ```
 
-- **Grill-first.** A new domain or major feature starts with `execution-grill-with-docs` before any code or content. Bug fixes and small additions skip the grill — file the issue and assign it.
+- **Grill-first.** A new domain or major feature starts with a grill before any code or content. Run `execution-context-grill` first if the shared model has shifted, then `execution-epic-grill` for the body of work. Bug fixes and small additions skip the grill — file the issue and assign it.
 - **PRD.** After a grill, run `execution-to-prd`. A PRD answers: what problem, who benefits, the user stories, the implementation decisions. It does **not** name files or show code.
 - **Issues.** Run `execution-to-issues` to break the PRD into independently-grabbable vertical slices.
 - **Sprint.** Selected issues go into a sprint. The sprint JSON is the source of truth.
@@ -18,10 +18,15 @@ grill → PRD → issues → sprint → retro → edits of persistent docs & Tea
 
 Hard-to-reverse decisions surfaced at grill time are recorded as **ADRs** — committed markdown, one decision per numbered file, in `.excn/adr/`. Offer criteria: hard to reverse, surprising without context, the result of a real trade-off. The retro records sprint-time decisions.
 
-## Two grills, kept separate
+## The grill family
 
-- The **Setup Grill** (one-time, the `to-execution` skill) produces context, philosophy, and team. It stops at handoff and does not plan work.
-- The **Work Grill** (recurring) is the Lifecycle's `grill → PRD → issues`, run in a *fresh session* against the current goal. Setup context never bleeds into work context.
+Grills are separated by the artifact each owns — "which grill am I in?" is answered by "what am I allowed to write?" (ADR-0009).
+
+- The **Setup Grill** (one-time, the `to-execution` skill) produces the scaffold, context seeds, philosophy seeds, and team. It stops at handoff and does not plan work.
+- The **Context Grill** (`execution-context-grill`, recurring) establishes or extends the workspace's shared model. Writes terms into `.excn/CONTEXT.md` term-by-term; may seed `.excn/PHILOSOPHY.md` only while the stamped sentinel is present (ADR-0010), then the Retro Loop owns it.
+- The **Epic Grill** (`execution-epic-grill`, recurring) grills a body of work into requirements that feed `execution-to-prd`, with an optional deep design pass (work-in-types) the agent offers when the work is design-heavy or on request. Writes design decisions to ADRs, never to CONTEXT.md or PHILOSOPHY.md.
+
+The Lifecycle's grill node expands: context-grill (when the shared model has shifted) → epic-grill → PRD → issues. Each grill runs in a fresh session. Context-grill's CONTEXT.md writes must be committed before epic-grill reads them — epic-grill reads CONTEXT.md by path, not from session memory.
 
 ## Sprint tracking
 

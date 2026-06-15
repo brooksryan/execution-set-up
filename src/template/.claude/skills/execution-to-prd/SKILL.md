@@ -1,9 +1,9 @@
 ---
 name: execution-to-prd
-description: Synthesize the current Work Grill conversation into a schema-valid JSON PRD at .excn/prds/. Use after a Work Grill, when the user wants a PRD from the current context.
+description: Synthesize the current Epic Grill conversation into a schema-valid JSON PRD at .excn/prds/. Use after an Epic Grill, when the user wants a PRD from the current context.
 ---
 
-Synthesize the current Work Grill conversation into a PRD. Do NOT interview — the grill already happened; use what the conversation already holds. If the context is thin (no grill in this session), say so and ask the user to run `execution-grill-with-docs` first.
+Synthesize the current Epic Grill conversation into a PRD. Do NOT interview — the grill already happened; use what the conversation already holds. If the context is thin (no grill in this session), say so and ask the user to run `execution-epic-grill` first.
 
 ## Read first (explicit paths — the `.excn` namespace is invisible to default search)
 - `.excn/CONTEXT.md` — use this glossary's vocabulary throughout the PRD.

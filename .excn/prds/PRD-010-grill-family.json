@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "id": "PRD-010",
+  "title": "Grill family: context-grill, epic-grill, and the optional type pass",
+  "status": "published",
+  "created": "2026-06-13",
+  "amended": null,
+  "problem_statement": "Today the Work Grill collapses three different kinds of understanding into one step (execution-grill-with-docs): sharpening the workspace's shared language, fixing what a body of work must satisfy, and working out a design. One skill owning all three violates Single-responsibility. The lead has no way to run a light requirements pass without also re-litigating glossary terms, and no way to opt into deep design work only when the work warrants it. The grills also aren't separated by what each owns, so it is unclear which artifact a given grill is allowed to write.",
+  "solution": "Separate the grills by the artifact each owns, so 'which grill am I in?' is answered by 'what am I allowed to write?'. Keep the one-time Setup Grill as the machinery setup. Add a recurring context-grill (a fork of the standard domain grill) that owns the workspace's shared model: terms into CONTEXT.md, and project principles into PHILOSOPHY.md only on first establishment (thereafter the Retro Loop owns them). Reframe the Work Grill's first step into an epic-grill scoped to a body of work: a required requirements pass ('what must this satisfy?') feeding the PRD, plus an optional type/design pass (the work-in-types methodology) that the agent offers when the work is design-heavy or on request, writing design decisions to ADRs and never to CONTEXT.md.",
+  "user_stories": [
+    {
+      "id": 1,
+      "actor": "Team Lead",
+      "want": "a recurring context-grill that owns the workspace glossary",
+      "benefit": "sharpening shared terms is separate from planning a specific body of work"
+    },
+    {
+      "id": 2,
+      "actor": "Team Lead",
+      "want": "the epic-grill to run a requirements pass by default and offer the deep type/design pass only when warranted",
+      "benefit": "small work is not forced through heavyweight design"
+    },
+    {
+      "id": 3,
+      "actor": "Team Lead",
+      "want": "the type pass to follow the work-in-types methodology (close every hole, specify every seam, check totality, then switch to call-graph and liveness)",
+      "benefit": "design grills terminate on a real condition instead of trailing off"
+    },
+    {
+      "id": 4,
+      "actor": "Team Lead",
+      "want": "context-grill to seed PHILOSOPHY.md when principles are not yet established but defer to the Retro Loop afterward",
+      "benefit": "first-time setup is not blocked while the sole-change-path Principle still holds for edits"
+    },
+    {
+      "id": 5,
+      "actor": "contributor",
+      "want": "each grill's writable artifact to be explicit",
+      "benefit": "a grill never writes outside its home"
+    }
+  ],
+  "implementation_decisions": [
+    {
+      "title": "Grill family keyed by writer-home",
+      "summary": "Three grills, each owning one artifact: setup-grill writes the scaffold and seeds, context-grill writes CONTEXT.md (and the PHILOSOPHY seed), epic-grill writes the PRD and ADRs. The grill family mirrors ADR-0008's writer-determines-home rule applied to grills instead of progress files."
+    },
+    {
+      "title": "New context-grill skill",
+      "summary": "A recurring fork of the standard domain grill (grill-with-docs), stamped per-Instance under an execution-* name. Owns CONTEXT.md term maintenance and offers ADRs under the existing three-part criteria. It is the workspace's shared-model grill, distinct from the one-time Setup Grill which defines how to-execution operates in the project."
+    },
+    {
+      "title": "PHILOSOPHY seed-once rule",
+      "summary": "context-grill may write PHILOSOPHY.md only when no project principles are yet established; once principles exist, edits route through the Retro Loop. This edges the Retro-loop-as-sole-change-path Principle, so it is an ADR candidate and must clear the alignment gate."
+    },
+    {
+      "title": "Epic-grill reframe of execution-grill-with-docs",
+      "summary": "The current execution-grill-with-docs becomes the epic-grill: a required requirements pass that feeds execution-to-prd, plus an optional type/design pass. Its glossary-sharpening duty moves out to context-grill."
+    },
+    {
+      "title": "Optional type pass, agent-gated",
+      "summary": "The type/design pass runs when the work is design-heavy or on user request; the agent asks rather than assuming. Its body is the work-in-types methodology: open each topic at its loosest signature, name seams before bodies, test every function for totality, push invariants into structure, then switch axes once to call-graph and liveness. Resolved types render inline and into ADRs, never into CONTEXT.md."
+    },
+    {
+      "title": "Lifecycle grill node expands",
+      "summary": "PROCESS.md's grill node becomes: context-grill (when the shared model shifts) then epic-grill (requirements plus optional design) then PRD then issues. The Setup Grill stays pre-Lifecycle. The CONTEXT.md 'Setup Grill / Work Grill' entry and flagged ambiguities update for the grill family."
+    },
+    {
+      "title": "Naming and rename tradeoff",
+      "summary": "Whether the reframed skill keeps the published name execution-grill-with-docs or renames to an epic-grill name is a breaking-consumer migration per ADR-0003 (names published in 0.3.0). Settle keep-name-versus-rename at issue time, weighing breakage against clarity."
+    },
+    {
+      "title": "Src-First mirror",
+      "summary": "All skill and doc changes land in src/template first, then the root Instance mirrors. New context-grill stamps update framework-version.json hashes."
+    }
+  ],
+  "testing_decisions": [
+    "alignment gate runs on every persistent-doc change: PROCESS.md, CONTEXT.md, the PHILOSOPHY seed-once rule, and the two candidate ADRs.",
+    "package-qa stamp contract re-runs after the template skill set changes, confirming the new context-grill skill stamps and framework-version.json hashes update.",
+    "No unit tests: skill and doc artifacts are markdown; correctness is gated by adherence agents, not code tests."
+  ],
+  "out_of_scope": [
+    "Changing the Setup Grill's behavior beyond clarifying its boundary against context-grill.",
+    "Direct PHILOSOPHY.md editing by any grill after principles are established (stays Retro-Loop-only).",
+    "Renaming execution-to-prd or execution-to-issues.",
+    "The viewer and runtime layer."
+  ],
+  "issues": ["EXEC-091", "EXEC-092", "EXEC-093", "EXEC-094", "EXEC-095", "EXEC-096"],
+  "notes": [
+    "Provenance: synthesized from the 2026-06-13 meta-grill on splitting the Work Grill into a scope-keyed grill family.",
+    "ADR candidates to offer at issue/build time, both alignment-gated: (1) grill family keyed by writer-home; (2) context-grill PHILOSOPHY seed-once edge on Retro-loop-as-sole-change-path.",
+    "Philosophy candidate for the next sprint's retrospective_notes: 'grills are separated by the artifact they own, not by lifecycle phase.'"
+  ]
+}
