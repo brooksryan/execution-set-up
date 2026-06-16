@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-083",
+  "title": "Setup Grill content moves into the Setup Skill bundle; execution-grill-with-docs serves the Work Grill only",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src skill content"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "The Setup Skill (src/SKILL.md) delegates its Setup Grill context step to the stamped execution-grill-with-docs, whose rules are Work-Grill-specific — it feeds a PRD and forbids writing PHILOSOPHY.md — and both are wrong during setup, where Handoff follows and the philosophy layer legitimately writes PHILOSOPHY.md. Move the setup-interview content (context layer, philosophy sweep, team, one-off adherence agents) into the Setup Skill's own npm bundle: inline in src/SKILL.md if it stays within Precise Minimalism, else a bundled setup-grill reference beside principles.md (npm files manifest grows). The context layer references the stamped CONTEXT-FORMAT.md by path — stamping (step 2) precedes the grill (step 3). The Setup Skill stops invoking execution-grill-with-docs; that skill stays purely the Work Grill's first step, unchanged. Explicit no-s from the 2026-06-12 Work Grill: no sentinel hook, no config.json rename, no migrate step, and no new stamped skill — the Setup Grill content rides in the to-execution package/plugin bundle, never stamped into Instances. Primary audience (Brooks, 2026-06-12): the fresh adopter arriving via npm — npm install to-execution, then telling the agent to read and follow node_modules/to-execution/SKILL.md. Write the skill for that reader: no assumption of a skill registry, an installed personal skill, or prior framework context. Skill-registry and plugin invocations read the same file and lose nothing.",
+  "prd": null,
+  "acceptance_criteria": [
+    "src/SKILL.md's Setup Grill phase carries its own interview instructions and no longer invokes or references execution-grill-with-docs",
+    "SKILL.md works standalone for an agent reading it from node_modules/to-execution/ with no skill registry and no prior context — it plus its bundled references is the complete setup procedure",
+    "The setup context layer references the stamped CONTEXT-FORMAT.md by explicit path",
+    "If a bundled reference file is added, the npm files manifest ships it (pack parity holds)",
+    "src/template/.claude/skills/execution-grill-with-docs/ is byte-unchanged by this issue",
+    "package-qa PASS"
+  ],
+  "slice_type": "AFK",
+  "root_cause": "The Setup Grill reused the Work Grill's first-step skill for its context layer, so one skill carried two conflicting rule sets selected by a caller it cannot see",
+  "fix": "Setup Grill interview inlined into src/SKILL.md step 3 (build the glossary from scratch: sharpen terms, scenario-test boundaries, cross-reference code, write each term as it resolves, format per the stamped CONTEXT-FORMAT.md path; ADRs sparingly per the stamped ADR-FORMAT.md path). Step 3 preamble distinguishes the Setup Grill from the Work Grill; step 1 reframes the stamped Lifecycle skills as the later Work Grill's and states setup runs from this file alone. Inline fit Precise Minimalism (SKILL.md 41→40 lines) so no bundled reference file was added — npm files manifest unchanged. src/template/.claude/skills/execution-grill-with-docs/ byte-unchanged.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 7,
+  "closed_in_sprint": 7,
+  "notes": "Resolved in the 2026-06-12 Work Grill (Brooks). Sentinel-hook + config.json variants were considered and descoped by the lead; ADR-0009 was drafted for the config rename and withdrawn with the descope."
+}

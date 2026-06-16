@@ -1,0 +1,35 @@
+{
+  "id": "EXEC-097",
+  "title": "writeRecord helper core, per-record issue schema, and `issue create` CLI",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "scaffolder",
+    "schema",
+    "cli"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Stand up the single write path for issues end-to-end: author a per-record issue schema (one file = one issue, not the collection wrapper), widen the issue `id` pattern and the `prd` reference pattern (and the PRD schema's own `id`) to accept legacy `EXEC-NNN`/`PRD-NNN` OR UUIDv7, and build the `writeRecord` helper that mints a UUIDv7, rejects any caller-supplied id, derives a frozen slug from the title, validates against the per-record schema with a bundled ajv, serializes canonically, and writes atomically to `.excn/issues/<uuid>-<slug>.json`. Expose it as `to-execution issue create`. Demoable: create an issue from the CLI and get a schema-valid uuid-keyed file.",
+  "prd": "PRD-011",
+  "acceptance_criteria": [
+    "`to-execution issue create --title ...` writes `.excn/issues/<uuid>-<slug>.json` with a valid UUIDv7 id and a slug derived (sanitized, lowercased) from the title",
+    "The helper rejects a record that arrives with an `id` field on create",
+    "A per-record issue schema exists and the helper validates against it; the legacy collection schema is retired or clearly scoped to archives",
+    "Issue `id` pattern, the `prd` reference pattern, and the PRD schema `id` pattern accept legacy ids OR UUIDv7",
+    "ajv is a declared package dependency and the validation path survives a fresh `npm install` (no host-root/pruned-module breakage) — sprint-6 lesson",
+    "All literals (uuid version, filename pattern, slug rules) are named constants, not inline — sprint-5 lesson",
+    "Serialization is library parse→mutate→stringify so malformed output (trailing comma) is structurally impossible — sprint-6 lesson",
+    "Write is temp-file + rename; a mid-write failure leaves no partial file",
+    "`.excn/.gitignore` does not catch `.excn/issues/*.json`; per-issue files stay git-tracked (ADR-0005, phantom-wipe class)",
+    "Helper unit tests cover: valid mint, supplied-id rejection, slug derivation, atomic write, schema-invalid rejection"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 9,
+  "closed_in_sprint": 9,
+  "notes": null
+}

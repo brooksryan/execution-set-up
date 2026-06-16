@@ -1,0 +1,24 @@
+{
+  "id": "EXEC-015",
+  "title": "Publish preflight guards + manifest metadata",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/package.json"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Add `prepublishOnly` preflight to src/package.json asserting fail-closed: repo-local git email is personal, `npm whoami` is the confirmed personal user, origin remote is under brooksryan, working tree clean at a tagged commit. Add repository/author metadata. Src-First. Acceptance: inversion test — preflight run with wrong identity active aborts; package-qa PASS (mandatory — src/package.json change).",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-013",
+    "EXEC-014"
+  ],
+  "related_tickets": [
+    "PRD-002"
+  ],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "AFK. package-qa gate mandatory. PRD-002 P4. Shipped 2026-06-07 (sprint_1 item S1-9): 6 fail-closed guards inversion-tested; third package_qa_pass logged in tmp/exec/prd-002_progress.json."
+}

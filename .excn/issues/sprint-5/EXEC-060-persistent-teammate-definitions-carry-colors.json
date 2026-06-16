@@ -1,0 +1,26 @@
+{
+  "id": "EXEC-060",
+  "title": "Persistent Teammate definitions carry colors",
+  "severity": "P3",
+  "scope": [
+    "src/template",
+    "agents"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Brooks's directive: every persistent Teammate def gets a color in frontmatter for visual identification (scribe blue, builder orange, viewer green, packager purple, architect cyan); the _teammate.template.md shape gains the color line so new Instances inherit the convention. Chartered definition change: alignment gate + Team Lead approval; Src-First.",
+  "prd": null,
+  "acceptance_criteria": [
+    "All five persistent Teammate defs (and the template scribe.md + _teammate.template.md shape) carry color frontmatter",
+    "alignment PASS; root mirrors src/template"
+  ],
+  "slice_type": "HITL",
+  "notes": "Filed 2026-06-10 from Brooks's directive (sprint 5).",
+  "status": "closed",
+  "root_cause": null,
+  "fix": "color frontmatter on all five persistent Teammates (scribe blue templated) + _teammate.template.md color line. alignment PASS, Brooks approved.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 5,
+  "closed_in_sprint": 5
+}

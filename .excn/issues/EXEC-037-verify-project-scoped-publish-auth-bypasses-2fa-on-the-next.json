@@ -1,0 +1,24 @@
+{
+  "id": "EXEC-037",
+  "title": "Verify project-scoped publish auth bypasses 2FA on the next real release",
+  "status": "open",
+  "severity": "P3",
+  "scope": [
+    "ops"
+  ],
+  "classification": "local",
+  "actionable_now": false,
+  "description": "On the next real to-execution publish, confirm the RELEASE.md recipe publishes unattended (no OTP prompt / no E403). npm-personal-token may be a classic token that 2FA-gates writes; whoami can't prove write-2FA. If it OTP/E403s, overwrite the Keychain item (service npm-personal-token, account $USER) value with an automation/granular-automation token that bypasses 2FA — src/.npmrc and the recipe stay unchanged.",
+  "prd": null,
+  "acceptance_criteria": [],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [
+    "EXEC-034"
+  ],
+  "assigned_sprint": null,
+  "closed_in_sprint": null,
+  "notes": "Filed 2026-06-09 as the deferred 2FA-bypass-on-write proof for EXEC-034 (Brooks)."
+}

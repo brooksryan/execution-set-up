@@ -1,0 +1,29 @@
+{
+  "status": "closed",
+  "actionable_now": true,
+  "prd": "PRD-009",
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "Template ships .excn/progress/ and .excn/runtime/ via .gitkeep on every init; stamp-policy adds both to WORK_TRACKING_DIR_PREFIXES so update classes them work-tracking and never touches records inside. Commit 7e4a7d8. code-standards + package-qa PASS.",
+  "related_tickets": [],
+  "assigned_sprint": 6,
+  "closed_in_sprint": 6,
+  "notes": null,
+  "id": "EXEC-066",
+  "title": "Two homes stamped: Template ships .excn/progress/ and .excn/runtime/, stamp policy classes them work-tracking",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "src/bin"
+  ],
+  "classification": "macro",
+  "description": "The Template ships the two Progress Record / Runtime Record homes of ADR-0008: .excn/progress/ (agent- and gate-written) and .excn/runtime/ (hook-written), present on every fresh init. The stamp policy classifies both as work-tracking so update never touches their contents. The stamped .excn gitignore continues to match *_progress.json at any depth with no change. End-to-end: init a temp dir, both homes exist, update leaves files placed in them untouched.",
+  "acceptance_criteria": [
+    "Fresh init stamps .excn/progress/ and .excn/runtime/",
+    "stamp policy classifies both directories as work-tracking (update never refreshes or drift-reports their contents)",
+    "Existing *_progress.json gitignore line covers records inside both homes with no gitignore edit",
+    "Src-First: lands in src/ first, dogfood root mirrors",
+    "package-qa and code-standards gates PASS"
+  ],
+  "depends_on": []
+}

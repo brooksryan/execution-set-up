@@ -1,0 +1,34 @@
+{
+  "id": "EXEC-010",
+  "title": "Update Preflight manifest and Scaffolder template to the resolution outcome",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/SKILL.md",
+    "src/bin",
+    "src/template"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Reflect EXEC-007/008/009 outcomes: Preflight's required-skill list matches what the framework actually uses; stamped template carries the forked skills and the .excn/adr location reference; schemas current.",
+  "prd": "PRD-005",
+  "acceptance_criteria": [
+    "Preflight's required-skill list matches the forked skill set (execution-grill-with-docs, execution-to-prd, execution-to-issues)",
+    "the Scaffolder manifest stamps the forked skills and the .excn/adr location reference",
+    "schemas current",
+    "package-qa PASS on the CLI/template change",
+    "a fresh init stamps the updated manifest"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-007",
+    "EXEC-008",
+    "EXEC-009"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 2,
+  "closed_in_sprint": 2,
+  "notes": "Kept from sprint 1, re-pointed to PRD-005 for sprint 2. package-qa gate mandatory. Shipped 2026-06-07 by team-lead (sprint_2 item S2-5): Setup Skill Preflight drops the three forked skills from required globals (keeps make-teammate, async-questions), Scaffolder stamps them; Setup Grill/Handoff/README/both PROCESS.md/principles.md reference the execution-* forks; src/SKILL.md sole-copy; alignment PASS."
+}

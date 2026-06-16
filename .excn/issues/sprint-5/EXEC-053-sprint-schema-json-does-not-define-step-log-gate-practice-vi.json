@@ -1,0 +1,26 @@
+{
+  "id": "EXEC-053",
+  "title": "sprint.schema.json does not define step_log; gate practice violates strict schema",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "schemas"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Adherence Agents append gate verdicts to a step_log array in the active sprint JSON (established practice since sprint 4 planning), but sprint.schema.json sets additionalProperties:false and defines no step_log — every gated sprint file fails strict validation. Resolve by adding an optional step_log definition to the schema (Src-First: src/template/.excn/schemas first, root mirrors) or by relocating verdict logging; the gate-watch verdict-sensing retro note (sprint 4) bears on the same choice.",
+  "prd": null,
+  "acceptance_criteria": [
+    "A gated sprint JSON validates strictly against sprint.schema.json",
+    "Adherence Agent verdict logging conforms to wherever the decision lands"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "Optional step_log added to sprint.schema.json (template + root); sprint_4/5 validate strictly; gate-watch verdict sensing extended (sprint-JSON writes + Stop-time evidence scan). Gates PASS (one revise cycle: named patterns).",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 5,
+  "closed_in_sprint": 5,
+  "notes": "Filed 2026-06-10 from scribe validation flag at sprint-4 record close."
+}

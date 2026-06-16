@@ -1,0 +1,28 @@
+{
+  "status": "closed",
+  "actionable_now": true,
+  "prd": "PRD-009",
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "verdict-ledger.schema.json (new): top-level append-only array of {step, at, artifact, summary}, entry shape under #/$defs/entry; sprint.schema.json step_log references it via cross-file $ref instead of an inlined duplicate; progress.schema.json untouched. ajv-validated against the live session ledger and sprint_6.json. Commit f9f2af6. package-qa PASS (code-standards N/A — schema-only).",
+  "related_tickets": [],
+  "assigned_sprint": 6,
+  "closed_in_sprint": 6,
+  "notes": null,
+  "id": "EXEC-068",
+  "title": "Verdict Ledger schema: gates' append shape validates strictly",
+  "severity": "P2",
+  "scope": [
+    "schemas"
+  ],
+  "classification": "local",
+  "description": "A new verdict-ledger schema defines the append-only array of gate verdicts (step, at, artifact, summary). The session Verdict Ledger and a sprint record's step_log entries share the entry shape; the sprint schema references it rather than duplicating it. progress.schema.json remains the unit-of-work tracker shape. End-to-end: the live session ledger and sprint-6 step_log validate strictly against the new schema.",
+  "acceptance_criteria": [
+    "verdict-ledger.schema.json ships in the Template's schemas",
+    "session_progress.json validates against it as-is",
+    "sprint.schema.json step_log entries reference the same entry shape (no duplicated definition)",
+    "progress.schema.json unchanged for trackers",
+    "Src-First: template schemas first, dogfood root mirrors"
+  ],
+  "depends_on": []
+}

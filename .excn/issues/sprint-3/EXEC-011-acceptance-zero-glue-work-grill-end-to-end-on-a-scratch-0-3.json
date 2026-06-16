@@ -1,0 +1,28 @@
+{
+  "id": "EXEC-011",
+  "title": "Acceptance: zero-glue Work Grill end-to-end on a scratch 0.3.0 Instance",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "investigation"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Run the full Work Grill (grill -> PRD -> issues) on a scratch 0.3.0 Instance after EXEC-033. Every artifact lands in the framework structure conformant to schema, with zero translation language anywhere in the run. This is PRD-005's acceptance test.",
+  "prd": "PRD-005",
+  "acceptance_criteria": [
+    "the full Work Grill (grill -> PRD -> issues) runs end-to-end on a scratch 0.3.0 Instance",
+    "every artifact lands in the framework structure conformant to schema",
+    "zero translation language anywhere in the run"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-033"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 3,
+  "closed_in_sprint": 3,
+  "notes": "Kept from sprint 1, re-pointed to PRD-005 for sprint 2. HITL — the grill requires the user. Deferred from sprint 2 (Brooks, 2026-06-08): never started; returned to backlog.json with the acceptance flag preserved. S2-10 remains in sprint_2.json not_shipped as the planned-but-deferred record."
+}

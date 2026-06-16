@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-051",
+  "title": "nothing-new-under-the-sun: stamped prior-art research Invoked Agent for scoping",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "agents"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Author a lightweight Invoked Agent, stamped by default in the Template, that runs during scoping (between PRD and issue breakdown). Invocation contract: a PRD id/path plus pointers to the relevant parts of the codebase. Behavior: web-search for prior art on the problem the PRD solves — YouTube videos, Stack Overflow threads, Medium/blog articles, reference implementations — and return a digest of existing approaches and common gotchas in the candidate implementation paths, each with its source. It informs scoping only: it does not decide, edit files, or gate work. Authored from the framework's agent-def shape; stamped as invariant layout (Scaffolder copies it; package-qa contract). Src-First; root Instance mirrors so this team can use it immediately.",
+  "prd": "PRD-007",
+  "acceptance_criteria": [
+    "The agent definition ships in the Template and is stamped into a fresh Instance",
+    "Invoked with a PRD and codebase pointers, it returns a sourced digest of prior art and implementation gotchas",
+    "It performs no file edits and issues no verdicts",
+    "alignment PASS on the definition; package-qa passes on the stamp contract",
+    "Demonstrated once against PRD-007 itself on this Instance"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "Definition stamped + alignment PASS + TL approved; acceptance demo run against PRD-007, digest persisted to .excn/research/prior-art-prd-007.md; stamp contract package-qa PASS.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 4,
+  "closed_in_sprint": 4,
+  "notes": "Filed 2026-06-10 (Brooks, added scope at execution kickoff). Chartered definition addition — alignment-gated, Team-Lead-approved (ADR-0004 path)."
+}

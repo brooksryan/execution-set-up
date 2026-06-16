@@ -1,0 +1,27 @@
+{
+  "id": "EXEC-049",
+  "title": "Update path: stamp records framework version; update command re-stamps invariants and reports drift",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/bin"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Stamping records the framework version in the Instance. An update command (the Scaffolder's second verb) re-stamps only the invariant layout at the installed package's version: variant files (the grill's project-specific outputs) and work-tracking state are never touched; invariant files that drifted locally from their stamped form are reported, not overwritten. Demoable: stamp a scratch Instance at the previous version, run update, observe invariants refreshed, variants intact, drift reported.",
+  "prd": "PRD-007",
+  "acceptance_criteria": [
+    "A stamped Instance records the framework version that stamped it",
+    "The update command refreshes invariant files to the installed version and never modifies variant files or work-tracking state",
+    "Locally drifted invariant files are reported and left in place",
+    "package-qa passes on the stamp contract"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "framework-version.json marker on init + update verb (re-stamps invariants, drift persists via template-hash anchor, restores missing); stamp-policy.js data module; code-standards PASS, package-qa PASS.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 4,
+  "closed_in_sprint": 4,
+  "notes": null
+}

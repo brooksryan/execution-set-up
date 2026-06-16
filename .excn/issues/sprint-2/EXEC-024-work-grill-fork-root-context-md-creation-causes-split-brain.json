@@ -1,0 +1,22 @@
+{
+  "id": "EXEC-024",
+  "title": "Work Grill fork: root CONTEXT.md creation causes split-brain glossary",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src",
+    "skills"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "grill-with-docs CONTEXT-FORMAT.md says \"If neither exists, create a root CONTEXT.md lazily when the first term is resolved\" and \"One CONTEXT.md at the repo root.\" An .excn Instance has no root CONTEXT.md, so the skill creates a second glossary at root, blind to .excn/CONTEXT.md.",
+  "prd": "PRD-005",
+  "slice_type": null,
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 2,
+  "closed_in_sprint": 2,
+  "notes": "Catalog evidence from the EXEC-006 scratch run (npx to-execution@0.2.2, 2026-06-07); acceptance criteria deferred to the EXEC-007 design grill; direction ruled: fork, stamped per-Instance. Resolution implemented under EXEC-007; stays open, closes when EXEC-007 ships. Closed 2026-06-07 (sprint_2): resolution shipped inside execution-grill-with-docs (EXEC-007, item S2-1)."
+}

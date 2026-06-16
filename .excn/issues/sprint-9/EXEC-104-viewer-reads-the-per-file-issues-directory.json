@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-104",
+  "title": "Viewer reads the per-file issues directory",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "viewer"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Point the status-page viewer at the per-file layout: glob `.excn/issues/**/*.json` instead of reading `backlog.json`. Handle an empty issues directory and a missing `backlog.json` (fresh-Instance path) without erroring, and sort sanely when legacy ids (no uuid timestamp prefix) and UUIDv7 ids coexist.",
+  "prd": "PRD-011",
+  "acceptance_criteria": [
+    "The viewer renders issues by globbing `.excn/issues/**/*.json`, not by reading `backlog.json`",
+    "An empty `.excn/issues/` and a missing `backlog.json` render cleanly (fresh-Instance path) — G7",
+    "Mixed legacy-id and UUIDv7 records sort in a sane, stable order; the uuid-prefix=creation-order claim degrades gracefully for legacy ids",
+    "code-standards gate passes"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-102"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 9,
+  "closed_in_sprint": 9,
+  "notes": null
+}

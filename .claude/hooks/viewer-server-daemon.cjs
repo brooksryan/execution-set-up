@@ -12,6 +12,14 @@
 //   node viewer-server-daemon.cjs --root <abs-repo> --port <n> [--idle-ms <n>]
 // --idle-ms overrides the idle threshold; it exists for behavioral testing of the
 // self-exit and has no production caller.
+//
+// Directory-index endpoint (EXEC-104, ADR-0011): the issue tracker is now a directory
+// of per-file <uuid>-<slug>.json records with no manifest, and a browser cannot list a
+// directory — so a GET on a DIRECTORY_INDEX_WHITELIST directory (the issues home and
+// its sprint-<N> partitions, only) returns a JSON array of the entry names viewer.js
+// follows: *.json records and sprint-<N>/ partition subdirectories. The listing leaks
+// only those names — never other entries, never file contents (content stays gated by
+// PATH_WHITELIST) — so it widens nothing beyond enumerating issue records.
 
 const fs = require('fs');
 const http = require('http');
@@ -78,8 +86,54 @@ function resolveWhitelisted(root, urlPath) {
 }
 
 /**
- * Build the request handler over a fixed root: health endpoint, GET-only, whitelist,
- * 404 everything else.
+ * Resolve a request path to a whitelisted directory to index, with the same decode and
+ * traversal guard as resolveWhitelisted: only a directory whose root-relative form
+ * matches DIRECTORY_INDEX_WHITELIST (the issues home or a sprint-<N> partition) is
+ * enumerable; anything else yields null (so the request falls through to file serving
+ * or a 404). path.resolve drops a trailing slash, so the same path matches with or
+ * without one.
+ * @param {string} root - absolute repo root.
+ * @param {string} urlPath - the request's pathname.
+ * @returns {string|null} the absolute directory path to list, or null.
+ */
+function resolveIndexDir(root, urlPath) {
+  let decoded;
+  try {
+    decoded = decodeURIComponent(urlPath);
+  } catch {
+    return null; // malformed escapes never reach the filesystem
+  }
+  const resolved = path.resolve(root, decoded.replace(/^\/+/, ''));
+  // Traversal guard: the resolved directory must remain inside the repo root.
+  if (resolved !== root && !resolved.startsWith(root + path.sep)) return null;
+  const rootRelative = path.relative(root, resolved).split(path.sep).join('/');
+  if (!rules.DIRECTORY_INDEX_WHITELIST.some((pattern) => pattern.test(rootRelative))) return null;
+  return resolved;
+}
+
+/**
+ * List a whitelisted directory as the JSON-array index viewer.js consumes: *.json
+ * record names plus sprint-<N> partition subdirectory names (the latter trailing-slash
+ * suffixed so the viewer recurses). Only those two entry kinds are emitted — any other
+ * file or directory is omitted, so the listing never leaks unrelated names.
+ * @param {string} dirPath - absolute directory path (already index-whitelisted).
+ * @returns {string[]} the entry names to serve.
+ */
+function listIndexEntries(dirPath) {
+  const names = [];
+  for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+    if (entry.isFile() && entry.name.endsWith(rules.INDEX_JSON_EXTENSION)) {
+      names.push(entry.name);
+    } else if (entry.isDirectory() && rules.PARTITION_DIR_NAME.test(entry.name)) {
+      names.push(`${entry.name}${rules.INDEX_DIR_SUFFIX}`);
+    }
+  }
+  return names;
+}
+
+/**
+ * Build the request handler over a fixed root: health endpoint, GET-only, directory
+ * index, file whitelist, 404 everything else.
  * @param {string} root - absolute repo root.
  * @param {string} version - framework version echoed by the health endpoint.
  * @param {() => void} touch - called on every request to reset the idle clock.
@@ -99,6 +153,23 @@ function makeHandler(root, version, touch) {
       response.end(JSON.stringify({ repo: root, pid: process.pid, version }));
       return;
     }
+    const indexDir = resolveIndexDir(root, urlPath);
+    if (indexDir !== null) {
+      let entries;
+      try {
+        entries = listIndexEntries(indexDir);
+      } catch {
+        entries = null; // an absent directory (e.g. no such partition) reads as not found
+      }
+      if (entries === null) {
+        response.writeHead(HTTP_NOT_FOUND, { 'Content-Type': rules.ERROR_CONTENT_TYPE });
+        response.end('not found\n');
+        return;
+      }
+      response.writeHead(rules.HTTP_OK, { 'Content-Type': rules.MIME_TYPES['.json'], 'Cache-Control': rules.CACHE_CONTROL_NO_STORE });
+      response.end(JSON.stringify(entries));
+      return;
+    }
     const filePath = resolveWhitelisted(root, urlPath);
     let body;
     try {
@@ -112,7 +183,7 @@ function makeHandler(root, version, touch) {
       return;
     }
     const mime = rules.MIME_TYPES[path.extname(filePath)] || rules.DEFAULT_MIME_TYPE;
-    response.writeHead(rules.HTTP_OK, { 'Content-Type': mime, 'Cache-Control': 'no-store' });
+    response.writeHead(rules.HTTP_OK, { 'Content-Type': mime, 'Cache-Control': rules.CACHE_CONTROL_NO_STORE });
     response.end(body);
   };
 }

@@ -1,0 +1,31 @@
+{
+  "id": "EXEC-045",
+  "title": "Hook-based teammate load reporting, surfaced in the status-page viewer",
+  "status": "closed",
+  "severity": "P3",
+  "scope": [
+    "src/template",
+    "hooks",
+    "viewer"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "A hook logs per-teammate activity so we can see which Teammates bear the most load, surfaced in the status-page viewer. Grounding: teammate-hook-triggers.md §0 (every tool event carries agent_type/agent_id; the §0 probe is a per-tool JSONL append — the telemetry mechanism), §1 (PostToolUse/PostToolBatch as the 'agent did X' signal), §2.3 (identity disambiguation). Spans two owners: hook wiring → builder (Template), reporting UI → viewer. Resolved at the sprint-4 grill: the record is hook-appended .excn/load_progress.json (the *_progress.json ignore class, ADR-0005), viewer-fetchable. Rides the EXEC-046 plumbing; ships disabled by default. Src-First.",
+  "prd": "PRD-007",
+  "acceptance_criteria": [
+    "The hook appends per-tool-event load records to .excn/load_progress.json with identity from agent_type/agent_id",
+    "load_progress.json has a schema in .excn/schemas/ and stays in the *_progress.json ignore class",
+    "The status-page viewer renders a per-Teammate load lane from it",
+    "Ships disabled by default; enabling via the toggle config activates it"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "Hook side: load-report.js + load-progress.schema.json (rolling 5000-record window, ships off). Viewer side: per-Teammate load panel in viewer/ (absent-file off-state, broken-file named error, agent_type/agent_id aggregation). Gates PASS (viewer lane after one revise cycle: ONE_MINUTE_MS).",
+  "depends_on": [
+    "EXEC-046"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 4,
+  "closed_in_sprint": 4,
+  "notes": "Filed 2026-06-10 (Brooks). Exploratory; acceptance criteria set by the EXEC-043 grill/PRD. Hook side and viewer lane both shipped + gated 2026-06-10."
+}

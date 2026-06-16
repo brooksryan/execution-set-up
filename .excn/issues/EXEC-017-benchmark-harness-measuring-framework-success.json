@@ -1,0 +1,26 @@
+{
+  "id": "EXEC-017",
+  "title": "Benchmark harness measuring framework success",
+  "status": "open",
+  "severity": "P2",
+  "scope": [
+    "benchmark"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Build a repeatable benchmark that runs a defined reference project (spec'd in advance) through agent execution and measures whether this framework earns its overhead. Three measures, per Brooks: (1) total token consumption, (2) % of project completed to spec, (3) wall-clock time. Design should compare scaffolded (to-execution Instance) vs unscaffolded baseline runs on the same spec. Needs its own grill → PRD before implementation.",
+  "prd": null,
+  "acceptance_criteria": [
+    "A reference spec exists against which % completion is mechanically assessable",
+    "One command (or documented procedure) produces all three measures for a run",
+    "Scaffolded vs unscaffolded comparison is possible on the same spec"
+  ],
+  "slice_type": null,
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": null,
+  "closed_in_sprint": null,
+  "notes": "Filed by Team Lead from Brooks's directive 2026-06-07, mid-EXEC-001 grill."
+}

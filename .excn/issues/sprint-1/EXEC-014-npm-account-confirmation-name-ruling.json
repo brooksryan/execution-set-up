@@ -1,0 +1,21 @@
+{
+  "id": "EXEC-014",
+  "title": "npm account confirmation + name ruling",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "npm"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Brooks logs into npm (interactive — user action, agents must not attempt); confirm the personal npm username; Team Lead confirms unscoped `to-execution` against the real username. Availability: registry 404 on to-execution, verified 2026-06-07 by Team Lead. Acceptance: `npm whoami` returns the confirmed personal user; unscoped name confirmed by Team Lead.",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [
+    "PRD-002"
+  ],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "HITL. PRD-002 P3. Shipped 2026-06-07 (sprint_1 item S1-8): npm whoami = brooksryan, re-verified twice, logged as npm_whoami_verified in tmp/exec/prd-002_progress.json; unscoped to-execution ruling approved with the rename."
+}

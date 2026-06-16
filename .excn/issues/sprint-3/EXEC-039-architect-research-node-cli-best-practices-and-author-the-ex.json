@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-039",
+  "title": "architect: research Node/CLI best practices and author the extended code standard",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "standards"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "architect produces a durable research artifact in .excn/research/ on Node + CLI best practices, then extends CODE_STANDARDS.md from it so 'clean' is a researched, enforceable rubric the code-standards gate applies. Includes the chartered-vs-emergent wording fix to CODE_STANDARDS.md's change-path line (currently 'raised only through the Retro Loop'), since architect-authored standards are chartered (ADR-0004) — mirroring sprint 2's Retro-Loop-docs refinement. Alignment-gated persistent-doc change, Team-Lead-approved.",
+  "prd": "PRD-006",
+  "acceptance_criteria": [
+    "a durable Node/CLI best-practices research artifact exists in .excn/research/",
+    "CODE_STANDARDS.md extended from that research with checkable pass/fail rules, no prose padding (Precise Minimalism)",
+    "CODE_STANDARDS.md's change-path line carries the chartered-vs-emergent distinction (ADR-0004)",
+    "the change passes alignment and is Team-Lead-approved"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-038"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 3,
+  "closed_in_sprint": 3,
+  "notes": null
+}

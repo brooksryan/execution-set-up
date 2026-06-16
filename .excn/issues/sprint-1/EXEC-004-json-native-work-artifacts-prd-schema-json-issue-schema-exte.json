@@ -1,0 +1,21 @@
+{
+  "id": "EXEC-004",
+  "title": "JSON-native work artifacts: prd.schema.json + issue schema extension",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template/schemas"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Author prd.schema.json (problem, solution, user stories, implementation/testing decisions, out-of-scope, linked issues, status). Extend issue.schema.json: prd linkage field, structured acceptance_criteria, slice_type (HITL/AFK). Convert PRD-001 from markdown to conformant JSON. Line to encode: artifacts agents execute against are JSON; documents humans read for context are markdown. Acceptance: schemas parse; PRD-001.json validates; root schemas/ mirrored from src/.",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [
+    "PRD-001"
+  ],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "AFK. Covers PRD-001 stories 8, 9. Biggest structural change per Team Lead. Shipped 2026-06-07 by team-lead (sprint_1 item S1-2; the owner-field schema gap observed at assignment is retro-logged)."
+}

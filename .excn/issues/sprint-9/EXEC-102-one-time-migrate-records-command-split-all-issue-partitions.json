@@ -1,0 +1,37 @@
+{
+  "id": "EXEC-102",
+  "title": "One-time `migrate-records` command: split all issue partitions, retrofit sprints, then enable the guard on the dogfood Instance",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "migration",
+    "scaffolder"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Build a one-time `to-execution migrate-records` command (distinct from `migrate`, which stays location-only per ADR-0008): split `backlog.json` and every `sprint-<N>/sprint-<N>-issues.json` into per-file `<uuid>-<slug>.json` records (preserving — grandfathering — existing `EXEC-NNN` ids), and retrofit every `sprint_<N>.json` to canonical-sentinel form. All writes go through the helper (guard-safe). Then dogfood it on the root Instance on a clean tree and enable the channel-guard feature flag here.",
+  "prd": "PRD-011",
+  "acceptance_criteria": [
+    "`migrate-records` splits `backlog.json` AND each sprint issue-companion file into per-file records, preserving legacy ids",
+    "Every `sprint_<N>.json` is retrofitted to canonical-sentinel form via the helper",
+    "Repo root is resolved by absolute path, never an inherited cwd — sprint-4 postmortem",
+    "Every written record re-reads schema-valid BEFORE any monolith is deleted — verify-before-destroy, postmortem",
+    "Idempotent: a second run is a no-op; it never clobbers an existing per-file record — sprint-6 restamp lesson",
+    "Inputs are committed first; recovery is a documented `git checkout` — postmortem",
+    "Dogfood run is sequenced by the Team Lead on a clean tree with no WIP lanes; verification Bash uses no `&&` chain that could trigger a file-reverting linter — sprint-8 lesson",
+    "After migration completes and CLI adoption (EXEC-101) is in place, the channel-guard flag is enabled on this Instance"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-097",
+    "EXEC-099",
+    "EXEC-100",
+    "EXEC-101"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 9,
+  "closed_in_sprint": 9,
+  "notes": null
+}

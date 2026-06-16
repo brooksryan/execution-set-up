@@ -1,0 +1,23 @@
+{
+  "id": "EXEC-003",
+  "title": "Restore ADR policy across framework docs",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src",
+    "src/template",
+    "root docs"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Remove every 'no ADRs' statement (principles, template PROCESS, root PROCESS, CONTEXT Lifecycle entry, TEAM_DIRECTIVE Don'ts). Write the decision-record split into PROCESS and Principles: ADRs record hard-to-reverse decisions at grill time (criteria: hard to reverse, surprising, real trade-off); the retro remains the sprint-time record. ADR location = methodology namespace, resolved by EXEC-001; ADRs are committed markdown (understanding, not adherence). Acceptance: no doc contradicts the policy; alignment gate passes the sweep; Src-First order observed.",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [
+    "PRD-001"
+  ],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "AFK. Covers PRD-001 stories 3, 5, 6, 14. Shipped 2026-06-07 by team-lead (sprint_1 item S1-1)."
+}

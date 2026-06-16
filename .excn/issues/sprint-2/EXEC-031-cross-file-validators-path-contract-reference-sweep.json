@@ -1,0 +1,31 @@
+{
+  "id": "EXEC-031",
+  "title": "Cross-file validators + path-contract reference sweep",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src",
+    "skills"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Make scribe's validators operate across the partitioned files, and sweep the path contract: PROCESS.md, the scribe definition, the process-adherence rubric, and the publish targets all reference the partitioned layout instead of single-file issues.json/sprint paths.",
+  "prd": "PRD-004",
+  "acceptance_criteria": [
+    "scribe's validators operate cross-file across the partitioned backlog and sprint records",
+    "PROCESS.md, the scribe definition, and the process-adherence rubric reference the partitioned paths",
+    "publish targets (execution-to-prd / execution-to-issues) point at the partitioned layout",
+    "no stale single-file issues.json or sprint path references remain in live docs",
+    "alignment gate PASS"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-030"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 2,
+  "closed_in_sprint": 2,
+  "notes": "New for sprint 2 under PRD-004. Shipped 2026-06-07 (sprint_2 item S2-7): scribe.md (+ src/template mirror, byte-identical) gained partition ownership + ## Partition mechanics + cross-file validation discipline. Landed mid-sprint as a chartered slice per ADR-0004; alignment PASS 0 violations over the partition doc set (.excn/prd-004_progress.json, step alignment_review_pass). PROCESS.md/process-adherence.md half authored by team-lead."
+}

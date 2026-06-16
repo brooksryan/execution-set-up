@@ -1,5 +1,4 @@
 {
-  "schema_version": "1.0",
   "sprint_id": 5,
   "name": "Sprint 5",
   "status": "closed",
@@ -304,5 +303,6 @@
       "artifact": ".excn/PROCESS.md + src/template/.excn/PROCESS.md (QA gates stale-rubric sentence)",
       "summary": "PASS, 0 violations — sentence conforms to all Principles and project Philosophy; both clauses carry distinct instruction weight; tied to the sprint-5 stale-rubric retrospective observation and the package-qa decision."
     }
-  ]
+  ],
+  "schema_version": "1.0"
 }

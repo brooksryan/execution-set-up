@@ -1,5 +1,4 @@
 {
-  "schema_version": "1.0",
   "sprint_id": 2,
   "name": "Work Grill fork + work-tracking partition → 0.3.0",
   "status": "closed",
@@ -178,5 +177,6 @@
       "title": "Change-path ambiguity surfaced as a blocker before any edit",
       "body": "scribe halted EXEC-031 on recognizing its deliverables land in Retro-Loop-guarded docs and escalated rather than editing through the ambiguity; that escalation is what prompted the carve-out ruling recorded as ADR-0004."
     }
-  ]
+  ],
+  "schema_version": "1.0"
 }

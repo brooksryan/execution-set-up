@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-008",
+  "title": "Implement execution-to-prd skill",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "skills"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Stamp src/template/.claude/skills/execution-to-prd/SKILL.md (single file) as an .excn-native fork of to-prd, and mirror into root .claude/skills/ (Src-First). It publishes .excn/prds/PRD-NNN-<slug>.json with prd.schema.json as the contract; no label vocabulary and no external-tracker setup dependency.",
+  "prd": "PRD-005",
+  "acceptance_criteria": [
+    "src/template/.claude/skills/execution-to-prd/SKILL.md exists as a single file (no multi-doc set)",
+    "a run publishes .excn/prds/PRD-NNN-<slug>.json that validates against prd.schema.json",
+    "no label vocabulary and no external-tracker setup dependency",
+    "root .claude/skills/ mirror is byte-identical to src (Src-First)",
+    "alignment gate PASS"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 2,
+  "closed_in_sprint": 2,
+  "notes": "Re-scoped from 'Resolve to-prd: JSON publish target, no labels' for sprint 2 under PRD-005; fork direction ruled by Brooks 2026-06-07. Shipped 2026-06-07 by team-lead (sprint_2 item S2-3): execution-to-prd fork publishes schema-valid JSON PRDs to .excn/prds/PRD-<NNN>-<slug>.json, prd.schema.json sole authority, no markdown template/labels/tracker; alignment PASS; src+root mirrored."
+}

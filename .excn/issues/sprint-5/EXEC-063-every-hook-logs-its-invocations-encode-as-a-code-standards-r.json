@@ -1,0 +1,30 @@
+{
+  "id": "EXEC-063",
+  "title": "Every hook logs its invocations; encode as a CODE_STANDARDS rule",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "hooks",
+    "standards"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Hook firings are invisible today — only gate-watch leaves a heartbeat, so invocation frequency can't be observed (Brooks). Two parts: (1) architect extends CODE_STANDARDS.md ## Hooks with a checkable rule: every hook script appends an invocation record {ts, script, event, outcome} via the shared hook-lib helper to a single .excn hook-invocations progress file (*_progress.json class) before exiting, including no-op/disabled exits, never breaking the fail-safe contract; (2) builder implements the hook-lib helper, retrofits all stamped hook scripts, and doctor's firing/stale heartbeat reads the unified log. Standard change is chartered: alignment gate + Team Lead approval.",
+  "prd": null,
+  "acceptance_criteria": [
+    "CODE_STANDARDS.md carries the checkable hook-logging rule (alignment PASS)",
+    "All stamped hook scripts append invocation records via hook-lib, including disabled/no-op paths",
+    "doctor heartbeats read the unified invocation log",
+    "Fail-safe contract intact: logging failure never blocks or surfaces",
+    "package-qa + code-standards PASS"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": "CODE_STANDARDS ## Hooks invocation-logging rule (alignment PASS) + hook-lib logInvocation (self-catching, rolling 5000) + every wired hook logs each exit path + doctor heartbeats read the unified hook-invocations_progress.json. code-standards PASS first-run, package-qa PASS.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 5,
+  "closed_in_sprint": 5,
+  "notes": "Filed 2026-06-10 (Brooks's directive)."
+}

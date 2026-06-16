@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-040",
+  "title": "builder: refactor the Scaffolder CLI to the code standard (behavior-preserving)",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/bin"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "builder refactors the Scaffolder CLI in place to the extended code standard: deterministic layout (header -> imports -> constants -> helpers -> public surface), descriptive names, doc comments, pointer-block content separated from the wiring logic. Behavior-preserving — init stamp/pointer behavior and the stamp/pointer/preflight contracts unchanged. Gates: code-standards + package-qa both PASS.",
+  "prd": "PRD-006",
+  "acceptance_criteria": [
+    "the Scaffolder CLI conforms to CODE_STANDARDS.md (code-standards PASS)",
+    "behavior unchanged — package-qa PASS (contracts intact, stamp manifest unchanged)",
+    "no new module tree, build step, or test suite",
+    "src->root mirrored per Src-First"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-039"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 3,
+  "closed_in_sprint": 3,
+  "notes": "Acceptance criterion 'src->root mirrored per Src-First' recorded N/A at ship: cli.js + pointer-block.js are package source (src/bin only), not stamped template files, so there is no root mirror."
+}

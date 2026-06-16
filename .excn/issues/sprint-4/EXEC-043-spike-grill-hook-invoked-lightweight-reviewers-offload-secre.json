@@ -1,0 +1,26 @@
+{
+  "id": "EXEC-043",
+  "title": "Spike/grill: hook-invoked lightweight reviewers; offload secretary work to smaller models",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "hooks"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Today the Team Lead manually spawns the Adherence/adversarial agents, and they run at full weight even for mechanical checks. Explore scaffolding Claude Code hooks into the Template so reviewers auto-invoke at the right workflow moments, and route routine secretary work (scribe's structured-JSON updates, progress-record maintenance) to a smaller model. Grounding: .excn/research/teammate-hook-triggers.md §3.1/§6 (Stop block+reason as file-update reminder; PostToolUse additionalContext for status-based instruction injection), §0 (actor identity in the hook payload). Caveat §3.1: additionalContext is model-judged — injected guidance must read as legitimate ops instruction. Exploratory: first step is a spike/grill deciding which reviewers are safe to auto-fire and which secretary tasks are mechanical enough for a smaller model. The Template ships no hook wiring today; this spike also designs the shared hook-scaffolding plumbing EXEC-044/EXEC-045 ride on. Src-First.",
+  "prd": "PRD-007",
+  "acceptance_criteria": [
+    "A grill→PRD (or recorded spike outcome) names which reviewers auto-fire, at which hook events, and which secretary tasks move to a smaller model",
+    "The shared Template hook-scaffolding plumbing for EXEC-044/EXEC-045 is designed"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": "Sprint-4 grill resolved the design; PRD-007 names the remind-only reviewers/hook events and the clerk offload; ADR-0006 records the plumbing EXEC-044/EXEC-045 ride on (EXEC-046).",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 4,
+  "closed_in_sprint": 4,
+  "notes": "Filed 2026-06-10 (Brooks). Grill-first per the Lifecycle — this slice produces a PRD/spike record, not code."
+}

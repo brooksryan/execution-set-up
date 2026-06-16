@@ -1,0 +1,20 @@
+{
+  "id": "EXEC-001",
+  "title": "Move methodology docs out of the Instance repo root",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "src/bin"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Stamped docs (CONTEXT.md, PHILOSOPHY.md, PROCESS.md, TEAM_DIRECTIVE.md, schemas/) clutter a host project's root and can collide with existing files. Decide a namespaced location, update template/, cli.js, and every cross-reference (SKILL.md, agent defs, README). The restored ADR location (PRD-001) rides on this outcome.",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "Raised by Team Lead during the Setup Grill dogfood. Decision resolved by ADR-0002 (.excn/adr/0002-excn-namespace.md, alignment PASS); implementation superseded by PRD-003 issue set EXEC-018…022."
+}

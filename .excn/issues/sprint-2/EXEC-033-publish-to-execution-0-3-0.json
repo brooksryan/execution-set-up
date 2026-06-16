@@ -1,0 +1,31 @@
+{
+  "id": "EXEC-033",
+  "title": "Publish to-execution@0.3.0",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src",
+    "npm"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Publish the forked Work Grill (PRD-005) and the work-tracking partition (PRD-004) together as to-execution@0.3.0 behind the EXEC-015 guards. Registry acceptance is npx-vs-local byte-diff; package-qa runs from the published tarball.",
+  "prd": "PRD-005",
+  "acceptance_criteria": [
+    "to-execution@0.3.0 is published to the public registry behind the EXEC-015 guards",
+    "the fork (PRD-005) and the partition (PRD-004) ship together in the 0.3.0 tarball",
+    "npx-vs-local byte-diff registry acceptance passes",
+    "package-qa PASS run from the published tarball"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-010",
+    "EXEC-032"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 2,
+  "closed_in_sprint": 2,
+  "notes": "New for sprint 2. HITL — publish gate, explicit Team Lead approval required. Carries both PRD-005 and PRD-004 outcomes in one release. Shipped 2026-06-07 by packager (sprint_2 item S2-9): to-execution@0.3.0 live on npm (shasum 2a2d5194f8cce193c34e459cfd1e47cb6c0c44c0; 31 files, 21.4 kB packed). Release commit 821cc06, tag v0.3.0, content commit 7ce56ea. Gates: package-qa PASS 0 violations from the pack tarball; prepublishOnly 6 identity guards held; registry acceptance npx-vs-local byte-diff IDENTICAL 27/27, three execution-* skills + .excn/issues/backlog.json confirmed in the scratch stamp."
+}

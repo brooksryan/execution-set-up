@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-077",
+  "title": "Sprint-close team-teardown reminder hook",
+  "status": "open",
+  "severity": "P3",
+  "scope": [
+    "hooks",
+    "template"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Persistent Teammates spawned for a sprint outlive sprint close, bloating context with idle-notification traffic and stale team/task dirs (~/.claude/teams, ~/.claude/tasks). Add a remind-only hook (gate-watch pattern, fail-safe exit 0) that fires when an edit closes a sprint — Write/Edit on .excn/sprints/sprint_<N>.json setting status to closed, or an equivalently clear close trigger — and injects a reminder to tear the team down: shutdown_request each Teammate, then TeamDelete. Remind-only; never tears down itself.",
+  "prd": null,
+  "acceptance_criteria": [
+    "A hook detects a sprint-close edit (sprint JSON status flipped to closed, or an equivalently unambiguous trigger) and injects a teardown reminder naming the steps: shutdown_request each persistent Teammate, await responses, TeamDelete.",
+    "Remind-only: the hook performs no teardown and never blocks more than once (gate-watch stop_hook_active pattern).",
+    "Fail-safe: missing/malformed config or payload exits 0 with no output.",
+    "No reminder fires on sprint edits that do not close the sprint.",
+    "Hook ships as .cjs in the template, logs invocations via hook-lib, and passes code-standards + package-qa gates."
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": null,
+  "closed_in_sprint": null,
+  "notes": null
+}

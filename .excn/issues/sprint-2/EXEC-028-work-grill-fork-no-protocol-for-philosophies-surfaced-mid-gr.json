@@ -1,0 +1,22 @@
+{
+  "id": "EXEC-028",
+  "title": "Work Grill fork: no protocol for philosophies surfaced mid-grill",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src",
+    "skills"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "grill-with-docs updates CONTEXT.md and offers ADRs only; PHILOSOPHY.md changes are Retro-Loop-gated, so mid-grill philosophies have no route — fork needs one (e.g. park as retro observations).",
+  "prd": "PRD-005",
+  "slice_type": null,
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 2,
+  "closed_in_sprint": 2,
+  "notes": "Catalog evidence from the EXEC-006 scratch run (npx to-execution@0.2.2, 2026-06-07); acceptance criteria deferred to the EXEC-007 design grill; direction ruled: fork, stamped per-Instance. Resolution implemented under EXEC-007; stays open, closes when EXEC-007 ships. Closed 2026-06-07 (sprint_2): resolution shipped inside execution-grill-with-docs (EXEC-007, item S2-1)."
+}

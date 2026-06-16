@@ -1,0 +1,28 @@
+{
+  "id": "EXEC-086",
+  "title": "Migrate's settings.json rewrite repoints commands for hooks it never renamed, silently killing custom hooks",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "src/bin"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Reported from a consuming Instance (evolvco/create-evolve-internal, 2026-06-12): after the .cjs hook-layout migration, their custom push-guard.js/merge-guard.js were silently dead — settings.json pointed at .cjs files that do not exist. Mechanism confirmed in src/bin/cli.js migrateHookLayout: the file-rename step is hash-guarded (untracked and locally-modified hooks are skipped and reported) but the HOOK_COMMAND_REWRITE pass then repoints every .claude/hooks/*.js substring in settings.json unconditionally ('Done whatever the hook outcome'), including commands whose target files were just skipped. An enforcement hook dying silently is the worst failure mode. Fix end-to-end: reproduce in a temp Instance carrying a custom hook, a locally-modified stamped hook, and a recorded-hash marker; then scope the settings rewrite to exactly the files migrate renamed in this or a prior run, and report — never rewrite — commands that point at skipped or untracked .js hooks. Also confirm or refute the stale-twins hypothesis: a marker without recorded file hashes classes every stamped hook as untracked, so migrate renames nothing while update stamps fresh .cjs copies, leaving a .js twin of every stamped hook (the consumer's second symptom).",
+  "prd": null,
+  "acceptance_criteria": [
+    "Repro exists: a temp Instance with a custom .js hook, a locally-modified stamped .js hook, and a hash-recording marker demonstrates the defect before the fix and its absence after",
+    "Migrate rewrites a settings.json command only when its target hook file was renamed by migrate (this run or a completed prior run); idempotency on re-run holds",
+    "A settings command pointing at a skipped or untracked .js hook is reported by name in migrate's output, and the file keeps working (command still names the existing .js)",
+    "The stale-twins hypothesis (hash-less marker classes all hooks untracked → update stamps .cjs beside .js) is confirmed or refuted in the repro, and the finding recorded in this issue's fix field",
+    "package-qa PASS including a new migrate-contract check covering the custom-hook and modified-hook cases"
+  ],
+  "slice_type": "AFK",
+  "root_cause": "migrateHookLayout's settings rewrite scope (every .claude/hooks/*.js substring) is broader than its file-rename scope (only hooks byte-identical to their recorded stamped form)",
+  "fix": "Scoped migrateHookLayout's settings.json rewrite to hooks migrate renamed (this run, or a completed prior run leaving .cjs with no .js twin): HOOK_COMMAND_REWRITE became a recognizer with capture groups (migrate-policy.js); cli.js decides per match via hookCommandMigrated/rewriteHookCommands; commands naming skipped or untracked .js hooks are reported by name and left firing against the existing .js. Stale-twins hypothesis CONFIRMED: a marker without a files map yields recordedHash undefined for every hook, classing all stamped hooks untracked, so migrate renames nothing and a subsequent update stamps fresh .cjs copies beside the orphaned .js — verified live in the repro. package-qa migrate-contract check extended (clean/modified/custom hook trio, idempotency, interrupted-run repoint, healthy no-op).",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 7,
+  "closed_in_sprint": 7,
+  "notes": "Filed 2026-06-12 from the create-evolve-internal agent's report (via Brooks). Consumer self-fixed in their PR #41: renamed guards to .cjs, repointed tests, removed twins, 23/23 hook tests green. Framework regression EXEC-075/076."
+}

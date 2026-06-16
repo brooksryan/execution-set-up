@@ -1,0 +1,26 @@
+{
+  "id": "EXEC-089",
+  "title": "Breakdown review checks acceptance criteria for internal conflicts",
+  "status": "open",
+  "severity": "P3",
+  "scope": [
+    "src skill content"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "EXEC-083's AC-1 (the Setup Skill no longer references execution-grill-with-docs) and AC-3 (reference the stamped CONTEXT-FORMAT.md by a path inside that skill's directory) contradicted each other on a strict reading and required a Team Lead ruling mid-gate to reconcile (recorded as the EXEC-083 AC-1/AC-3 read-together decision). Breakdown review should check an issue's acceptance criteria against each other for internal conflict before the issue is filed, so a contradiction surfaces at authoring rather than at the gate.",
+  "prd": null,
+  "acceptance_criteria": [
+    "Breakdown review includes a step that checks an issue's acceptance criteria for internal conflict before filing",
+    "A pair of criteria that cannot both hold on a strict reading is flagged at authoring",
+    "The check is documented where breakdown happens (execution-to-issues skill content or the breakdown-review step)"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": null,
+  "closed_in_sprint": null,
+  "notes": "Filed from the Sprint 7 retro (obs 2), 2026-06-12. Cites the EXEC-083 AC-1/AC-3 mid-gate ruling."
+}

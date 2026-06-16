@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-075",
+  "title": "Stamped hooks break under host \"type\":\"module\" — ship template hooks as .cjs",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "template",
+    "hooks"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "All hooks in src/template/.claude/hooks/ are CommonJS .js files. When a host project's package.json declares \"type\":\"module\" (observed live in evo-gnit), Node treats every .js hook as ESM and each throws ReferenceError: require is not defined in ES module scope — gate-watch, spawn-guard, message-nudge, viewer-server, load-report, hook-lib, and every rules file silently or visibly fail. Rename the stamped hook and rules files to .cjs, update intra-hook require paths (e.g. require('./hook-lib') → './hook-lib.cjs'), and update every hook command in src/template/.claude/settings.json to point at the .cjs filenames. The Scaffolder must stamp the .cjs layout for new Instances.",
+  "prd": null,
+  "acceptance_criteria": [
+    "Every file in src/template/.claude/hooks/ uses the .cjs extension; no .js hook or rules file remains in the template.",
+    "All intra-hook require() paths resolve to the .cjs filenames.",
+    "src/template/.claude/settings.json hook commands reference the .cjs paths.",
+    "A scaffold stamped into a temp project whose package.json has \"type\":\"module\" runs every hook (PostToolUse, Stop, spawn-guard, viewer-server) without an ESM ReferenceError.",
+    "package-qa stamp-contract check passes on the new manifest."
+  ],
+  "slice_type": "AFK",
+  "root_cause": "Stamped hooks were CommonJS .js; host package.json \"type\":\"module\" made Node parse them as ESM, so require() threw.",
+  "fix": "Template hooks renamed to .cjs with settings.json/requires/health-policy updated; landed in commit c624700 after code-standards and package-qa PASS.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 6,
+  "closed_in_sprint": 6,
+  "notes": null
+}

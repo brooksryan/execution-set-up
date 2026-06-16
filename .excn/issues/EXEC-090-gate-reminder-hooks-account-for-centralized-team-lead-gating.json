@@ -1,0 +1,26 @@
+{
+  "id": "EXEC-090",
+  "title": "Gate-reminder hooks account for centralized Team-Lead gating",
+  "status": "open",
+  "severity": "P3",
+  "scope": [
+    "src hooks"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "The builder Stop-hook gate-reminder and the scribe PostToolUse:Edit gate-reminder both assume the agent making an edit also runs the gate. Sprint 7 centralized gating on the Team Lead, so the Stop-hook fired repeatedly for Team-Lead-run gates and the PostToolUse:Edit reminder fired on each scribe CONTEXT.md/PROCESS.md edit mid-batch — accurate that a gate was due, but misattributing who runs it, producing harmless repeated noise. The reminder hooks should account for a gating model where the editor is not the gate-runner.",
+  "prd": null,
+  "acceptance_criteria": [
+    "The gate-reminder hooks distinguish a gate being due from who runs it, and do not imply the editing agent must run the gate",
+    "Under centralized Team-Lead gating the reminders do not produce repeated misattributed noise",
+    "A gate genuinely outstanding is still surfaced"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": null,
+  "closed_in_sprint": null,
+  "notes": "Filed from the Sprint 7 retro (obs 4), 2026-06-12. builder-owned (src hooks) when pulled."
+}

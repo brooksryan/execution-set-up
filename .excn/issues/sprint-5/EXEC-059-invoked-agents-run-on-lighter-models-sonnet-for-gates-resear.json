@@ -1,0 +1,27 @@
+{
+  "id": "EXEC-059",
+  "title": "Invoked Agents run on lighter models (sonnet for gates/research, haiku for clerk)",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "agents"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Brooks's directive: one-off Invoked Agents don't need big models. Add model frontmatter: sonnet for the Adherence/gate agents (alignment, process-adherence in the Template; code-standards, package-qa at root) and nothing-new-under-the-sun; clerk stays haiku. Persistent Teammates keep inheriting the session model. Chartered definition change: alignment gate + Team Lead approval; Src-First with root mirrors.",
+  "prd": null,
+  "acceptance_criteria": [
+    "The five one-off defs carry model: sonnet (clerk stays haiku)",
+    "Persistent Teammate defs carry no model pin",
+    "alignment PASS; root mirrors src/template for stamped defs"
+  ],
+  "slice_type": "HITL",
+  "notes": "Filed 2026-06-10 from Brooks's directive (sprint 5).",
+  "status": "closed",
+  "root_cause": null,
+  "fix": "model: sonnet on alignment/process-adherence/nothing-new (template+root) and code-standards/package-qa (root); clerk stays haiku; Teammates unpinned. alignment PASS, Brooks approved.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 5,
+  "closed_in_sprint": 5
+}

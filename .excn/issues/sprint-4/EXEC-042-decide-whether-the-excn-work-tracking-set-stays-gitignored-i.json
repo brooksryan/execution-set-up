@@ -1,0 +1,28 @@
+{
+  "id": "EXEC-042",
+  "title": "Decide whether the .excn work-tracking set stays gitignored (issues should be visible in-repo)",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "src/bin"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "The Scaffolder stamps .excn/.gitignore (src/template/.excn/gitignore, restored at stamp time) ignoring sprints/, issues/, prds/, retros/, *_progress.json. A gitignored backlog can't be seen, reviewed, or shared from the repo. Decide (HITL, Brooks): version-control the full set, keep status quo, or a middle path tracking issues/ (maybe prds/, sprints/) while keeping *_progress.json and retros/ ignored. Changes the Scaffolder's invariant layout and brushes the JSON-for-progress Principle, so record the decision as an ADR; a Principle-level change also routes through the alignment gate. Src-First: src/template/.excn/gitignore changes first, root Instance mirrors. Fix while here: root .excn/.gitignore also ignores drafts/, which the shipped template does not.",
+  "prd": "PRD-007",
+  "acceptance_criteria": [
+    "An ADR records the decision with the trade-off (visible/reviewable backlog vs. ephemeral-state noise)",
+    "src/template/.excn/gitignore implements the decision and the root .excn/.gitignore mirrors it",
+    "Root-vs-template drift (drafts/) is resolved",
+    "package-qa passes on the stamp contract"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": "ADR-0005; template gitignore = *_progress.json only, root mirrors, drafts/ removed; package-qa PASS.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 4,
+  "closed_in_sprint": 4,
+  "notes": "Filed 2026-06-10 (Brooks). Owner: builder; ADR + alignment gate for the Principle brush."
+}

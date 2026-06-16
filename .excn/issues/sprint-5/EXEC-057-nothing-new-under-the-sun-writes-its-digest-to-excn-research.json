@@ -1,0 +1,27 @@
+{
+  "id": "EXEC-057",
+  "title": "nothing-new-under-the-sun writes its digest to .excn/research/",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "agents"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "The prior-art agent's definition forbids file writes (final message is the deliverable), so its digest evaporates unless a human persists it — Brooks hit this running it in another repo. Change the definition: the agent writes its digest to .excn/research/prior-art-<prd-id>.md (overwriting its own prior run for the same PRD) and returns the path + summary as its final message. Keep all other prohibitions (no verdicts, no other file writes, sourced-only). Chartered definition change: alignment gate + Team Lead approval; Src-First with root mirror.",
+  "prd": null,
+  "acceptance_criteria": [
+    "Invoked with a PRD, the agent leaves a sourced digest at .excn/research/prior-art-<prd-id>.md",
+    "It writes nothing else and still issues no verdicts",
+    "alignment PASS; Team Lead approved; root mirrors src/template"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": "prior-art agent writes its digest to .excn/research/prior-art-<prd-id>.md; alignment PASS, Brooks approved.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 5,
+  "closed_in_sprint": 5,
+  "notes": "Filed 2026-06-10 from Brooks's report (sprint-5 open)."
+}

@@ -1,0 +1,26 @@
+{
+  "id": "EXEC-088",
+  "title": "Breakdown sets issue owners against the TEAM_DIRECTIVE roster at filing time",
+  "status": "open",
+  "severity": "P3",
+  "scope": [
+    "src skill content"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Sprint 7 filed all five items with owner \"builder\", but TEAM_DIRECTIVE.md forbids builder from src/template content (S7-3/EXEC-082) and persistent docs (S7-5/EXEC-084); two of five were rerouted mid-sprint. When an issue's owner field is first set during breakdown (execution-to-issues / breakdown review), the owner should be resolved against the TEAM_DIRECTIVE roster's ownership boundaries, so an item's owner matches who may execute its scope rather than defaulting to one role.",
+  "prd": null,
+  "acceptance_criteria": [
+    "Breakdown/issue-authoring resolves each issue's owner against the TEAM_DIRECTIVE roster before the issue is filed",
+    "An issue whose scope falls under a non-builder owner (src/template, persistent docs) is filed with that owner, not builder",
+    "The check is documented where breakdown owners are assigned (execution-to-issues skill content or the breakdown-review step)"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": null,
+  "closed_in_sprint": null,
+  "notes": "Filed from the Sprint 7 retro (obs 1), 2026-06-12. Two of five S7 items needed mid-sprint owner rerouting."
+}

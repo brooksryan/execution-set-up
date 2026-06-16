@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-064",
+  "title": "PreToolUse spawn guard: rostered persistent Teammates must not be spawned as one-shot background agents",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "hooks"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Brooks's directive: the Team Lead keeps spawning rostered persistent Teammates (builder, scribe, viewer...) via the one-shot Agent tool as background agents, despite the TEAM_DIRECTIVE routing rule. Add a spawn_guard hook feature (on the existing toggle plumbing): PreToolUse on the Agent/Task spawn tool reads the requested agent type; if it matches a rostered persistent-Teammate type being spawned as a transient/background one-shot, deny with a reason naming the routing rule and the right mechanism. The persistent-types list is per-Instance config (hooks.config.json is already variant-classed — natural home). Invoked Agent types (gates, clerk, nothing-new) pass untouched. Default: off in template, on in this Instance (validation precedent). Fail-safe contract holds; subject to the new CODE_STANDARDS hook-logging rule.",
+  "prd": null,
+  "acceptance_criteria": [
+    "Spawning a configured persistent-Teammate type via the one-shot spawn tool is denied with a reason citing the TEAM_DIRECTIVE routing rule",
+    "Invoked Agent spawns are unaffected",
+    "Toggle off in template, on in this Instance; missing/malformed config no-ops",
+    "Invocations logged per the CODE_STANDARDS ## Hooks rule",
+    "Gates PASS"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "spawn-guard PreToolUse hook denies one-shot spawns of configured persistent-Teammate types citing the TEAM_DIRECTIVE routing rule; per-Instance type list in variant hooks.config.json; off in template, on here. Gates PASS.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 5,
+  "closed_in_sprint": 5,
+  "notes": "Filed 2026-06-10 (Brooks's directive, sprint 5)."
+}

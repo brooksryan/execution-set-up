@@ -1,0 +1,32 @@
+{
+  "id": "EXEC-022",
+  "title": "Publish to-execution@0.2.0",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src",
+    "npm"
+  ],
+  "classification": null,
+  "actionable_now": true,
+  "description": "Publish the restructured package as to-execution@0.2.0 behind the EXEC-015 guards.",
+  "prd": "PRD-003",
+  "acceptance_criteria": [
+    "all preflight guards green at publish",
+    "scratch npx stamp byte-identical to local",
+    "two scratch-host acceptance runs: pre-existing CLAUDE.md and pre-existing AGENTS.md, both non-destructively wired",
+    "Brooks's OTP/token step pre-arranged, not a surprise"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-019",
+    "EXEC-020",
+    "EXEC-021"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "npm 2FA HITL planned. Shipped 2026-06-07 by packager (sprint_1 item S1-15): published as 0.2.1 after acceptance test A caught the 0.2.0 nested-gitignore packaging defect; 0.2.0 deprecated on-registry."
+}

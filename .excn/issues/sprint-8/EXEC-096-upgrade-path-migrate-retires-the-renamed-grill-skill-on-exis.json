@@ -1,0 +1,31 @@
+{
+  "id": "EXEC-096",
+  "title": "Upgrade path: migrate retires the renamed grill skill on existing Instances; doctor flags the orphan",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "src/bin",
+    "src skill content"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "update only adds and refreshes template files and never prunes, and migrate has no skill concept, so renaming execution-grill-with-docs orphans the old skill dir in every already-stamped Instance, where the published name still resolves and runs the pre-split behavior. Teach migrate to detect a stamped execution-grill-with-docs dir on an already-stamped Instance and retire it under a versioned, idempotent, location-only migration that never touches a dir the user authored, and have doctor flag the orphan and name migrate as the fix. In scope only if EXEC-091 rules for a rename; if keep-name wins, this issue closes as not-needed.",
+  "prd": "PRD-010",
+  "acceptance_criteria": [
+    "migrate detects a stamped execution-grill-with-docs dir on an already-stamped Instance and retires or relocates it under a versioned migration id — location-only, idempotent.",
+    "migrate never touches a skill dir the user added themselves (only the known published name).",
+    "doctor flags the orphaned old skill and names migrate as the fix.",
+    "Temp-dir test: stamp the old layout, run update, then migrate leaves only the renamed skill; package-qa PASS."
+  ],
+  "slice_type": "AFK",
+  "root_cause": "update never prunes template-dropped dirs (cli.js) and migrate knows only records and hooks, so a renamed skill is orphaned on upgrade.",
+  "fix": null,
+  "depends_on": [
+    "EXEC-091",
+    "EXEC-093"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 8,
+  "closed_in_sprint": null,
+  "notes": "Filed from the adversarial gap-hunt 2026-06-14 (Gap 1, P1). CONFIRMED in scope: EXEC-091 ruled for the rename to execution-epic-grill (2026-06-14), so the orphan/upgrade path must be built."
+}

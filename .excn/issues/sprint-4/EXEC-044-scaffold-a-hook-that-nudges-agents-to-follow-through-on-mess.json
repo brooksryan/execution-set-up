@@ -1,0 +1,30 @@
+{
+  "id": "EXEC-044",
+  "title": "Scaffold a hook that nudges agents to follow through on messages they send teammates",
+  "status": "closed",
+  "severity": "P3",
+  "scope": [
+    "src/template",
+    "hooks"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "When a Teammate messages another, a hook senses it and reminds the sender to do the related follow-through (update a record, file an issue, pass a gate) driven off message content. Grounding: teammate-hook-triggers.md §4.3 (inbox store ~/.claude/teams/<team>/inboxes/<agent>.json as sense signal and async nudge channel), §3 (PostToolUse → additionalContext as the in-session nudge path), §0 (sender identity). Resolved at the sprint-4 grill: trigger on SENT messages, in the sender's session (ADR-0006). Rides the EXEC-046 plumbing; ships disabled by default. Src-First.",
+  "prd": "PRD-007",
+  "acceptance_criteria": [
+    "Sending a teammate message triggers a follow-through nudge in the sender's session via additionalContext",
+    "The nudge names the follow-through implied by the message (record update, issue, gate)",
+    "Ships disabled by default; enabling via the toggle config activates it",
+    "No recipient-side watching"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "message-nudge.js implemented (sent-side additionalContext follow-through nudge, rules in nudge-rules.js, ships off); payload field names probed not live-confirmed — confirm against a live SendMessage payload before enabling. Gates PASS.",
+  "depends_on": [
+    "EXEC-046"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 4,
+  "closed_in_sprint": 4,
+  "notes": "Filed 2026-06-10 (Brooks). Exploratory; acceptance criteria set by the EXEC-043 grill/PRD."
+}

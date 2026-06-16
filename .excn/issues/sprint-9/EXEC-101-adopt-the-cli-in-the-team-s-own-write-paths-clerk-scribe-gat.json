@@ -1,0 +1,32 @@
+{
+  "id": "EXEC-101",
+  "title": "Adopt the CLI in the team's own write-paths (clerk, scribe, gates)",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "agents",
+    "gates"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Move every live write-path the team uses for issues and sprints onto the `to-execution` CLI/helper: clerk's partition moves and status flips, scribe's sprint open/close, and the gates' step_log verdict appends. This must land before the channel guard is enabled on this Instance, or the running team locks itself out of recording its own work (H1). Agent-definition edits route through the Retro Loop / alignment gate.",
+  "prd": "PRD-011",
+  "acceptance_criteria": [
+    "clerk, scribe, and the gate verdict-append path all write issues/sprints via the `to-execution` CLI, not by hand-editing JSON",
+    "No live team write-path depends on raw `Write`/`Edit` to `.excn/issues/` or `.excn/sprints/`",
+    "Agent-definition changes pass the alignment gate (Retro Loop)",
+    "Verified end-to-end: a full file→sprint→verdict cycle runs through the CLI with the guard enabled in a scratch check"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-097",
+    "EXEC-098",
+    "EXEC-099"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 9,
+  "closed_in_sprint": 9,
+  "notes": null
+}

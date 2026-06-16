@@ -1,0 +1,30 @@
+{
+  "id": "EXEC-076",
+  "title": "Migrate already-stamped Instances to the .cjs hook layout",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "migrate",
+    "hooks"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Instances stamped before EXEC-075 (e.g. evo-gnit) carry the broken .js hooks and a settings.json pointing at them; under host \"type\":\"module\" every hook fails at require(). Extend migrate-policy so the Migrate command renames the stamped hook/rules files to .cjs, rewrites the settings.json hook commands, and removes the stale .js copies. The health check should flag an Instance still on the .js layout.",
+  "prd": null,
+  "acceptance_criteria": [
+    "Running the Migrate command on an Instance stamped with the old .js hooks leaves it on the .cjs layout: hooks renamed, settings.json commands updated, no stale .js hook files.",
+    "Migration is idempotent — a second run is a no-op.",
+    "Health check reports the .js layout as decayed/migration-due.",
+    "Verified end-to-end on evo-gnit: Stop hook runs without the ESM ReferenceError."
+  ],
+  "slice_type": "AFK",
+  "root_cause": "Instances stamped before EXEC-075 carry CommonJS .js hooks that break under host \"type\":\"module\".",
+  "fix": "migrate renames legacy .js hooks to .cjs (hash-guarded, idempotent, marker re-keying), rewrites settings.json commands and sibling requires; doctor flags .js layout MIGRATION-DUE. Landed in commit 7b54a6e after code-standards and package-qa PASS; verified live on evo-gnit.",
+  "depends_on": [
+    "EXEC-075"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 6,
+  "closed_in_sprint": 6,
+  "notes": null
+}

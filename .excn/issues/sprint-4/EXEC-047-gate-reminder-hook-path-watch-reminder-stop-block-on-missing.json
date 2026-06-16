@@ -1,0 +1,30 @@
+{
+  "id": "EXEC-047",
+  "title": "Gate-reminder hook: path-watch reminder + stop-block on missing gate verdict (default on)",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "hooks"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "The first hook feature on the EXEC-046 plumbing, shipped enabled by default: a post-tool watch on gate-relevant paths injects a gate-due reminder via additionalContext, and a Stop-time block catches an agent idling with gated edits but no gate verdict recorded. Remind-only — it never spawns a gate (ADR-0006).",
+  "prd": "PRD-007",
+  "acceptance_criteria": [
+    "Editing a gated path produces the gate-due reminder in the editing agent's context",
+    "An agent idling with gated edits and no gate verdict is stop-blocked once (loop-guarded via stop_hook_active)",
+    "The feature ships enabled by default and disabling it via the toggle config silences both behaviors",
+    "No hook path spawns an agent"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "gate-watch.js: PostToolUse path-watch reminder + Stop block-once with stop_hook_active guard + verdict sensing; ships enabled; code-standards PASS.",
+  "depends_on": [
+    "EXEC-046"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 4,
+  "closed_in_sprint": 4,
+  "notes": "Filed 2026-06-10 (Brooks). Record restored 2026-06-10 after an id collision with a parallel-session filing (now EXEC-055)."
+}

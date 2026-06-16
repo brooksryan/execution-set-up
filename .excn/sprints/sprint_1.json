@@ -1,5 +1,4 @@
 {
-  "schema_version": "1.0",
   "sprint_id": 1,
   "name": "Work Grill nativization & package establishment",
   "status": "closed",
@@ -9,12 +8,41 @@
     "duration_note": "Single-day sprint. Final metrics: 16 shipped / 0 in_progress / 0 not_shipped; 16 issues closed (closed_in_sprint 1); gates: 10+ alignment reviews incl. two FAIL→PASS cycles, process-adherence close review PASS, 6+ package-qa runs; 3 npm publishes (0.1.0, 0.2.1, 0.2.2) + 1 deprecation (0.2.0)."
   },
   "team": [
-    { "name": "team-lead", "role": "main session", "owns": "arbitration, src/template content, one-off authoring, final approval" },
-    { "name": "scribe", "role": "structured artifacts", "owns": "sprint/issue JSON, CONTEXT.md terms, the Retro Loop" },
-    { "name": "packager", "role": "scripts + npm", "owns": "src/bin, src/package.json, versioning, publishing" }
+    {
+      "name": "team-lead",
+      "role": "main session",
+      "owns": "arbitration, src/template content, one-off authoring, final approval"
+    },
+    {
+      "name": "scribe",
+      "role": "structured artifacts",
+      "owns": "sprint/issue JSON, CONTEXT.md terms, the Retro Loop"
+    },
+    {
+      "name": "packager",
+      "role": "scripts + npm",
+      "owns": "src/bin, src/package.json, versioning, publishing"
+    }
   ],
   "goal": "Make the Work Grill native to the framework — methodology-namespace move (EXEC-001), restored ADR policy (EXEC-003), JSON-native PRD/issue schemas (EXEC-004), philosophy-scan (EXEC-005), completed deviation catalog (EXEC-006) — and establish the to-execution package under personal ownership (EXEC-012 through EXEC-016).",
-  "issues_addressed": ["EXEC-001", "EXEC-003", "EXEC-004", "EXEC-005", "EXEC-006", "EXEC-012", "EXEC-013", "EXEC-014", "EXEC-015", "EXEC-016", "EXEC-018", "EXEC-019", "EXEC-020", "EXEC-021", "EXEC-022", "EXEC-023"],
+  "issues_addressed": [
+    "EXEC-001",
+    "EXEC-003",
+    "EXEC-004",
+    "EXEC-005",
+    "EXEC-006",
+    "EXEC-012",
+    "EXEC-013",
+    "EXEC-014",
+    "EXEC-015",
+    "EXEC-016",
+    "EXEC-018",
+    "EXEC-019",
+    "EXEC-020",
+    "EXEC-021",
+    "EXEC-022",
+    "EXEC-023"
+  ],
   "shipped": [
     {
       "id": "S1-2",
@@ -22,7 +50,9 @@
       "title": "JSON-native work artifacts: prd.schema.json + issue schema extension",
       "owner": "team-lead",
       "summary": "prd.schema.json + issue-schema extension landed Src-First with root mirrors; PRD-001 converted md→JSON and schema-validated; the three issue stopgaps (acceptance criteria in description, PRD linkage in related_tickets, slice type in notes) now have schema homes for future issues.",
-      "closes_issues": ["EXEC-004"],
+      "closes_issues": [
+        "EXEC-004"
+      ],
       "notes": "Shipped 2026-06-07. Gates: alignment_review_pass logged in tmp/exec/prd-001_progress.json."
     },
     {
@@ -31,7 +61,9 @@
       "title": "Restore ADR policy across framework docs",
       "owner": "team-lead",
       "summary": "ADR policy restored across all live docs Src-First: Two-decision-records principle (ADRs at grill time, retro at sprint close), ADR glossary term added, no-ADR statements swept to zero; location stays generic pending EXEC-001.",
-      "closes_issues": ["EXEC-003"],
+      "closes_issues": [
+        "EXEC-003"
+      ],
       "notes": "Shipped 2026-06-07. Gates: alignment_review_pass logged in tmp/exec/prd-001_progress.json. tmp/ historical logs untouched by design."
     },
     {
@@ -40,7 +72,9 @@
       "title": "Philosophy-scan subagent in the Setup Grill",
       "owner": "team-lead",
       "summary": "Philosophy-scan added to the Setup Grill: read-only sweep proposes evidence-backed candidates before the open question; acceptance verified against terminal-game (8 candidates, documented conventions all surfaced).",
-      "closes_issues": ["EXEC-005"],
+      "closes_issues": [
+        "EXEC-005"
+      ],
       "notes": "Shipped 2026-06-07. src/SKILL.md is the sole copy — nothing to mirror. Gates: alignment_review_pass logged in tmp/exec/prd-001_progress.json."
     },
     {
@@ -49,7 +83,9 @@
       "title": "npm account confirmation + name ruling",
       "owner": "packager",
       "summary": "npm identity confirmed brooksryan via interactive login + whoami verification; unscoped name to-execution ruled and registry-availability verified.",
-      "closes_issues": ["EXEC-014"],
+      "closes_issues": [
+        "EXEC-014"
+      ],
       "notes": "Shipped 2026-06-07. npm_whoami_verified logged in tmp/exec/prd-002_progress.json."
     },
     {
@@ -58,7 +94,9 @@
       "title": "Git init with per-repo personal identity",
       "owner": "packager",
       "summary": "git init -b main with repo-local personal identity; root commit 25ed028, 37 files, author+committer brooksryan; global config untouched.",
-      "closes_issues": ["EXEC-012"],
+      "closes_issues": [
+        "EXEC-012"
+      ],
       "notes": "Shipped 2026-06-07. Identity ratified as-is by Brooks (no amend). exec_012_done logged in tmp/exec/prd-002_progress.json."
     },
     {
@@ -67,7 +105,9 @@
       "title": "GitHub repo created and pushed under brooksryan",
       "owner": "packager",
       "summary": "brooksryan/execution-set-up created and pushed gh-mediated under the personal account; credential isolation hardened repo-locally (usehttppath + username pin, fail-closed verified); visibility public per Team Lead ruling.",
-      "closes_issues": ["EXEC-013"],
+      "closes_issues": [
+        "EXEC-013"
+      ],
       "notes": "Shipped 2026-06-07. exec_013_done + credential_isolation_applied logged in tmp/exec/prd-002_progress.json. Visibility superseded to PUBLIC by Brooks's direct ruling to packager ('repo can be public, nothing to hide'), flipped and verified 2026-06-07."
     },
     {
@@ -76,7 +116,9 @@
       "title": "Publish preflight guards + manifest metadata",
       "owner": "packager",
       "summary": "prepublishOnly preflight (src/bin/preflight.js) with 6 fail-closed identity/state guards, each inversion-tested to abort; repository/author/engines metadata added; package-qa PASS; pushed via plain git as live proof of the seeded personal credential.",
-      "closes_issues": ["EXEC-015"],
+      "closes_issues": [
+        "EXEC-015"
+      ],
       "notes": "Shipped 2026-06-07. Third package_qa_pass logged in tmp/exec/prd-002_progress.json; commits 71a7208 and 95b1211 on origin."
     },
     {
@@ -85,7 +127,9 @@
       "title": "First publish 0.1.0",
       "owner": "packager",
       "summary": "to-execution@0.1.0 published to npm under brooksryan with all six fail-closed guards enforced at publish time; npx scratch-dir acceptance byte-identical to local stamp; name reserved. One procedure deviation recorded: token staged out-of-repo via NPM_CONFIG_USERCONFIG after the in-repo path correctly tripped the clean-tree guard.",
-      "closes_issues": ["EXEC-016"],
+      "closes_issues": [
+        "EXEC-016"
+      ],
       "notes": "Shipped 2026-06-07. Registry-verified: to-execution@0.1.0, shasum 21894432ab8493face209febfa4af101ec8be3ac. prd-002_progress.json current_step complete; token hygiene swept."
     },
     {
@@ -94,7 +138,9 @@
       "title": "Move methodology docs out of the Instance repo root",
       "owner": "team-lead",
       "summary": "Namespace decided: .excn/ per ADR-0002, grounded in .excn/research/agent-context-loading.md; implementation slices published as EXEC-018…022.",
-      "closes_issues": ["EXEC-001"],
+      "closes_issues": [
+        "EXEC-001"
+      ],
       "notes": "Shipped 2026-06-07. ADR-0002 accepted, alignment PASS."
     },
     {
@@ -103,7 +149,9 @@
       "title": "Template restructure to .excn layout + src/ cross-reference sweep",
       "owner": "team-lead",
       "summary": "Template restructured to the .excn namespace per ADR-0002 with history-preserving renames; CLAUDE.md removed from the template (pointer is CLI-owned); full src/ cross-reference sweep; slice-1 package-qa rubric co-updated; latent gitignore defect fixed (template tmp gitkeeps were never tracked — root tmp/ pattern matches at any depth; skeleton force-added).",
-      "closes_issues": ["EXEC-018"],
+      "closes_issues": [
+        "EXEC-018"
+      ],
       "notes": "Shipped 2026-06-07. All five acceptance criteria met; alignment_review_pass logged in tmp/exec/prd-001_progress.json."
     },
     {
@@ -112,7 +160,9 @@
       "title": "CLI stamps .excn layout; ensureGitignore removed",
       "owner": "packager",
       "summary": "CLI stamps the .excn layout; ensureGitignore deleted — init writes nothing outside the manifest; host root .gitignore proven untouched by sha256 under both plain and --force runs; package-qa PASS.",
-      "closes_issues": ["EXEC-019"],
+      "closes_issues": [
+        "EXEC-019"
+      ],
       "notes": "Shipped 2026-06-07. Evidence in tmp/exec/prd-003_progress.json; commits e941e9c + a1977bf on origin."
     },
     {
@@ -121,7 +171,9 @@
       "title": "CLI pointer-block append",
       "owner": "packager",
       "summary": "CLI-owned pointer block (13 lines, explicit .excn paths) wired by wirePointers() outside the manifest walk — force-unreachable by construction; dual-file append with visible sentinel; all nine PRD inversion cases pass; package-qa PASS.",
-      "closes_issues": ["EXEC-020"],
+      "closes_issues": [
+        "EXEC-020"
+      ],
       "notes": "Shipped 2026-06-07. package-qa PASS 0 violations across 45 behavioral checks; commit 224a20b on origin (cli.js + in-window rubric update per M2)."
     },
     {
@@ -130,7 +182,9 @@
       "title": "Root Instance migration to .excn",
       "owner": "team-lead",
       "summary": "Root Instance migrated to .excn with full history preserved; invariant mirrors refreshed from src; root de-touched to two CLI-stamped pointer files; ADR-0001 placed; the product migrated its own first customer.",
-      "closes_issues": ["EXEC-021"],
+      "closes_issues": [
+        "EXEC-021"
+      ],
       "notes": "Shipped 2026-06-07. Alignment PASS (entry 13, .excn/tmp/prd-001_progress.json); ADR-0001 finalized by packager, separately gated (e266892); root top level: .claude .excn AGENTS.md CLAUDE.md README.md src."
     },
     {
@@ -139,7 +193,9 @@
       "title": "Publish to-execution@0.2.0",
       "owner": "packager",
       "summary": "to-execution@0.2.1 published behind all six guards after acceptance test A caught a real 0.2.0 packaging defect (npm pack consumed the nested .gitignore as an ignore spec and stripped it); fix = ecosystem-standard un-dotted template gitignore + CLI stamp-time rename; registry stamp byte-identical to local; 0.2.0 deprecated.",
-      "closes_issues": ["EXEC-022"],
+      "closes_issues": [
+        "EXEC-022"
+      ],
       "notes": "Shipped 2026-06-07. Registry-verified: to-execution@0.2.1 latest, shasum 92a42705c42eee8487fff14e8186556948fae71d, 0.2.0 deprecated on-registry; package-qa PASS 47/47; commit 24a17a0 + tag v0.2.1; token hygiene confirmed. prd-003_progress current_step complete."
     },
     {
@@ -148,7 +204,9 @@
       "title": "Flatten .excn — remove the tmp/ nesting",
       "owner": "team-lead",
       "summary": "Work-tracking flattened into .excn per Brooks's directive — tmp level removed everywhere, ephemeral/committed split preserved via explicit stamped ignore set; first alignment FAIL→fix→resubmit cycle ran on this slice (dead root-pointer path caught by the gate); 0.2.2 published and registry-verified byte-identical; packager additionally caught a second sweep casualty in cli.js usage text.",
-      "closes_issues": ["EXEC-023"],
+      "closes_issues": [
+        "EXEC-023"
+      ],
       "notes": "Shipped 2026-06-07. All five acceptance criteria met. Registry-verified: to-execution@0.2.2, shasum a585c0a90bd2bf190cd31a2f8b39a5d3adb9a020; commit 26a5ed6 + tag v0.2.2; package-qa PASS 44 checks; ignore semantics ruled stay-ephemeral by Brooks; alignment PASS cycle 2 (entries 14/15)."
     },
     {
@@ -157,7 +215,9 @@
       "title": "Complete the deviation catalog: grill-with-docs against a scratch Instance",
       "owner": "team-lead",
       "summary": "Deviation catalog completed against a registry-stamped 0.2.2 scratch Instance: six deviations from grill-with-docs's three reference files, quoted, filed as EXEC-024…029; fork direction + glossary-format adoption ruled live by Brooks.",
-      "closes_issues": ["EXEC-006"],
+      "closes_issues": [
+        "EXEC-006"
+      ],
       "notes": "Shipped 2026-06-07. HITL grill run with Brooks against the EXEC-023 flat shape (npx to-execution@0.2.2 scratch Instance)."
     }
   ],
@@ -219,5 +279,6 @@
       "title": "Long-lived dispatch state belongs in spawn prompts or on disk",
       "body": "The undelivered-message incident ended in the scribe session being killed and the whole team recreated, with the full work queue baked into the new spawn prompt — spawn prompts are the one delivery channel that cannot be lost. Long-lived dispatch state belongs in spawn prompts or on disk, not only in message history."
     }
-  ]
+  ],
+  "schema_version": "1.0"
 }

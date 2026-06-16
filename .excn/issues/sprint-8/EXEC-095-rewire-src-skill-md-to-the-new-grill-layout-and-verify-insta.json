@@ -1,0 +1,33 @@
+{
+  "id": "EXEC-095",
+  "title": "Rewire src/SKILL.md to the new grill layout and verify install to scaffold end-to-end via package-qa",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "src skill content",
+    "packaging"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "The npm install to scaffold path must still work after the split. Update src/SKILL.md's by-name references to the Work-Grill skills (the Preflight note and the Handoff step) and the Setup Grill's format-authority paths (the CONTEXT-FORMAT.md and ADR-FORMAT.md references the Setup Grill itself reuses) to the names and homes settled in EXEC-091. Then prove the full adoption path end-to-end: npm install to-execution, the agent reads node_modules/to-execution/SKILL.md, npx to-execution init tree-walks template/ and stamps the whole grill family into a fresh Instance, and every path SKILL.md and the stamped skills reference resolves. package-qa gates it.",
+  "prd": "PRD-010",
+  "acceptance_criteria": [
+    "src/SKILL.md references the Work-Grill skills by their settled names and points the Setup Grill at the settled CONTEXT-FORMAT.md / ADR-FORMAT.md homes; no reference to a renamed or retired path remains.",
+    "package-qa proves the path: npm install then read node_modules/to-execution/SKILL.md then npx to-execution init stamps the grill family into a fresh Instance with no overwrite, and every path SKILL.md and the stamped skills reference resolves.",
+    "A fresh init yields a working Instance whose Setup Grill and Work Grill both point at real, stamped files.",
+    "package-qa PASS; Src-First (SKILL.md lives in src) with root mirror as applicable."
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-091",
+    "EXEC-092",
+    "EXEC-093",
+    "EXEC-094"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 8,
+  "closed_in_sprint": null,
+  "notes": "Filed from the PRD-010 breakdown 2026-06-14 at Brooks's direction: guarantee the install to scaffold path. Depends on EXEC-091 so the format-doc home is settled before SKILL.md is repointed (Gap 5)."
+}

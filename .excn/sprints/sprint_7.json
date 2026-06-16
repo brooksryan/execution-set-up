@@ -1,5 +1,4 @@
 {
-  "schema_version": "1.0",
   "sprint_id": 7,
   "name": "Sprint 7",
   "status": "closed",
@@ -116,6 +115,28 @@
       "summary": "package-qa runs were held until the working tree was quiet (no in-flight builder edits) and gated combined trees — S7-1+S7-3 together; the S7-4 run re-verified the EXEC-086/087 contract checks still green — following the sprint-5/6 combined-gating precedent. Date 2026-06-12."
     }
   ],
+  "retrospective_notes": [
+    {
+      "title": "Issue owners were filed against a single role, not the directive roster",
+      "body": "All five sprint items carried owner 'builder' at filing, but TEAM_DIRECTIVE.md forbids builder from src/template content (S7-3/EXEC-082) and persistent docs (S7-5/EXEC-084); two of five were rerouted mid-sprint (S7-3 to team-lead, S7-5 to scribe). The gap is that owner fields were set without reference to the directive roster's ownership boundaries at filing time."
+    },
+    {
+      "title": "EXEC-083's acceptance criteria contradicted each other",
+      "body": "EXEC-083 AC-1 (no longer references execution-grill-with-docs) and AC-3 (reference the stamped CONTEXT-FORMAT.md by a path inside that skill's directory) conflicted on a strict reading and required a Team Lead ruling mid-gate to reconcile. The conflict was present in the authored criteria, unsurfaced at breakdown review."
+    },
+    {
+      "title": "Record-move timing drifted behind the work",
+      "body": "S7-2 and S7-4 began before their in_progress moves landed, and S7-5 went not_shipped→shipped without an in_progress beat. Work outpaced the tracker; every item landed in its correct terminal state and nothing broke, but the convention for when an issue moves to in_progress (and whether a direct not_shipped→shipped move is sanctioned) is pinned in no document."
+    },
+    {
+      "title": "Gate-reminder hooks assume the editor runs the gate",
+      "body": "Builder's Stop-hook gate-reminder fired repeatedly for gates that were Team-Lead-run this sprint, and the PostToolUse:Edit reminder fired on each scribe CONTEXT.md edit mid-batch. Both hooks assume the agent making the edit also runs the gate; when gating is centralized on the Team Lead the reminders are accurate about the gate being due but misattribute who runs it, producing harmless repeated noise."
+    },
+    {
+      "title": "Every gate run passed first-submission; the consumer P1 closed same-day",
+      "body": "Every gate run this sprint returned PASS with zero violations on first submission — nine recorded passes (alignment x4, code-standards x2, package-qa x3), no revision cycles all sprint. The consumer-reported P1 (EXEC-086) moved repro→fix→contract-check→shipped same-day, and the stale-twins hypothesis was confirmed in the repro and recorded in the issue's fix field."
+    }
+  ],
   "step_log": [
     {
       "step": "term_resolution_ratified",
@@ -190,26 +211,5 @@
       "summary": "PASS — 0 violations. All five items shipped, companion issues closed (closed_in_sprint 7), four decisions + five retrospective notes recorded with no next-steps language, nine PASS gate runs verified; verdict in session_progress.json."
     }
   ],
-  "retrospective_notes": [
-    {
-      "title": "Issue owners were filed against a single role, not the directive roster",
-      "body": "All five sprint items carried owner 'builder' at filing, but TEAM_DIRECTIVE.md forbids builder from src/template content (S7-3/EXEC-082) and persistent docs (S7-5/EXEC-084); two of five were rerouted mid-sprint (S7-3 to team-lead, S7-5 to scribe). The gap is that owner fields were set without reference to the directive roster's ownership boundaries at filing time."
-    },
-    {
-      "title": "EXEC-083's acceptance criteria contradicted each other",
-      "body": "EXEC-083 AC-1 (no longer references execution-grill-with-docs) and AC-3 (reference the stamped CONTEXT-FORMAT.md by a path inside that skill's directory) conflicted on a strict reading and required a Team Lead ruling mid-gate to reconcile. The conflict was present in the authored criteria, unsurfaced at breakdown review."
-    },
-    {
-      "title": "Record-move timing drifted behind the work",
-      "body": "S7-2 and S7-4 began before their in_progress moves landed, and S7-5 went not_shipped→shipped without an in_progress beat. Work outpaced the tracker; every item landed in its correct terminal state and nothing broke, but the convention for when an issue moves to in_progress (and whether a direct not_shipped→shipped move is sanctioned) is pinned in no document."
-    },
-    {
-      "title": "Gate-reminder hooks assume the editor runs the gate",
-      "body": "Builder's Stop-hook gate-reminder fired repeatedly for gates that were Team-Lead-run this sprint, and the PostToolUse:Edit reminder fired on each scribe CONTEXT.md edit mid-batch. Both hooks assume the agent making the edit also runs the gate; when gating is centralized on the Team Lead the reminders are accurate about the gate being due but misattribute who runs it, producing harmless repeated noise."
-    },
-    {
-      "title": "Every gate run passed first-submission; the consumer P1 closed same-day",
-      "body": "Every gate run this sprint returned PASS with zero violations on first submission — nine recorded passes (alignment x4, code-standards x2, package-qa x3), no revision cycles all sprint. The consumer-reported P1 (EXEC-086) moved repro→fix→contract-check→shipped same-day, and the stale-twins hypothesis was confirmed in the repro and recorded in the issue's fix field."
-    }
-  ]
+  "schema_version": "1.0"
 }

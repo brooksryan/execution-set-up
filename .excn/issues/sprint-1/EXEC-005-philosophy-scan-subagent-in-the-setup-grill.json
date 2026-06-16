@@ -1,0 +1,21 @@
+{
+  "id": "EXEC-005",
+  "title": "Philosophy-scan subagent in the Setup Grill",
+  "status": "closed",
+  "severity": "P3",
+  "scope": [
+    "src/SKILL.md"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Before the philosophy question, the Setup Skill spawns a read-only subagent to sweep the target codebase (readmes, contributor docs, configs, prior documentation) and return philosophy candidates. Candidates are presented as confirmable proposals; the scan never writes PHILOSOPHY.md. Acceptance: a scratch run against a codebase with existing conventions surfaces at least its documented ones as proposals.",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [
+    "PRD-001"
+  ],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "AFK. Covers PRD-001 stories 1, 2. Shipped 2026-06-07 by team-lead (sprint_1 item S1-3); acceptance verified by invocation against terminal-game."
+}

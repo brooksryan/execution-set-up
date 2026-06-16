@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-056",
+  "title": "Edit and add issues from the status-page viewer",
+  "status": "open",
+  "severity": "P2",
+  "scope": [
+    "viewer"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Extend the status-page viewer from read-only to read-write for issues: add new issues and edit existing ones from the web page. Writes go through the server (EXEC-054/055) since a static page cannot write the .excn JSON; every write must remain schema-valid against issue.schema.json and respect the issue partitioning (backlog vs sprint partitions, scribe ownership of moves). Hard requirements: keep it as lightweight and fast as possible — no framework, minimal surface.",
+  "prd": "PRD-008",
+  "acceptance_criteria": [
+    "Issues can be added and edited from the status page; writes validate against issue.schema.json and land atomically",
+    "Ids are assigned by the server scanning all partitions (scribe-assigns-ids rule honored)",
+    "Schema-invalid payloads are rejected with a named error",
+    "Partition moves and lifecycle remain agent work"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-054"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": null,
+  "closed_in_sprint": null,
+  "notes": "Filed 2026-06-10 (Brooks). Builds on the viewer-server track; interaction with scribe ownership of issue JSON to be resolved at grill time. Re-identified from EXEC-048 on 2026-06-10: the original id collided with a PRD-007 hook slice filed in a parallel session; sprint-4 close gate caught the lineage mismatch."
+}

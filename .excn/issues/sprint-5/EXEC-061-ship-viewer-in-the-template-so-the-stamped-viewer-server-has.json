@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-061",
+  "title": "Ship viewer/ in the Template so the stamped viewer-server has a page to serve",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "viewer"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "EXEC-054 stamps a viewer-server daemon whose whitelist serves viewer/* assets, but the viewer (built root-only in sprint 3, EXEC-036) is not in the Template — a fresh Instance's enabled viewer_server serves .excn JSON and 404s the page itself. Promote viewer/ (index.html, styles.css, viewer.js, README) into src/template/viewer/ as stamped invariant layout; the root Instance's copy becomes the mirror; update then keeps Instance viewers current. Brooks-directed at sprint-5 review.",
+  "prd": "PRD-008",
+  "acceptance_criteria": [
+    "viewer assets live at .excn/viewer/ (template and Instance) — nothing stamped at the host root beyond the pointer block (ADR-0002)",
+    "A fresh stamped Instance with viewer_server enabled serves the status page end-to-end",
+    "viewer/ files are invariant-classed (update refreshes them, drift reported not overwritten)",
+    "Root viewer/ is byte-identical to the template copy (Src-First)",
+    "package-qa passes"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "viewer promoted into the Template at .excn/viewer/ per ADR-0002 ruling (root mirrored via git mv); daemon whitelist + index mapping repointed; root-absolute asset refs fix a pre-existing 404 at bare /; whitelist gains the issues/sprints JSON the board fetches. code-standards PASS, package-qa PASS.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 5,
+  "closed_in_sprint": 5,
+  "notes": "Filed 2026-06-10 (Brooks, sprint-5 review). Brooks ruling 2026-06-10: viewer relocates into .excn/viewer/ — the first delivery placed it at the Instance root."
+}

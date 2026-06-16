@@ -1,0 +1,26 @@
+{
+  "id": "EXEC-036",
+  "title": "Static HTML status pages over the .excn JSON for at-a-glance team status",
+  "status": "closed",
+  "severity": "P3",
+  "scope": [
+    "viewer"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "minimalist static HTML page(s) that read the .excn work-tracking JSON (sprints/, issues/ partitions, prds/, *_progress.json) and render current state — what's shipped / in-flight / backlog — so an end-user can glance at status without interrupting the team. Basic, minimalist; ideally no build step (read JSON client-side).",
+  "prd": null,
+  "acceptance_criteria": [
+    "opening the page shows the live sprint's shipped/in_progress/not_shipped and the backlog from the JSON with no manual data entry",
+    "no build step required to view",
+    "minimalist — no framework heft"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 3,
+  "closed_in_sprint": 3,
+  "notes": "Brooks directive 2026-06-08."
+}

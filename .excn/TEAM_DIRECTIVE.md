@@ -63,4 +63,4 @@ Cosmetic ratifications with a sane default (naming, visibility) default-and-flag
 - Never close a path-changing sweep without checking the live Instance's entry points (root CLAUDE.md, AGENTS.md).
 - Never sweep another owner's files — hand the owner the hit list.
 
-- Never self-assign an issue id — scribe assigns ids; parallel sessions request them.
+- Never hand-write or hand-edit an issue or sprint file — use the `to-execution` CLI (ADR-0011).

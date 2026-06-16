@@ -1,0 +1,25 @@
+{
+  "id": "EXEC-052",
+  "title": "Classify .excn/hooks.config.json as variant in the update path",
+  "status": "closed",
+  "severity": "P3",
+  "scope": [
+    "src/bin"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "package-qa observation (sprint 4): hooks.config.json is invariant-classed in stamp-policy.js, so any Instance that flips toggles sees it reported as drifted on every update run — safe (never overwritten) but noisy. Decide variant-classing it (toggles are per-Instance state) or excluding it from drift reporting.",
+  "prd": "PRD-007",
+  "acceptance_criteria": [
+    "update on an Instance with flipped toggles reports no hooks.config.json drift",
+    "package-qa passes"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "hooks.config.json variant-classed in stamp-policy.js; flipped toggles no longer drift-reported; stale marker hash drops on next update. Gates PASS.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 5,
+  "closed_in_sprint": 5,
+  "notes": "Filed 2026-06-10 from the final sprint-4 package-qa observation."
+}

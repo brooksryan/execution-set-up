@@ -1,0 +1,33 @@
+{
+  "id": "EXEC-100",
+  "title": "Channel guard: deny raw writes to the issues and sprints homes (feature flag, default off)",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "hooks",
+    "schema"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Add a PreToolUse channel guard that denies raw `Write`/`Edit` to `.excn/issues/` and `.excn/sprints/`, with a deny reason that redirects to the `to-execution` CLI. Model it on `progress-location-guard`: a `*-rules.cjs` data module (homes, deny-reason template, placeholder) separate from the decision logic. Add a `hooks-config` feature flag, default OFF in the Template (no auto-lockout); enabling on this Instance is sequenced later (EXEC-102, after CLI adoption).",
+  "prd": "PRD-011",
+  "acceptance_criteria": [
+    "Raw `Write`/`Edit` to `.excn/issues/` or `.excn/sprints/` is denied with a reason that names the `to-execution` CLI",
+    "The guard never sees the helper's own writes (helper writes via fs, not the Write tool) — verified",
+    "Data/logic split mirrors `progress-location-guard`; homes and deny-reason are named constants in a `-rules.cjs` module — sprint-5 lesson",
+    "Fail-safe: missing/malformed config or payload, or internal error, exits 0 and never blocks a write (ADR-0006)",
+    "New `hooks-config` feature key added to the schema; default OFF in the Template",
+    "Guard subsumes the monolith-shape and uuid/serialization checks (no schema logic in the hook)"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-097",
+    "EXEC-099"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 9,
+  "closed_in_sprint": 9,
+  "notes": null
+}

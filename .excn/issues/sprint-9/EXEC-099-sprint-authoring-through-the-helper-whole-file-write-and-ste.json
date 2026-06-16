@@ -1,0 +1,31 @@
+{
+  "id": "EXEC-099",
+  "title": "Sprint authoring through the helper — whole-file write and step_log append",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "scaffolder",
+    "cli"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Teach the helper to write sprint records (`kind=sprint`): whole-sprint create/update (scribe owns `sprint_<N>.json` at open/close) AND a `step_log` append mode (a gate adds one verdict without rewriting the file). Emit canonical-sentinel form — accreting arrays last, a constant sentinel key dead-last — so concurrent appends produce minimal, non-conflicting diffs. Expose `to-execution sprint ...`.",
+  "prd": "PRD-011",
+  "acceptance_criteria": [
+    "`to-execution sprint` can create/update a whole sprint record and append a single `step_log` entry",
+    "Sprint files are emitted in canonical-sentinel form (arrays last, sentinel key dead-last) by a shared serializer",
+    "A single step_log append is a minimal byte-diff that does not touch sibling entries — sprint-4 step_log lesson",
+    "Whole-sprint authoring (open/close) goes through the helper, not just appends — H5",
+    "Sentinel-serializer constants are named, not inline — sprint-5 lesson"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-097"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 9,
+  "closed_in_sprint": 9,
+  "notes": null
+}

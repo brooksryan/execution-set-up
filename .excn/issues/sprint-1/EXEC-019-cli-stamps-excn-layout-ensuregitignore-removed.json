@@ -1,0 +1,30 @@
+{
+  "id": "EXEC-019",
+  "title": "CLI stamps .excn layout; ensureGitignore removed",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/bin"
+  ],
+  "classification": null,
+  "actionable_now": true,
+  "description": "Point the CLI at the restructured template so init stamps the .excn layout, and remove the root-gitignore mutation path.",
+  "prd": "PRD-003",
+  "acceptance_criteria": [
+    "init stamps the .excn layout verbatim from template",
+    "host root .gitignore never touched (nested .excn/.gitignore is template-stamped)",
+    "ensureGitignore() deleted",
+    "skip-safety + idempotency semantics unchanged",
+    "package-qa PASS against the slice-1 rubric"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-018"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "Shipped 2026-06-07 by packager (sprint_1 item S1-12); host root .gitignore sha256-proven untouched under plain and --force runs."
+}

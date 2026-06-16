@@ -1,0 +1,34 @@
+{
+  "id": "EXEC-094",
+  "title": "Wire the grill family into PROCESS.md and CONTEXT.md; sweep every stale reference and repoint format-doc links",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    ".excn docs",
+    "src/template"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "PROCESS.md's grill node expands to context-grill (when the shared model shifts) then epic-grill (requirements plus optional design) then PRD then issues, and states the disk handoff: epic-grill reads CONTEXT.md by path and context-grill's term writes land before epic-grill begins. CONTEXT.md's Setup-Grill/Work-Grill glossary entry and flagged ambiguities update for the grill family, and its 'Format authority' pointer repoints to the settled format-doc home. A repo-wide reference sweep lands in this same change so zero stale references remain — per the PROCESS.md contract-sweep rule that EXEC-083 violated when AC-1 and AC-3 contradicted. Src-First then root mirror.",
+  "prd": "PRD-010",
+  "acceptance_criteria": [
+    "PROCESS.md grill node expands to context-grill then epic-grill then PRD then issues, and states the disk handoff (epic-grill reads committed CONTEXT.md before it begins).",
+    "CONTEXT.md Setup/Work Grill entry and flagged ambiguities describe the grill family; the 'Format authority' line repoints to the settled CONTEXT-FORMAT.md / ADR-FORMAT.md home and resolves.",
+    "A repo-wide sweep for the old skill name and the format-doc paths (across *.md, hooks, settings, README, AGENTS.md, root CLAUDE.md pointer block) leaves zero stale references in src/template and the root Instance; the sweep result is recorded.",
+    "Every relative and absolute link to CONTEXT-FORMAT.md and ADR-FORMAT.md resolves after the move.",
+    "alignment PASS on the persistent-doc changes (PROCESS.md, CONTEXT.md); Src-First mirror to root."
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-092",
+    "EXEC-093"
+  ],
+  "related_tickets": [
+    "EXEC-089"
+  ],
+  "assigned_sprint": 8,
+  "closed_in_sprint": null,
+  "notes": "Filed from the PRD-010 breakdown 2026-06-14. Repo-wide stale-name sweep (Gap 4, P1), format-doc link repoint (Gap 5), and disk-handoff statement (Gap 8) added from the adversarial gap-hunt; the stale-name failure is exactly the sprint-7 EXEC-083 contradiction."
+}

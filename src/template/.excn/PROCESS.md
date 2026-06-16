@@ -32,13 +32,13 @@ The Lifecycle's grill node expands: context-grill (when the shared model has shi
 
 Each sprint is one JSON file at `.excn/sprints/sprint_<N>.json`, conforming to `.excn/schemas/sprint.schema.json`. scribe owns it.
 
-Issues are partitioned by lifecycle location: open, unpulled issues live in `.excn/issues/backlog.json`; a sprint's pulled issues live in its companion `.excn/issues/sprint-<N>/sprint-<N>-issues.json`, which becomes that sprint's archive once it closes. An issue's file IS its state; ids stay globally unique across all partitions. scribe moves issues at sprint boundaries.
+Issues are per-file records: open, unpulled issues live as `.excn/issues/<id>-<slug>.json`; a sprint's pulled issues live in its `.excn/issues/sprint-<N>/` directory, which becomes that sprint's archive once it closes. The directory is the tracker — an issue's file location IS its state; ids are self-minted UUIDv7 (legacy `EXEC-NNN` grandfathered), globally unique. All issue and sprint writes go through the `to-execution` CLI; a channel guard blocks raw edits (ADR-0011). scribe relocates issue files at sprint boundaries via `issue update`.
 
-- **Open:** scribe creates the JSON with `status: "active"`, a one-sentence goal, the team, and items in `not_shipped`, and moves the pulled issues from `backlog.json` into the sprint's companion partition.
+- **Open:** scribe creates the sprint JSON with `status: "active"`, a one-sentence goal, the team, and items in `not_shipped`, and relocates the pulled issue files into the sprint's `.excn/issues/sprint-<N>/` directory.
 - **In flight:** Teammates work items. An item moves to `in_progress` when its owner starts work; when one ships, they message scribe with what shipped and scribe moves it to `shipped` — a gated item whose work completed before its `in_progress` move landed goes straight to `shipped`.
-- **Closed:** scribe sets `status: "closed"`, adds decisions and retrospective notes, returns any unresolved issues to `backlog.json` (closed issues stay in the companion file as the archive), then runs the Retro Loop.
+- **Closed:** scribe sets `status: "closed"`, adds decisions and retrospective notes, relocates any unresolved issues back to `.excn/issues/` (closed issues stay in the sprint directory as the archive), then runs the Retro Loop.
 
-A sprint is **complete** when every item is in `shipped` or `not_shipped` (none `in_progress`), decisions and retrospective notes are recorded, and any mandatory QA gates passed. `process-adherence` reads the sprint record plus its companion issues file and checks this before a sprint may close.
+A sprint is **complete** when every item is in `shipped` or `not_shipped` (none `in_progress`), decisions and retrospective notes are recorded, and any mandatory QA gates passed. `process-adherence` reads the sprint record plus the sprint's `.excn/issues/sprint-<N>/` directory and checks this before a sprint may close.
 
 A sprint ends pushed: after `status` is `closed` and any Retro-Loop edits have landed, the sprint's committed work is pushed to the remote — the close is not done until the push lands.
 

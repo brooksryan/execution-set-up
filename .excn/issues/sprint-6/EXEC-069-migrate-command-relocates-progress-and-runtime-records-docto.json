@@ -1,0 +1,33 @@
+{
+  "status": "closed",
+  "actionable_now": true,
+  "prd": "PRD-009",
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "to-execution migrate command relocates legacy flat *_progress.json records into ADR-0008 homes by writer class (runtime basenames -> .excn/runtime/, rest -> .excn/progress/); location-only (fs.rename, byte-identical), idempotent, every move reported; doctor flags legacy layout and names migrate; gate-watch scan follows ledgers into .excn/progress/. Commit 813217e. code-standards + package-qa PASS (24+5-check fixtures). Deferred to Team Lead per the root-restamp ruling: live dogfood-root migration at a clean-tree point, and the durable package-qa rubric extension (alignment-gated).",
+  "related_tickets": [],
+  "assigned_sprint": 6,
+  "closed_in_sprint": 6,
+  "notes": null,
+  "id": "EXEC-069",
+  "title": "Migrate command relocates Progress and Runtime Records; doctor flags the legacy flat layout",
+  "severity": "P2",
+  "scope": [
+    "src/bin"
+  ],
+  "classification": "macro",
+  "description": "A new Scaffolder migrate command relocates known records on an already-stamped Instance into their ADR-0008 homes: versioned migration table, idempotent re-run, location-only (content byte-identical), every move reported. doctor detects the legacy flat layout and names the command. update's never-touch-work-tracking contract is unchanged. End-to-end: a temp Instance with the legacy flat layout migrates cleanly; re-run is a no-op; the dogfood root is migrated as proof.",
+  "acceptance_criteria": [
+    "migrate relocates known *_progress.json records into .excn/progress/ and .excn/runtime/ by writer class",
+    "Re-running migrate is a no-op; file content is byte-identical after relocation",
+    "doctor reports the legacy flat layout and names migrate; reports clean after migration",
+    "update behavior unchanged (never touches work-tracking)",
+    "package-qa rubric extended to exercise the migrate contract (chartered change, alignment-gated per ADR-0004)",
+    "Dogfood root migrated: no *_progress.json remains at .excn base; hooks and viewer keep working",
+    "package-qa and code-standards gates PASS"
+  ],
+  "depends_on": [
+    "EXEC-066",
+    "EXEC-067"
+  ]
+}

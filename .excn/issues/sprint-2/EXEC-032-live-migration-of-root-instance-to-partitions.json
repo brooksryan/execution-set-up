@@ -1,0 +1,30 @@
+{
+  "id": "EXEC-032",
+  "title": "Live migration of root Instance to partitions",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "root"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Split the root Instance's issues.json and sprint records into the partitioned layout with zero data loss; issue and sprint counts reconcile before and after. State migration is scribe's; the template/doc side is team-lead's, Src-First.",
+  "prd": "PRD-004",
+  "acceptance_criteria": [
+    "root .excn/issues/issues.json is split into the partitioned backlog + sprint records with zero data loss",
+    "issue and sprint counts reconcile before and after the migration",
+    "no orphaned pre-partition state files remain at root",
+    "alignment gate PASS"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-030",
+    "EXEC-031"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 2,
+  "closed_in_sprint": 2,
+  "notes": "New for sprint 2 under PRD-004. State migration is scribe-owned; template/doc changes are team-lead, Src-First. Shipped 2026-06-07 (sprint_2 item S2-8): live root-Instance migration to partitions; team-lead spot-checked on disk (tree, 33 unique, 0 dangling, gitignored, no orphans). Functional reconciliation is the gate (ephemeral work-tracking, no alignment needed)."
+}

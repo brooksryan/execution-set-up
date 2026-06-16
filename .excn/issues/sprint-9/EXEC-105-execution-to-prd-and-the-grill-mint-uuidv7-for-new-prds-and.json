@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-105",
+  "title": "`execution-to-prd` and the grill mint UUIDv7 for new PRDs and ADRs",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "skills"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Update the `execution-to-prd` skill and the grill so newly authored PRDs (JSON) and ADRs (markdown) mint a UUIDv7 id instead of the next sequential number. Must ship only after the `prd`/PRD id patterns are widened (EXEC-097), or references to a UUID PRD fail validation (G5).",
+  "prd": "PRD-011",
+  "acceptance_criteria": [
+    "A new PRD authored by `execution-to-prd` carries a UUIDv7 id and a slug-suffixed filename",
+    "A new ADR carries a UUIDv7 in its frontmatter",
+    "Does not ship before EXEC-097's pattern widening; a UUID PRD validates and is referenceable by issues",
+    "Skill edits read fresh from disk (no stale-content / linter-revert window) — sprint-8 lesson"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-097"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 9,
+  "closed_in_sprint": 9,
+  "notes": null
+}

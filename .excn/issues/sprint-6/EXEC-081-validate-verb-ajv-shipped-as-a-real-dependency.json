@@ -1,0 +1,28 @@
+{
+  "id": "EXEC-081",
+  "title": "validate verb + ajv shipped as a real dependency",
+  "status": "closed",
+  "severity": "P3",
+  "scope": [
+    "cli"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Gate agents and clerk validate work-tracking JSON against .excn/schemas/ with ajv, but the package ships no validator, so every agent ad-hoc-installs ajv into the host (and npm prunes those modules on the next install — observed on the dogfood root 2026-06-11). Ship `to-execution validate <file> [--schema <path>]` that auto-detects the schema from the file's location/shape (issues partitions, sprint, PRD, progress, hooks config, verdict ledger) and validates with ajv; add ajv (+ ajv-formats if needed) to src/package.json dependencies so the npm install carries it. Exit 0 on valid, non-zero with violation listing on invalid (fail-closed CLI rule).",
+  "prd": null,
+  "acceptance_criteria": [
+    "ajv is a dependency in src/package.json; npm-installed package validates without any ad-hoc install.",
+    "`to-execution validate` auto-detects the right schema for backlog/sprint-issues, sprint, PRD, progress, hooks-config, and verdict-ledger files; --schema overrides.",
+    "Valid file exits 0; invalid exits non-zero listing each violation with JSON path.",
+    "Usage/help text updated; passes code-standards and package-qa gates.",
+    "Gate-agent/clerk guidance (CONTEXT or TEAM_DIRECTIVE) points at the verb instead of ad-hoc ajv installs."
+  ],
+  "slice_type": "AFK",
+  "root_cause": "Package shipped no validator, so gate agents ad-hoc-installed ajv into hosts; the next npm install pruned those modules.",
+  "fix": "validate verb auto-detects the .excn schema by location/shape and validates with ajv, now a real dependency; TEAM_DIRECTIVE points gates/clerk at the verb. Commit 487cdcf; gates PASS incl. alignment on the directive edit.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 6,
+  "closed_in_sprint": 6,
+  "notes": null
+}

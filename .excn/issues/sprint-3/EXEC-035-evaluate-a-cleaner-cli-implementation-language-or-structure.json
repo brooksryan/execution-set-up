@@ -1,0 +1,25 @@
+{
+  "id": "EXEC-035",
+  "title": "Evaluate a cleaner CLI implementation — language or structure",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/bin"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "cli.js is messy and JS is friction. Consider a cleaner language or at least a cleaner implementation/structure for the Scaffolder CLI. Requires its own design grill → PRD before any rewrite (decision: stay-JS-cleaner vs port; weigh the npm/npx distribution constraint, the stamp/pointer/preflight contracts, and package-qa).",
+  "prd": null,
+  "acceptance_criteria": [
+    "a grill resolves language/structure direction with the npx-distribution constraint weighed",
+    "the chosen approach preserves the stamp + pointer + preflight contracts (package-qa still passes)"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 3,
+  "closed_in_sprint": 3,
+  "notes": "Brooks directive 2026-06-08. Grill-first — macro, needs its own grill → PRD like EXEC-017."
+}

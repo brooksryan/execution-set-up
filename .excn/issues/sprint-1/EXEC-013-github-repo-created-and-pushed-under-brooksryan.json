@@ -1,0 +1,23 @@
+{
+  "id": "EXEC-013",
+  "title": "GitHub repo created and pushed under brooksryan",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "repo"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Create brooksryan/execution-set-up via gh with the personal account active (gh auth switch --user brooksryan before, switch back after — or scoped token), add origin, push default branch. Verified absent 2026-06-07. Acceptance: origin remote URL reads github.com/brooksryan/; no commit or push credential carries the work identity.",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-012"
+  ],
+  "related_tickets": [
+    "PRD-002"
+  ],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "HITL. PRD-002 P2. Shipped 2026-06-07 (sprint_1 item S1-7). Visibility superseded to PUBLIC by Brooks's direct ruling to packager ('repo can be public, nothing to hide'), flipped and verified 2026-06-07."
+}

@@ -1,0 +1,21 @@
+{
+  "id": "EXEC-012",
+  "title": "Git init with per-repo personal identity",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "repo"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "git init the repo root, then immediately set repo-local user.name/user.email to the personal identity (brooksryan / brooksryan19@gmail.com) before any commit. Global git config (work) stays untouched. Per ADR-0001: nothing in this repo's history may carry the work identity. Acceptance: first commit authored under the personal identity; `git config user.email` inside the repo returns the personal address; global config unchanged.",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [
+    "PRD-002"
+  ],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "HITL — mutating git op, Team Lead go required. Dependency ADR-0001 approved 2026-06-07 (satisfied). PRD-002 P1. Shipped 2026-06-07 (sprint_1 item S1-6); identity ratified as-is by Brooks."
+}

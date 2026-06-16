@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-030",
+  "title": "Partition schemas + template skeleton",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template/schemas",
+    "src/template"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Evolve issue.schema.json and sprint.schema.json to the partitioned shape (PRD-004), and make the template stamp .excn/issues/backlog.json plus a sprint-N skeleton instead of the single issues.json/sprint records. Src-First: schemas and template change in src/ first, root mirrors.",
+  "prd": "PRD-004",
+  "acceptance_criteria": [
+    "issue.schema.json and sprint.schema.json are updated to the partitioned shape",
+    "the template stamps .excn/issues/backlog.json and a sprint-N skeleton",
+    "schemas parse and a freshly stamped Instance validates against them",
+    "root schemas/ and template mirror src (Src-First)",
+    "alignment gate PASS"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 2,
+  "closed_in_sprint": 2,
+  "notes": "New for sprint 2 under PRD-004 (work-tracking partition). This slice introduces the partitioned shape; EXEC-009 (execution-to-issues) depends on it. Shipped 2026-06-07 by team-lead (sprint_2 item S2-6): issue/sprint schemas carry the partition contract (backlog.json + sprint-<N>/sprint-<N>-issues.json), template stamps empty backlog.json, .gitkeep removed, src+root mirrored; package-qa PASS 0 violations."
+}

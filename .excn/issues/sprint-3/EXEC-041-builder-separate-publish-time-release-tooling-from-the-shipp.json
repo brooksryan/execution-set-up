@@ -1,0 +1,30 @@
+{
+  "id": "EXEC-041",
+  "title": "builder: separate publish-time release tooling from the shipped product",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/bin",
+    "release"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "builder relocates the publish-time identity guard out of the shipped product to repo-root release tooling, repointing the publish hook (prepublishOnly) and the guard's version-read, so the published package becomes product-only (the guard no longer ships to consumers). Cleans the guard to the code standard as it moves. Gates: package-qa (manifest re-baselines to product-only; the guard still runs at our publish) + code-standards both PASS.",
+  "prd": "PRD-006",
+  "acceptance_criteria": [
+    "the publish-time guard no longer ships in the package tarball (package-qa manifest re-baseline PASS)",
+    "the publish hook + version-read repointed; the guard still fires at our publish via prepublishOnly",
+    "the relocated guard conforms to CODE_STANDARDS.md (code-standards PASS)",
+    "no secret committed; global npm config untouched"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-039"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 3,
+  "closed_in_sprint": 3,
+  "notes": null
+}

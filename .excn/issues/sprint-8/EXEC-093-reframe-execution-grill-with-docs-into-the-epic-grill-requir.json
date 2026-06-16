@@ -1,0 +1,32 @@
+{
+  "id": "EXEC-093",
+  "title": "Reframe execution-grill-with-docs into the epic-grill: requirements pass + optional work-in-types pass; drop glossary duty",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "src skill content"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "The reframed Work-Grill skill runs a required requirements pass ('what must this body of work satisfy?') feeding execution-to-prd, plus an optional work-in-types design pass the agent offers when the work is design-heavy or on user request. The offer-gate states an explicit default so it is neither silently skipped nor auto-applied: the agent asks 'is this design-heavy?' and defaults to skip on no signal. The type pass closes on the semantic termination condition (every union variant handled, every optional field justified, nothing left unspecified, every seam specified on both sides, then a single axis-switch to call-graph and liveness), never a turn count; resolved types render inline and into ADRs, never CONTEXT.md. Glossary/term-sharpening duty is removed, now owned by context-grill. Stamp + root mirror; the skill dir name follows the EXEC-091 ruling.",
+  "prd": "PRD-010",
+  "acceptance_criteria": [
+    "The reframed skill runs a required requirements pass feeding execution-to-prd and an optional work-in-types design pass.",
+    "The type-pass offer rule states an explicit default: the agent asks 'is this design-heavy?' and defaults to skip on no signal; it cannot be silently skipped or auto-applied.",
+    "The type pass terminates on the semantic condition (all variants handled, all optional fields justified, nothing unspecified, all seams specified both sides, then call-graph/liveness), not a turn budget.",
+    "Glossary/term-sharpening duty is removed from this skill; resolved design types render inline and into ADRs, never CONTEXT.md.",
+    "Skill dir name follows the EXEC-091 ruling; init stamps it and the dogfood root mirrors (Src-First); package-qa PASS; alignment PASS."
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-091",
+    "EXEC-092"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 8,
+  "closed_in_sprint": null,
+  "notes": "Filed from the PRD-010 breakdown 2026-06-14. Offer-gate default and semantic-termination criteria added from the adversarial gap-hunt (Gap 7, G1). Depends on EXEC-092 so glossary duty has its new owner before this skill sheds it. SETTLED (EXEC-091, 2026-06-14): the skill dir is renamed execution-grill-with-docs -> execution-epic-grill; ADR-FORMAT.md stays co-located here as its canonical home."
+}

@@ -1,0 +1,23 @@
+{
+  "id": "EXEC-062",
+  "title": "Prune aged *_progress.json records",
+  "status": "open",
+  "severity": "P3",
+  "scope": [
+    "src/bin",
+    "hooks"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Gitignored progress records (gate verdicts, session logs, per-PRD progress) accumulate in .excn forever — a dozen-plus since June 6 on the dogfood Instance. Add pruning: doctor warns on aged records and/or a clerk-run chore archives or deletes records older than N closed sprints. Decide retention policy at implementation.",
+  "prd": null,
+  "acceptance_criteria": [],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": null,
+  "closed_in_sprint": null,
+  "notes": "Filed 2026-06-10 (Brooks, sprint-5 review)."
+}

@@ -1,0 +1,31 @@
+{
+  "id": "EXEC-020",
+  "title": "CLI pointer-block append",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/bin"
+  ],
+  "classification": null,
+  "actionable_now": true,
+  "description": "The CLI appends the framework pointer block to host instruction files non-destructively.",
+  "prd": "PRD-003",
+  "acceptance_criteria": [
+    "appends to every existing file among {CLAUDE.md, AGENTS.md}; creates both minimal pointer files if neither exists",
+    "visible-text sentinel, no HTML comments; second run appends nothing; user-deleted block re-appends",
+    "pointer files append-only under every flag including --force (host content byte-for-byte preserved)",
+    "warns without failing when post-append AGENTS.md exceeds 32 KiB",
+    "full inversion suite passes incl. no-trailing-newline and both-files cases",
+    "package-qa PASS against the slice-3-updated rubric"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-019"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "Shipped 2026-06-07 by packager (sprint_1 item S1-13): package-qa PASS 0 violations / 45 behavioral checks; commit 224a20b."
+}

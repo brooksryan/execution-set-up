@@ -1,0 +1,31 @@
+{
+  "id": "EXEC-098",
+  "title": "`issue update` and partition move through the helper",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "scaffolder",
+    "cli"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Extend the helper and CLI with `to-execution issue update`: update any field except the immutable `id`, including status flips and moving an issue between partitions (backlog ↔ `sprint-<N>/`) by relocating its per-file record — location remains the lifecycle state. Reject any attempt to change the `id`.",
+  "prd": "PRD-011",
+  "acceptance_criteria": [
+    "`to-execution issue update <id> --status ...` flips status and rewrites the file canonically",
+    "The `id` field is immutable; an update that tries to change it is rejected",
+    "Moving an issue into a sprint relocates its `<uuid>-<slug>.json` file to `.excn/issues/sprint-<N>/` (location-as-state preserved)",
+    "Other fields (assigned_sprint, notes, etc.) update without rewriting siblings",
+    "Update path reuses the helper's canonical serialization and atomic write"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-097"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 9,
+  "closed_in_sprint": 9,
+  "notes": null
+}

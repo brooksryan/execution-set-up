@@ -1,0 +1,27 @@
+{
+  "id": "EXEC-038",
+  "title": "Create the architect Teammate (research + standards authoring)",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "roster"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Stand up architect as a persistent Teammate: author its agent definition (the _teammate.template shape — Owns / Does-not-own / Process / Constraints) and add its roster rows to CONTEXT.md and TEAM_DIRECTIVE.md (roster, routing, gates). architect owns durable research (.excn/research/) and authoring engineering standards (CODE_STANDARDS.md) from researched best practices; proposes, does not ratify (Team Lead keeps final approval); writes no product/implementation code; every standard edit it authors rides the alignment gate, landing chartered (ADR-0004) or via the Retro Loop. Seam: Team Lead keeps arbitration/final-approval/template/Adherence-agent authoring (architect authors the rubric, TL authors the gate); scribe keeps the Retro Loop; builder/viewer keep implementation code.",
+  "prd": "PRD-006",
+  "acceptance_criteria": [
+    "architect agent def exists in the _teammate.template shape",
+    "CONTEXT.md roster + TEAM_DIRECTIVE.md roster/routing/gates list architect with the seam above and no overlap with existing Teammates",
+    "the def change passes alignment and is Team-Lead-approved",
+    "no product/implementation code authored in this slice"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 3,
+  "closed_in_sprint": 3,
+  "notes": null
+}

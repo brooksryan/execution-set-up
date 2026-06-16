@@ -1,5 +1,4 @@
 {
-  "schema_version": "1.0",
   "sprint_id": 4,
   "name": "Work-tracking visibility decision, hooks grill, template minimalism sweep",
   "status": "closed",
@@ -350,5 +349,6 @@
       "artifact": ".excn/TEAM_DIRECTIVE.md (and src/template seed)",
       "summary": "PASS, 0 violations — one-line Don'ts rule (scribe assigns issue ids; parallel sessions request them) tied to the sprint-4 issue-id-collision retro note; minimal, ownership-only, Src-First respected"
     }
-  ]
+  ],
+  "schema_version": "1.0"
 }

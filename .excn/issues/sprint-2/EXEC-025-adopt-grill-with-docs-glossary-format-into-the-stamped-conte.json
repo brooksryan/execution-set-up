@@ -1,0 +1,28 @@
+{
+  "id": "EXEC-025",
+  "title": "Adopt grill-with-docs glossary format into the stamped CONTEXT.md seed",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "skills"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "The skill writes ## Language with **Term** + _Avoid_ aliases, Relationships, Example dialogue, Flagged ambiguities; our seed declares ## Glossary + ### Term + ## Team roster. RULED by Brooks: adopt their format, merged with our roster section. Implement: src/template/.excn/CONTEXT.md seed gains the Language format (Term + _Avoid_ aliases, Relationships, Example dialogue, Flagged ambiguities) merged with the roster section; root .excn/CONTEXT.md seed mirrors (Src-First).",
+  "prd": "PRD-005",
+  "acceptance_criteria": [
+    "src/template/.excn/CONTEXT.md seed uses the Language format: **Term** entries with _Avoid_ aliases, Relationships, Example dialogue, Flagged ambiguities",
+    "the Language format is merged with the existing team-roster section (roster preserved)",
+    "root .excn/CONTEXT.md seed mirrors src (Src-First)",
+    "alignment gate PASS"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 2,
+  "closed_in_sprint": 2,
+  "notes": "Re-scoped for sprint 2 from a catalog deviation to its own implementation slice (its resolution is this issue, not EXEC-007). Catalog evidence from the EXEC-006 scratch run (npx to-execution@0.2.2, 2026-06-07); format-adoption direction ruled by Brooks 2026-06-07. Shipped 2026-06-07 (sprint_2 item S2-2): root .excn/CONTEXT.md adopted the seed Language format (3 doc-level sections + 12 _Avoid_ lines, 17 terms preserved); seed + root both alignment PASS (.excn/prd-005_progress.json); bulk per-term restructure deferred (adopt-forward) by recorded sprint decision."
+}

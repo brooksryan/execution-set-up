@@ -1,11 +1,10 @@
 {
-  "schema_version": "1.0",
   "sprint_id": 9,
   "name": "Sprint 9",
-  "status": "active",
+  "status": "closed",
   "dates": {
     "start": "2026-06-15",
-    "end": null,
+    "end": "2026-06-16",
     "duration_note": null
   },
   "team": [
@@ -135,10 +134,7 @@
         "EXEC-101"
       ],
       "notes": null
-    }
-  ],
-  "in_progress": [],
-  "not_shipped": [
+    },
     {
       "id": "S9-6",
       "type": "FEAT",
@@ -151,6 +147,8 @@
       "notes": null
     }
   ],
+  "in_progress": [],
+  "not_shipped": [],
   "defects_discovered": [],
   "decisions": [],
   "retrospective_notes": [
@@ -249,6 +247,25 @@
       "at": "2026-06-16",
       "artifact": "EXEC-101 (S9-5): clerk.md + scribe.md agent-def edits adopting the to-execution CLI for guarded-home writes (Src-First, root-mirrored)",
       "summary": "PASS — 0 violations. One Precise-Minimalism FAIL on a clerk.md benefit clause cut and re-passed. Team Lead approved (chartered change, ADR-0004); def edits describe the post-migration steady state."
+    },
+    {
+      "step": "migrate_records_live",
+      "artifact": ".excn/issues",
+      "summary": "EXEC-102 cutover: backlog+8 archives split to 105 per-file records, sprints retrofitted, channel_guard enabled and firing; revert point 0af99ae",
+      "at": "2026-06-16"
+    },
+    {
+      "step": "alignment_review_fail",
+      "at": "2026-06-16",
+      "artifact": "TEAM_DIRECTIVE.md (Don't bullet), CONTEXT.md (Migrate update + Issue Tracker term), PROCESS.md (Sprint tracking section)",
+      "summary": "FAIL — 2 violations. (1) Change 1 Don't bullet: Minimalism/Precise Minimalism — rationale clause in a Don't bullet is explanatory prose removable without losing the rule. (2) Change 3 Line 37: Minimalism/Precise Minimalism — CLI flag --assigned-sprint is an implementation detail; process doc states operations, not flags. Changes 2a, 2b, and Lines 35/39/41 of Change 3 pass."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-16",
+      "artifact": "TEAM_DIRECTIVE.md (Don't bullet rev1), PROCESS.md Line 37 (rev1)",
+      "summary": "PASS — 0 violations. Both revised changes cut to instruction-only: Change 1 follows the established Don't pattern with ADR anchor; Change 3 Line 37 ends at the directory path with no flag detail. All previously-passed items (2a, 2b, PROCESS Lines 35/39/41) unchanged."
     }
-  ]
+  ],
+  "schema_version": "1.0"
 }

@@ -1,0 +1,31 @@
+{
+  "id": "EXEC-050",
+  "title": "Health check: per-feature hook status (enabled/firing/stale/broken) + outdated via the version stamp",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/bin",
+    "hooks"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "A user-runnable health check reporting per-feature status rather than pass/fail: wiring present, toggle config parses against its schema, enabled hooks show recent firing evidence (heartbeat in the progress records), and the Instance's recorded stamp version matches the installed package (outdated detection, via EXEC-049's version stamp). The check is how hook decay surfaces — hooks themselves fail safe to no-op (PRD-007 testing decisions).",
+  "prd": "PRD-007",
+  "acceptance_criteria": [
+    "One command reports per-feature status: enabled, firing, stale, or broken",
+    "An out-of-date Instance is reported as outdated with the recorded vs installed versions",
+    "A deliberately broken config and a disarmed hook are each detected and named",
+    "Runnable by an end user on any Instance"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "doctor verb: per-feature enabled/disabled/firing/stale/broken + config validation + outdated via version marker; health-policy.js data module; code-standards PASS (after one revise cycle: named time constants), package-qa PASS.",
+  "depends_on": [
+    "EXEC-046",
+    "EXEC-049"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 4,
+  "closed_in_sprint": 4,
+  "notes": null
+}

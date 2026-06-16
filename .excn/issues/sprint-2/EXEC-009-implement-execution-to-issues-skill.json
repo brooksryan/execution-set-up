@@ -1,0 +1,31 @@
+{
+  "id": "EXEC-009",
+  "title": "Implement execution-to-issues skill",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "skills"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Stamp src/template/.claude/skills/execution-to-issues/SKILL.md (single file) as an .excn-native fork of to-issues, and mirror into root .claude/skills/ (Src-First). It appends to the partitioned backlog target with issue.schema.json as the contract, and is invocable standalone (not only as a grill substep).",
+  "prd": "PRD-005",
+  "acceptance_criteria": [
+    "src/template/.claude/skills/execution-to-issues/SKILL.md exists as a single file",
+    "a run appends issues to the partitioned backlog target, each validating against issue.schema.json",
+    "the skill is invocable standalone, not only as a grill substep",
+    "root .claude/skills/ mirror is byte-identical to src (Src-First)",
+    "alignment gate PASS"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-030"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 2,
+  "closed_in_sprint": 2,
+  "notes": "Re-scoped from 'Resolve to-issues: schema-field output, no markdown body template' for sprint 2 under PRD-005; fork direction ruled by Brooks 2026-06-07. depends_on EXEC-030 — the partitioned backlog target must exist before the skill can append to it. Shipped 2026-06-07 by team-lead (sprint_2 item S2-4): execution-to-issues fork appends schema-valid issues to .excn/issues/backlog.json, issue.schema.json sole authority, globally-unique id scan across partitions, invocable standalone; alignment PASS; src+root mirrored."
+}

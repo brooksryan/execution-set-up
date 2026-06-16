@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-087",
+  "title": "Doctor names dead settings commands and .js/.cjs hook twins",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/bin"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "The create-evolve-internal breakage stayed invisible until a guard failed to fire: nothing in the framework flags a settings.json hook command pointing at a file that does not exist, or a stamped hook present as both .js and .cjs. Extend doctor's per-feature hook health: report each settings command whose target file is missing (BROKEN, naming the command and the missing path) and each hook present under both extensions (naming the twin and which file settings actually invokes). Covers custom commands the Instance added, not just stamped features — a dead enforcement hook is exactly what doctor exists to surface.",
+  "prd": null,
+  "acceptance_criteria": [
+    "doctor reports a settings.json hook command whose target file is missing, naming the command and path — including commands for non-stamped (custom) hooks",
+    "doctor reports a hook present as both <name>.js and <name>.cjs, naming which one settings invokes",
+    "A healthy migrated Instance (all .cjs, commands aligned) reports no new findings",
+    "package-qa PASS with doctor checks extended to cover both conditions"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "doctor gained two Instance-wide report lines after hook layout: 'hook commands:' resolves every settings.json hook command against disk and reports BROKEN naming the command and the missing path, custom non-stamped commands included; 'hook files:' reports each hook present as both <name>.js and <name>.cjs, naming which extension settings invokes (.cjs/.js/both/neither). readHookCommands extracted as the shared settings-command flattener (wiringProblems behavior unchanged); HOOK_COMMAND_SCRIPT_PATTERN added to health-policy.js. A healthy migrated Instance reports neither finding, exit 0. package-qa doctor checks extended to both conditions.",
+  "depends_on": [
+    "EXEC-086"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 7,
+  "closed_in_sprint": 7,
+  "notes": "Split from the EXEC-086 report at breakdown review (Brooks, 2026-06-12): detection is its own slice; doctor stays the health authority."
+}

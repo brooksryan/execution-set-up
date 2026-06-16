@@ -1,0 +1,27 @@
+{
+  "status": "closed",
+  "actionable_now": true,
+  "prd": "PRD-009",
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "Viewer header sprint switcher over probed sprint files (newest first, active default); closed sprints render lanes + decisions + retrospective notes + step_log verdicts; selection round-trips through the History API (?sprint=N deep-link). No server change; read-only. Commit bc8e892. code-standards PASS.",
+  "related_tickets": [],
+  "assigned_sprint": 6,
+  "closed_in_sprint": 6,
+  "notes": null,
+  "id": "EXEC-071",
+  "title": "Viewer sprint switcher: past sprints readable from the status page",
+  "severity": "P2",
+  "scope": [
+    "viewer"
+  ],
+  "classification": "local",
+  "description": "The viewer gains a sprint switcher over the sprint files it already probes: the active sprint renders by default; selecting a closed sprint renders the same lanes plus its decisions, retrospective notes, and step_log gate verdicts. End-to-end: sprints 1 through 6 browsable on the live status page.",
+  "acceptance_criteria": [
+    "Switcher lists every probed sprint, newest first, active sprint default",
+    "A closed sprint shows lanes, decisions, retrospective notes, and step_log verdicts",
+    "No server change; viewer stays read-only over .excn JSON",
+    "Src-First: template viewer first, dogfood root mirrors; code-standards gate PASSes; verified on the live viewer server"
+  ],
+  "depends_on": []
+}

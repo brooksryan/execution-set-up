@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-034",
+  "title": "Project-scoped npm publish auth (no global dotfile dependency)",
+  "status": "closed",
+  "severity": "P3",
+  "scope": [
+    "ops"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Publish auth scoped to this project via a gitignored src/.npmrc env-var ref (//registry.npmjs.org/:_authToken=${TO_EXECUTION_NPM_TOKEN}); token sourced from the macOS Keychain (service npm-personal-token, account $USER) at publish time; neither depends on nor clobbers the global ~/.npmrc; recipe documented in root RELEASE.md.",
+  "prd": null,
+  "acceptance_criteria": [
+    "src/.npmrc exists with exactly the env-var-ref line (no literal token) and is gitignored (git check-ignore matches)",
+    "~/.npmrc unmodified",
+    "token authenticates as brooksryan via the PROJECT src/.npmrc (proven: control E401 with env unset + global neutralized; live whoami → brooksryan)",
+    "no secret committed; .npmrc absent from the published tarball (package-qa: 4 guards confirmed)",
+    "prepublishOnly identity guards still pass",
+    "[DEFERRED] 2FA-bypass on publish verified on the next real release — see follow-up issue"
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 3,
+  "closed_in_sprint": 3,
+  "notes": "Intended for next sprint (Brooks, 2026-06-08). Surfaced by packager during EXEC-033. Re-scoped 2026-06-09 from ~/.npmrc-restore to project-scoped auth (Brooks). Mechanism built + package-qa-clean + auth-proven; 2FA-bypass-on-write deferred to next real publish (follow-up issue). Recipe in root RELEASE.md."
+}

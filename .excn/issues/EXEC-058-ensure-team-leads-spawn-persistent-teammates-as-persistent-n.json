@@ -1,0 +1,27 @@
+{
+  "id": "EXEC-058",
+  "title": "Ensure Team Leads spawn persistent Teammates as persistent, not as transient subagents",
+  "status": "open",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "hooks"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Observed (Brooks): Team Lead sessions sometimes spawn agents inappropriately — a persistent Teammate gets spawned as a transient Invoked Agent/subagent, losing membership, continuity, and messaging addressability. CONTEXT.md draws the Teammate-vs-Invoked-Agent line by lifecycle, and sprint 4 defect D4-1 already forced a persistent-Teammate-spawning rule mid-sprint, so the failure mode is real here too. Explore how to make correct spawning systematic rather than remembered: candidates include a TEAM_DIRECTIVE/agent-def instruction sweep (roster members spawn via make-teammate/teams, gates spawn via the Agent tool), a remind-only hook on the spawn tool that flags a roster-named agent being spawned transiently (rides the per-feature hook plumbing, ADR-0006), and a doctor/health check that compares the live team roster against the directive roster. Spike first: characterize when and why leads get it wrong, then pick the enforcement. Src-First.",
+  "prd": null,
+  "acceptance_criteria": [
+    "The failure mode is characterized: when a Team Lead spawns a roster Teammate transiently, what in the docs/tooling let it happen",
+    "A chosen mechanism (instruction, remind-only hook, or health check) makes the mismatch visible or prevented at spawn time",
+    "Spawning a roster-named Teammate persistently and an Invoked Agent transiently both pass without noise"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": null,
+  "closed_in_sprint": null,
+  "notes": "Filed 2026-06-10 (Brooks). Related context: sprint-4 defect D4-1 fix adopted persistent-Teammate spawning for the rest of that sprint."
+}

@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-021",
+  "title": "Root Instance migration to .excn",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "root"
+  ],
+  "classification": null,
+  "actionable_now": true,
+  "description": "Migrate the root Instance to the .excn layout, preserving all work-tracking state.",
+  "prd": "PRD-003",
+  "acceptance_criteria": [
+    "root methodology docs live in .excn/ and tmp/exec history moves to .excn/tmp/ with all sprint/issue/PRD/progress state intact",
+    "root CLAUDE.md replaced by the pointer block",
+    "ADR-0001 finalized into .excn/adr/0001-personal-ownership.md (packager authors, alignment-gated)",
+    "no orphaned old-path files at root"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-018"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "Shipped 2026-06-07 by team-lead (sprint_1 item S1-14): alignment PASS entry 13; ADR-0001 placed by packager (e266892); state verified intact at new paths."
+}

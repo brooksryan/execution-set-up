@@ -1,0 +1,33 @@
+{
+  "id": "EXEC-007",
+  "title": "Implement execution-grill-with-docs skill",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "skills"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Stamp src/template/.claude/skills/execution-grill-with-docs/{SKILL.md, CONTEXT-FORMAT.md, ADR-FORMAT.md} as an .excn-native fork of grill-with-docs, and mirror into root .claude/skills/ (Src-First). The fork subsumes the design resolutions of EXEC-024, EXEC-026, EXEC-027, EXEC-028, EXEC-029: glossary writes to .excn/CONTEXT.md only, ADR scan/write targets .excn/adr/ continuing the existing numbering, the multi-context CONTEXT-MAP convention is dropped for the single-namespace stance, mid-grill philosophies are parked as retro observations, and the skill reads host pointer targets explicitly.",
+  "prd": "PRD-005",
+  "acceptance_criteria": [
+    "src/template/.claude/skills/execution-grill-with-docs/ carries SKILL.md, CONTEXT-FORMAT.md, ADR-FORMAT.md, all .excn-native",
+    "glossary writes target .excn/CONTEXT.md only — no second root glossary (resolves EXEC-024)",
+    "ADR scan/write targets .excn/adr/ and continues the existing 0001/0002 numbering (resolves EXEC-026)",
+    "the multi-context CONTEXT-MAP convention is dropped; the skill takes the single-namespace stance (resolves EXEC-027)",
+    "mid-grill philosophies are routed as retro observations, not dropped (resolves EXEC-028)",
+    "the skill reads host pointer targets explicitly rather than root-path defaults (resolves EXEC-029)",
+    "root .claude/skills/ mirror is byte-identical to src (Src-First)",
+    "a grill run writes all decision records to the framework .excn location with zero translation language",
+    "alignment gate PASS"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 2,
+  "closed_in_sprint": 2,
+  "notes": "Re-scoped from 'Resolve grill-with-docs: fork vs adapt' for sprint 2 (fork direction ruled by Brooks 2026-06-07; design grill closed under PRD-005). Subsumes the design resolutions of EXEC-024/026/027/028/029 — no closes_issues schema field exists, so the subsumption is recorded here ownership-style; those issues stay open and close when this ships. Skill name fixed to execution-grill-with-docs (Work Grill fork decision). Lands as 0.3.0. Shipped 2026-06-07 by team-lead (sprint_2 item S2-1): .excn-native execution-grill-with-docs (SKILL.md + CONTEXT-FORMAT.md + ADR-FORMAT.md); explicit-path discovery, single context, ADRs to .excn/adr/, mid-grill philosophy via PRD notes→retro, inline glossary writes; alignment PASS 0 violations; src+root mirrored. Subsumes EXEC-024/026/027/028/029 (cascade-closed)."
+}

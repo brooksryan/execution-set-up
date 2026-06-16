@@ -1,0 +1,23 @@
+{
+  "id": "EXEC-006",
+  "title": "Complete the deviation catalog: run grill-with-docs against a scratch Instance",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "investigation"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "to-prd and to-issues deviations are cataloged in PRD-001 Further Notes. Run grill-with-docs through a real Work Grill on a scratch Instance and file every structure mismatch (docs/adr hardcode, CONTEXT-MAP convention, anything new) as an issue. Acceptance: each mismatch is one backlog issue with the observed behavior quoted.",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-023"
+  ],
+  "related_tickets": [
+    "PRD-001"
+  ],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "HITL — a grill requires the user. Covers PRD-001 story 10. Depends on EXEC-023 per Brooks's ruling 2026-06-07: the deviation catalog targets the final flat shape. Shipped 2026-06-07 (sprint_1 item S1-4): six deviations from grill-with-docs's three reference files filed as EXEC-024…029; fork direction + glossary-format adoption ruled live by Brooks."
+}

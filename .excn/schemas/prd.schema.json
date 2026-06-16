@@ -22,8 +22,8 @@
     "schema_version": { "type": "string", "const": "1.0" },
     "id": {
       "type": "string",
-      "pattern": "^PRD-\\d{3}$",
-      "description": "Stable identifier, never reused."
+      "pattern": "^(PRD-\\d{3}|[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$",
+      "description": "Stable identifier, never reused: a legacy PRD-NNN or a UUIDv7 (ADR-0011). The UUIDv7 branch mirrors UUIDV7_PATTERN in src/bin/write-policy.js."
     },
     "title": { "type": "string" },
     "status": { "type": "string", "enum": ["draft", "published", "superseded"] },
@@ -73,8 +73,8 @@
     "out_of_scope": { "type": "array", "items": { "type": "string" } },
     "issues": {
       "type": "array",
-      "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*-\\d{3,}$" },
-      "description": "Forward links to the issues broken out of this PRD."
+      "items": { "type": "string", "pattern": "^([A-Z][A-Z0-9]*-\\d{3,}|[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$" },
+      "description": "Forward links to the issues broken out of this PRD: legacy ids or UUIDv7s."
     },
     "notes": {
       "type": "array",

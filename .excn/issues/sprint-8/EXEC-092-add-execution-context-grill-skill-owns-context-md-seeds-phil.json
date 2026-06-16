@@ -1,0 +1,32 @@
+{
+  "id": "EXEC-092",
+  "title": "Add execution-context-grill skill — owns CONTEXT.md, seeds PHILOSOPHY once; stamp + root mirror",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "src skill content"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "A new stamped grill that establishes the workspace's shared model. It writes terms into CONTEXT.md inline, term-by-term (carrying the existing skill's don't-batch convention; scribe stewardship between grills preserved) and never regenerates the whole file. It may write PHILOSOPHY.md only on first establishment, detected by an explicit positive marker, appending and never overwriting existing body content; on an absent or ambiguous marker it refuses and routes principles to the Retro Loop. The skill states its own write-guardrail naming the only files it may write. Stamping is by tree-walk so the new dir auto-stamps; framework-version.json records its hashes; the dogfood root mirrors Src-First.",
+  "prd": "PRD-010",
+  "acceptance_criteria": [
+    "execution-context-grill ships under src/template/.claude/skills/; init tree-walk stamps it into a fresh Instance and framework-version.json records its hashes.",
+    "The skill name is execution-* prefixed and verified not to collide with a shadowing global skill (ADR-0003 rule cited in its rationale).",
+    "context-grill writes CONTEXT.md terms inline, term-by-term, never a full-file regenerate; scribe stewardship between grills is preserved.",
+    "PHILOSOPHY seed-once uses an explicit positive marker (not an emptiness heuristic); the grill appends and never overwrites existing PHILOSOPHY body; an absent or ambiguous marker makes it refuse and route principles to the Retro Loop.",
+    "The skill states an explicit write-guardrail naming the only files it may write.",
+    "Dogfood root mirrors the stamped copy (Src-First); package-qa PASS; alignment PASS on the new persistent skill."
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-091"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 8,
+  "closed_in_sprint": null,
+  "notes": "Filed from the PRD-010 breakdown 2026-06-14. Seed-clobber and CONTEXT-clobber acceptance criteria added from the adversarial gap-hunt (Gaps 2, 3, 6), grounded in the phantom-wipe postmortem and the sprint-6 clerk re-serialize lesson."
+}

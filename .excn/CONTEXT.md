@@ -83,8 +83,12 @@ A hook- or machine-written `*_progress.json` under `.excn/runtime/` — invocati
 _Avoid_: "progress record" — the writer, not the suffix, sets the class.
 
 ### Migrate
-The Scaffolder command that relocates known Progress/Runtime Records into their homes on an already-stamped Instance — versioned, idempotent, location-only. The only sanctioned relocation path; `update` never touches work-tracking (ADR-0008).
+The Scaffolder command that relocates known Progress/Runtime Records into their homes on an already-stamped Instance — versioned, idempotent, location-only. The sanctioned relocation path for records; `update` never touches work-tracking (ADR-0008). Distinct from the one-time `migrate-records` command, which splits issue collections into per-file records and retrofits sprints to canonical-sentinel form (ADR-0011).
 _Avoid_: "update" — update refreshes invariant files; it never moves state.
+
+### Issue Tracker
+The `.excn/issues/` directory is the tracker: each issue is a per-file `<id>-<slug>.json` record, and the file's location IS its lifecycle state — `.excn/issues/` for open issues, `.excn/issues/sprint-<N>/` for a sprint's pulled issues and its archive. Ids are self-minted UUIDv7 (legacy `EXEC-NNN` grandfathered), globally unique. The `to-execution` CLI is the sole write path; a channel guard blocks raw Write/Edit (ADR-0011).
+_Avoid_: "backlog.json" — there is no aggregate collection file; the directory is the tracker.
 
 ## Relationships
 

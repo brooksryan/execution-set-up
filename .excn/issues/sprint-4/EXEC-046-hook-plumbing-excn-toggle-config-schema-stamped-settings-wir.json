@@ -1,0 +1,28 @@
+{
+  "id": "EXEC-046",
+  "title": "Hook plumbing: .excn toggle config + schema + stamped settings wiring",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "hooks"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "The Scaffolder stamps the hook scaffolding's shared plumbing: a schema-validated toggle config in .excn (one enable flag per hook feature; schema added to the Instance schemas) and the project settings wiring that routes hook events to per-feature scripts. A missing or malformed config fails safe to no-op. Src-First; per ADR-0006.",
+  "prd": "PRD-007",
+  "acceptance_criteria": [
+    "A freshly stamped Instance carries the toggle config, its schema, and the settings wiring",
+    "Each feature script no-ops when its toggle is off, when the config is missing, or when it is malformed",
+    "package-qa passes on the stamp contract",
+    "Root Instance mirrors src/ (Src-First)"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "Stamped hooks.config.json + hooks-config.schema.json + .claude/settings.json wiring + 5 fail-safe hook scripts; package-qa PASS, code-standards PASS.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 4,
+  "closed_in_sprint": 4,
+  "notes": "Filed 2026-06-10 (Brooks). Record restored 2026-06-10 after an id collision with a parallel-session filing (now EXEC-054)."
+}

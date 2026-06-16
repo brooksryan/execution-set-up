@@ -1,0 +1,30 @@
+{
+  "id": "EXEC-023",
+  "title": "Flatten .excn — remove the tmp/ nesting",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "src/bin",
+    "root"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Work-tracking loses its tmp/ level and lives flat in the namespace: .excn/{sprints,issues,prds,retros}/ plus progress JSONs at the .excn level. Rationale (Brooks): the .excn namespace already isolates the framework; the inner tmp/ is ceremony. Implementation rules and implements the new ignore semantics — the stamped .gitignore currently ignores tmp/ wholesale; the flat layout needs explicit entries or a ruling that work-tracking commits. Spans: template layout + stamped gitignore content, CLI manifest + pointer-block line, package-qa rubric co-update, path references (skill, agent defs, PROCESS, schema descriptions), root Instance migration with history intact, ADR-0002 contents-census amendment (dated note, no history rewrite), 0.2.2 publish.",
+  "prd": null,
+  "acceptance_criteria": [
+    "No tmp/ level inside .excn anywhere — template, CLI, docs, root Instance",
+    "Ignore semantics for the flat layout ruled and implemented",
+    "All state files migrated flat with history intact; schemas' description strings updated",
+    "package-qa PASS on the co-updated rubric; 0.2.2 published with registry acceptance (npx-vs-local byte-diff)",
+    "Zero stale .excn/tmp references in live docs"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "Team Lead directive (Brooks, 2026-06-07), filed without PRD; sequenced before EXEC-006 so the deviation catalog targets the final shape. AFK — publish is self-serve via the Keychain token. Shipped 2026-06-07 (sprint_1 item S1-16): 0.2.2 registry-verified; ignore semantics ruled stay-ephemeral; first alignment FAIL→fix→PASS cycle ran on this slice."
+}

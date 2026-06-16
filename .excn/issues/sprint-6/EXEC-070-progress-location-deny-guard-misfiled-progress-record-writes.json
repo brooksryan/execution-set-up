@@ -1,0 +1,31 @@
+{
+  "status": "closed",
+  "actionable_now": true,
+  "prd": "PRD-009",
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "PreToolUse deny guard (spawn-guard pattern, ADR-0008): a *_progress.json write outside .excn/progress/ and .excn/runtime/ is denied with a redirect naming both homes; default OFF, fail-safe, one invocation record per firing, toggle optional in hooks-config.schema.json. Commit e7f4cd5 (10 files). code-standards + package-qa PASS; 15-check payload simulation.",
+  "related_tickets": [],
+  "assigned_sprint": 6,
+  "closed_in_sprint": 6,
+  "notes": null,
+  "id": "EXEC-070",
+  "title": "Progress-location deny guard: misfiled Progress Record writes are denied with a redirect",
+  "severity": "P2",
+  "scope": [
+    "hooks"
+  ],
+  "classification": "local",
+  "description": "A PreToolUse guard in the spawn-guard pattern denies a *_progress.json write outside .excn/progress/ and .excn/runtime/, with a redirect reason naming the right home. Rules/decision split, hooks.config toggle, every firing invocation-logged, fail-safe on any error (a broken guard never blocks legitimate writes). Location only — schema and content stay the gates' job. End-to-end: a simulated misfiled write is denied with the redirect; a correct-home write passes untouched.",
+  "acceptance_criteria": [
+    "Misfiled *_progress.json write denied with a reason naming .excn/progress/ or .excn/runtime/",
+    "Writes inside the two homes pass untouched; non-progress writes unaffected",
+    "Toggle in hooks.config.json; malformed config or payload fails safe (exit 0, no output)",
+    "Every firing logs one invocation record",
+    "Payload-simulation tests cover deny, pass, and fail-safe paths",
+    "Src-First: template hook source first, dogfood root mirrors; code-standards gate PASSes"
+  ],
+  "depends_on": [
+    "EXEC-066"
+  ]
+}

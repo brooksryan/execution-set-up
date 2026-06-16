@@ -1,0 +1,33 @@
+{
+  "id": "EXEC-103",
+  "title": "Stamp the per-file layout into `src/template` (fresh-Instance path)",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "template",
+    "scaffolder"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Src-First: land the new per-record schema, the `to-execution issue/sprint` CLI, the channel-guard hook + its `hooks-config` flag, and the empty `.excn/issues/` layout in `src/template` so a freshly-stamped Instance starts in the per-file world with no `backlog.json` ever. The fresh path must not error on an empty issues directory.",
+  "prd": "PRD-011",
+  "acceptance_criteria": [
+    "A fresh `npx to-execution init` stamps the per-record schema, the issue/sprint CLI, and the channel-guard hook + flag",
+    "A fresh Instance has an empty `.excn/issues/` and no `backlog.json`; nothing errors on the empty directory",
+    "The stamped `.gitignore` keeps `.excn/issues/*.json` tracked (not caught by the `*_progress.json` ignore) — phantom-wipe class",
+    "Changes land in `src/` first; the root Instance mirrors afterward (Src-First)",
+    "package-qa and code-standards gates pass on the stamped output"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-097",
+    "EXEC-099",
+    "EXEC-100"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": 9,
+  "closed_in_sprint": 9,
+  "notes": null
+}

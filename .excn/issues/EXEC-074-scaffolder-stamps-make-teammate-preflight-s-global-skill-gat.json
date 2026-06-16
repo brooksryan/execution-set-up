@@ -1,0 +1,30 @@
+{
+  "id": "EXEC-074",
+  "title": "Scaffolder stamps make-teammate; Preflight's global-skill gate drops to zero",
+  "status": "open",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "src skill content"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "make-teammate is generic and identical across projects, so per the framework's own invariant rule it belongs in the package: the Template ships it beside the stamped Lifecycle skills and init stamps it into every Instance's .claude/skills/. The Setup Skill's Preflight stops requiring any global skill (the make-teammate gate goes; the only remaining prerequisite is a working node/npx). Personal-level copies override the stamped one on collision — benign, same content family. Removes the last external dependency blocking plugin-marketplace publication. End-to-end: a fresh adopter with no personal skills installs the plugin, runs the Setup Skill, and Preflight passes; init stamps make-teammate; the Team step of the Setup Grill works.",
+  "prd": null,
+  "acceptance_criteria": [
+    "src/template ships make-teammate; init stamps it into .claude/skills/",
+    "Setup Skill Preflight requires no global skills",
+    "ADR-0003 amended: make-teammate joins the stamped skill set",
+    "package-qa PASS (manifest grows by the new template file; pack parity holds)",
+    "Dogfood root mirrors the stamped copy (Src-First)",
+    "Ships in the next npm release"
+  ],
+  "slice_type": "AFK",
+  "root_cause": "make-teammate predates the Scaffolder and stayed a personal global skill after the lifecycle skills were stamped (ADR-0003)",
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": null,
+  "closed_in_sprint": null,
+  "notes": "Surfaced 2026-06-10 scoping plugin publication, immediately after EXEC-073 removed the async-questions gate."
+}

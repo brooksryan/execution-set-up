@@ -1,5 +1,4 @@
 {
-  "schema_version": "1.0",
   "sprint_id": 3,
   "name": "npm-auth hardening, status viewer, cleaner-CLI grill, 0.3.0 acceptance",
   "status": "closed",
@@ -166,5 +165,6 @@
       "title": "ADR-0004's chartered carve-out carried real load this sprint",
       "body": "Three persistent-doc/def changes landed mid-sprint as chartered slices (architect creation EXEC-038, CODE_STANDARDS extension EXEC-039, preflight-path doc updates under EXEC-041) — all alignment-gated + TL-approved, none via the Retro Loop. Sprint 3 is the first heavy exercise of ADR-0004; it held."
     }
-  ]
+  ],
+  "schema_version": "1.0"
 }

@@ -1,0 +1,29 @@
+{
+  "status": "closed",
+  "actionable_now": true,
+  "prd": "PRD-009",
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": "Viewer hook-health panel over the Runtime Record invocation ledger (.excn/runtime/hook-invocations_progress.json): per-feature doctor-parity cards (firing/stale/disabled + last heartbeat) + collapsible recent-invocations table filterable by feature/outcome; absent/empty ledger renders an explicit empty state; status ledger-derived (mirrors health-policy.js). Bundled the EXEC-067 viewer load-path fix (load_progress.json -> .excn/runtime/). Commit 3bf5bbe. code-standards PASS; verified on the live viewer server.",
+  "related_tickets": [],
+  "assigned_sprint": 6,
+  "closed_in_sprint": 6,
+  "notes": null,
+  "id": "EXEC-072",
+  "title": "Viewer hook health: doctor-parity cards plus the invocation log",
+  "severity": "P2",
+  "scope": [
+    "viewer"
+  ],
+  "classification": "local",
+  "description": "The viewer renders per-feature hook health cards mirroring doctor (firing / stale / disabled, last heartbeat) from the Runtime Record invocation ledger, with a collapsible recent-invocations table filterable by feature and outcome. End-to-end: a stale or broken hook is visible on the status page at a glance, with the log entries to diagnose it.",
+  "acceptance_criteria": [
+    "Per-feature cards show doctor-parity status and last heartbeat from .excn/runtime/hook-invocations_progress.json",
+    "Collapsible table shows recent invocations, filterable by feature and outcome",
+    "Missing or empty ledger renders an explicit empty state, not an error",
+    "Src-First: template viewer first, dogfood root mirrors; code-standards gate PASSes; verified on the live viewer server"
+  ],
+  "depends_on": [
+    "EXEC-067"
+  ]
+}

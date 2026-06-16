@@ -1,5 +1,4 @@
 {
-  "schema_version": "1.0",
   "sprint_id": 8,
   "name": "Sprint 8",
   "status": "closed",
@@ -49,7 +48,7 @@
     {
       "id": "S8-2",
       "type": "FEAT",
-      "title": "EXEC-092: Add execution-context-grill skill \u2014 owns CONTEXT.md, seeds PHILOSOPHY once",
+      "title": "EXEC-092: Add execution-context-grill skill — owns CONTEXT.md, seeds PHILOSOPHY once",
       "owner": "team-lead",
       "summary": "New stamped skill under src/template/.claude/skills/execution-context-grill/: SKILL.md + CONTEXT-FORMAT.md. Writes CONTEXT.md terms inline (term-by-term, don't-batch); seeds PHILOSOPHY.md only while the stamped sentinel is present; states its write-guardrail. Stamp + root mirror. package-qa + alignment gates.",
       "closes_issues": [
@@ -60,7 +59,7 @@
     {
       "id": "S8-3",
       "type": "REFACTOR",
-      "title": "EXEC-093: Reframe execution-grill-with-docs \u2192 execution-epic-grill (requirements + optional work-in-types pass)",
+      "title": "EXEC-093: Reframe execution-grill-with-docs → execution-epic-grill (requirements + optional work-in-types pass)",
       "owner": "team-lead",
       "summary": "Rename the skill dir to execution-epic-grill. Rewrite SKILL.md: required requirements pass feeding execution-to-prd, plus optional work-in-types design pass (agent asks, defaults skip); type pass terminates on the semantic condition. ADR-FORMAT.md stays as canonical home. Drop glossary duty. Stamp + root mirror. package-qa + alignment gates.",
       "closes_issues": [
@@ -73,7 +72,7 @@
       "type": "DOCS",
       "title": "EXEC-094: Wire grill family into PROCESS.md + CONTEXT.md; sweep every stale reference",
       "owner": "team-lead",
-      "summary": "Expand PROCESS.md grill node (context-grill \u2192 epic-grill \u2192 PRD \u2192 issues) with the disk-handoff rule. Update CONTEXT.md glossary (Setup/Work Grill \u2192 grill family) and Format authority pointer. Repo-wide grep sweep for old skill name and format-doc paths \u2014 zero stale references. alignment gate. Src-First then root mirror.",
+      "summary": "Expand PROCESS.md grill node (context-grill → epic-grill → PRD → issues) with the disk-handoff rule. Update CONTEXT.md glossary (Setup/Work Grill → grill family) and Format authority pointer. Repo-wide grep sweep for old skill name and format-doc paths — zero stale references. alignment gate. Src-First then root mirror.",
       "closes_issues": [
         "EXEC-094"
       ],
@@ -82,9 +81,9 @@
     {
       "id": "S8-6",
       "type": "FEAT",
-      "title": "EXEC-096: Upgrade path \u2014 migrate retires the renamed grill skill; doctor flags the orphan",
+      "title": "EXEC-096: Upgrade path — migrate retires the renamed grill skill; doctor flags the orphan",
       "owner": "builder",
-      "summary": "Extend migrate-policy to detect a stamped execution-grill-with-docs dir and retire it under a versioned migration id (idempotent, location-only, user-authored dirs untouched). Extend health-policy so doctor flags the orphan and names migrate. Temp-dir stamp-old \u2192 update \u2192 migrate test. package-qa gate.",
+      "summary": "Extend migrate-policy to detect a stamped execution-grill-with-docs dir and retire it under a versioned migration id (idempotent, location-only, user-authored dirs untouched). Extend health-policy so doctor flags the orphan and names migrate. Temp-dir stamp-old → update → migrate test. package-qa gate.",
       "closes_issues": [
         "EXEC-096"
       ],
@@ -93,9 +92,9 @@
     {
       "id": "S8-5",
       "type": "FEAT",
-      "title": "EXEC-095: Rewire src/SKILL.md to the new grill layout and verify install\u2192scaffold end-to-end",
+      "title": "EXEC-095: Rewire src/SKILL.md to the new grill layout and verify install→scaffold end-to-end",
       "owner": "team-lead",
-      "summary": "Update src/SKILL.md lines 12, 22, 29: Work-Grill skill names and Setup-Grill format-authority paths point at the settled homes. package-qa proves the full path: npm install \u2192 SKILL.md \u2192 npx to-execution init stamps the grill family into a fresh Instance, all referenced paths resolve.",
+      "summary": "Update src/SKILL.md lines 12, 22, 29: Work-Grill skill names and Setup-Grill format-authority paths point at the settled homes. package-qa proves the full path: npm install → SKILL.md → npx to-execution init stamps the grill family into a fresh Instance, all referenced paths resolve.",
       "closes_issues": [
         "EXEC-095"
       ],
@@ -126,11 +125,11 @@
   "retrospective_notes": [
     {
       "title": "Linter file-reverts silently undo edits on Bash error exit",
-      "body": "A Bash command that exits non-zero triggered a linter/hook that reverted multiple edited files to their git state \u2014 silently undoing CONTEXT.md, PROCESS.md, README, cli.js, migrate-policy.js, health-policy.js, and execution-to-prd SKILL.md edits. The reverts were invisible until alignment gates read stale content and FAILed. Three alignment re-gates and one code-standards re-gate were needed. Workaround: avoid combining smoke-test Bash commands with '&&' chains that can fail partway; use separate commands or tolerate non-zero exits."
+      "body": "A Bash command that exits non-zero triggered a linter/hook that reverted multiple edited files to their git state — silently undoing CONTEXT.md, PROCESS.md, README, cli.js, migrate-policy.js, health-policy.js, and execution-to-prd SKILL.md edits. The reverts were invisible until alignment gates read stale content and FAILed. Three alignment re-gates and one code-standards re-gate were needed. Workaround: avoid combining smoke-test Bash commands with '&&' chains that can fail partway; use separate commands or tolerate non-zero exits."
     },
     {
       "title": "Alignment gates can read stale file content across re-submissions",
-      "body": "Two alignment re-gates read stale file content from prior runs even after edits were re-applied on disk. The fix was explicit instructions to read fresh from disk. The root cause is unclear \u2014 possibly agent-level caching or the files being reverted between submission and execution."
+      "body": "Two alignment re-gates read stale file content from prior runs even after edits were re-applied on disk. The fix was explicit instructions to read fresh from disk. The root cause is unclear — possibly agent-level caching or the files being reverted between submission and execution."
     },
     {
       "title": "Adversarial gap-hunt on retros added real value",
@@ -138,7 +137,7 @@
     },
     {
       "title": "Code-standards gate caught a real doc-comment splice bug",
-      "body": "Inserting retireOrphanedSkill between migrateHookLayout's doc comment and its function body split the doc \u2014 the first half was prepended to the new function, the second half orphaned on the old. code-standards caught it as a truthful-comments violation."
+      "body": "Inserting retireOrphanedSkill between migrateHookLayout's doc comment and its function body split the doc — the first half was prepended to the new function, the second half orphaned on the old. code-standards caught it as a truthful-comments violation."
     }
   ],
   "step_log": [
@@ -146,91 +145,92 @@
       "step": "package_qa_pass",
       "at": "2026-06-14",
       "artifact": "EXEC-095: execution-grill-with-docs/ removed from src/template; src/SKILL.md updated to execution-context-grill / execution-epic-grill",
-      "summary": "PASS \u2014 0 violations. All EXEC-095 acceptance checks hold. (1) execution-grill-with-docs/ does NOT stamp: init writes 54 files with only execution-context-grill/ and execution-epic-grill/ in the skills tree. (2) framework-version.json contains zero paths under execution-grill-with-docs. (3) npm pack --dry-run shows zero execution-grill-with-docs entries (64 total pack files; 6 execution/* entries all under context-grill, epic-grill, to-issues, to-prd). (4) All SKILL.md path references resolve in the stamped tree (execution-context-grill/CONTEXT-FORMAT.md, execution-epic-grill/ADR-FORMAT.md, .excn/ docs all present; two glob/template patterns correctly excluded from literal check). (5) Cross-skill links all resolve (31 references checked, 2 glob patterns skipped). (6) Standard checks: idempotency 0 writes / 54 skipped; all JSON parses; .excn/.gitignore = '*_progress.json'; root .gitignore untouched; skip-safety holds; pointer wiring: both CLAUDE.md and AGENTS.md created, sentinel visible text not HTML comment. (7) Migrate orphan path: seeded orphan execution-grill-with-docs/ at .claude/skills/; doctor reports ORPHAN naming migrate; migrate retires it and reports; orphan gone; second migrate is no-op; doctor reports 'current (no orphaned grill skill)'. Migrate contract (ADR-0008), EXEC-086 hook-command scope, EXEC-087 doctor hook-health, and update byte-identity all hold."
+      "summary": "PASS — 0 violations. All EXEC-095 acceptance checks hold. (1) execution-grill-with-docs/ does NOT stamp: init writes 54 files with only execution-context-grill/ and execution-epic-grill/ in the skills tree. (2) framework-version.json contains zero paths under execution-grill-with-docs. (3) npm pack --dry-run shows zero execution-grill-with-docs entries (64 total pack files; 6 execution/* entries all under context-grill, epic-grill, to-issues, to-prd). (4) All SKILL.md path references resolve in the stamped tree (execution-context-grill/CONTEXT-FORMAT.md, execution-epic-grill/ADR-FORMAT.md, .excn/ docs all present; two glob/template patterns correctly excluded from literal check). (5) Cross-skill links all resolve (31 references checked, 2 glob patterns skipped). (6) Standard checks: idempotency 0 writes / 54 skipped; all JSON parses; .excn/.gitignore = '*_progress.json'; root .gitignore untouched; skip-safety holds; pointer wiring: both CLAUDE.md and AGENTS.md created, sentinel visible text not HTML comment. (7) Migrate orphan path: seeded orphan execution-grill-with-docs/ at .claude/skills/; doctor reports ORPHAN naming migrate; migrate retires it and reports; orphan gone; second migrate is no-op; doctor reports 'current (no orphaned grill skill)'. Migrate contract (ADR-0008), EXEC-086 hook-command scope, EXEC-087 doctor hook-health, and update byte-identity all hold."
     },
     {
       "step": "package_qa_fail",
       "at": "2026-06-14",
       "artifact": "src/SKILL.md updated: execution-grill-with-docs refs replaced with execution-context-grill / execution-epic-grill; format-doc paths repointed; Work Grill renamed",
-      "summary": "FAIL \u2014 2 violations. (1) Manifest/extra: src/template/.claude/skills/execution-grill-with-docs/ still present on disk (3 files: SKILL.md, ADR-FORMAT.md, CONTEXT-FORMAT.md); init stamps it, making the stamped tree contain an extra skill directory that should have been removed as part of the grill-family split. (2) Pack parity: npm pack --dry-run confirms execution-grill-with-docs/ ships in the tarball (3 files listed). framework-version.json carries hashes under execution-grill-with-docs paths. src/SKILL.md itself has zero stale references (clean). New skills (execution-context-grill + execution-epic-grill) stamp correctly with correct files and all cross-references resolve. Idempotency holds (0 writes second init). All JSON parses. Gitignore correct. Pointer wiring not re-tested (no change). Fix required: delete src/template/.claude/skills/execution-grill-with-docs/ before resubmitting."
+      "summary": "FAIL — 2 violations. (1) Manifest/extra: src/template/.claude/skills/execution-grill-with-docs/ still present on disk (3 files: SKILL.md, ADR-FORMAT.md, CONTEXT-FORMAT.md); init stamps it, making the stamped tree contain an extra skill directory that should have been removed as part of the grill-family split. (2) Pack parity: npm pack --dry-run confirms execution-grill-with-docs/ ships in the tarball (3 files listed). framework-version.json carries hashes under execution-grill-with-docs paths. src/SKILL.md itself has zero stale references (clean). New skills (execution-context-grill + execution-epic-grill) stamp correctly with correct files and all cross-references resolve. Idempotency holds (0 writes second init). All JSON parses. Gitignore correct. Pointer wiring not re-tested (no change). Fix required: delete src/template/.claude/skills/execution-grill-with-docs/ before resubmitting."
     },
     {
       "step": "package_qa_pass",
       "at": "2026-06-14",
       "artifact": "S8-4 + S8-6 combined: PROCESS.md/CONTEXT.md grill-family wiring + execution-to-prd SKILL.md Epic Grill rename + skill-retirement migrate/doctor (migrate-policy.js, health-policy.js, cli.js)",
-      "summary": "PASS \u2014 0 violations. All stamp contract checks hold across 16 distinct checks: manifest exact (57 stamped = 57 template, gitignore mapped un-dotted); idempotency 0 writes on second init; all JSON parses; .excn/.gitignore = '*_progress.json', root .gitignore untouched, pattern anchored under .excn/; skip-safety: pre-existing file preserved; pointer wiring: both created in fresh dir, pre-existing content byte-preserved with block appended once, second init no-append, --force does not change pointer files, deleted block re-appended, sentinel visible text not HTML comment, oversized AGENTS.md warns; migrate contract (ADR-0008): 4 runtime records routed to .excn/runtime/, 2 progress records to .excn/progress/, none remaining at base, byte-identical, idempotent no-op, clash skips and leaves home copy intact, doctor names legacy layout and migrate before + clean after, migrate exits 1 without .excn, records survive update byte-identical; EXEC-086 hook-command scope: clean hook renamed .js\u2192.cjs and command repointed, modified+custom hooks left as .js with commands pointing at existing files (no dead commands created), interrupted prior run (cjs present, no js, command still .js) repointed correctly, fully-migrated instance no-ops; EXEC-087 doctor hook-health: dead custom command (push-guard.cjs missing) reported BROKEN with path, twin (spawn-guard both .js and .cjs) reported with invoked extension, live custom .js with command not flagged dead, healthy instance exits 0 with neither condition; skill retirement (ADR-0009/EXEC-096): init stamps execution-grill-with-docs/ alongside execution-epic-grill/, doctor reports ORPHAN naming migrate, migrate retires orphan and reports, orphan gone + replacement present, second migrate reports nothing to retire, doctor reports current; safety: dir with different frontmatter name (my-custom-skill) refused to retire with explanation; pack parity: gitignore ships un-dotted, both grill dirs in tarball."
+      "summary": "PASS — 0 violations. All stamp contract checks hold across 16 distinct checks: manifest exact (57 stamped = 57 template, gitignore mapped un-dotted); idempotency 0 writes on second init; all JSON parses; .excn/.gitignore = '*_progress.json', root .gitignore untouched, pattern anchored under .excn/; skip-safety: pre-existing file preserved; pointer wiring: both created in fresh dir, pre-existing content byte-preserved with block appended once, second init no-append, --force does not change pointer files, deleted block re-appended, sentinel visible text not HTML comment, oversized AGENTS.md warns; migrate contract (ADR-0008): 4 runtime records routed to .excn/runtime/, 2 progress records to .excn/progress/, none remaining at base, byte-identical, idempotent no-op, clash skips and leaves home copy intact, doctor names legacy layout and migrate before + clean after, migrate exits 1 without .excn, records survive update byte-identical; EXEC-086 hook-command scope: clean hook renamed .js→.cjs and command repointed, modified+custom hooks left as .js with commands pointing at existing files (no dead commands created), interrupted prior run (cjs present, no js, command still .js) repointed correctly, fully-migrated instance no-ops; EXEC-087 doctor hook-health: dead custom command (push-guard.cjs missing) reported BROKEN with path, twin (spawn-guard both .js and .cjs) reported with invoked extension, live custom .js with command not flagged dead, healthy instance exits 0 with neither condition; skill retirement (ADR-0009/EXEC-096): init stamps execution-grill-with-docs/ alongside execution-epic-grill/, doctor reports ORPHAN naming migrate, migrate retires orphan and reports, orphan gone + replacement present, second migrate reports nothing to retire, doctor reports current; safety: dir with different frontmatter name (my-custom-skill) refused to retire with explanation; pack parity: gitignore ships un-dotted, both grill dirs in tarball."
     },
     {
       "step": "package_qa_pass",
       "at": "2026-06-14",
       "artifact": "execution-epic-grill rename (EXEC-093): skill dir renamed, SKILL.md rewritten, ADR-FORMAT.md retained, CONTEXT-FORMAT.md absent, context-grill cross-ref updated",
-      "summary": "PASS \u2014 0 violations. execution-epic-grill/ stamps SKILL.md + ADR-FORMAT.md; execution-grill-with-docs/ absent from stamped tree; CONTEXT-FORMAT.md absent from execution-epic-grill/; ./ADR-FORMAT.md link resolves; ../execution-epic-grill/ADR-FORMAT.md cross-ref in context-grill resolves; ./CONTEXT-FORMAT.md in context-grill resolves; framework-version.json carries hashes under execution-epic-grill paths and zero hashes under execution-grill-with-docs; manifest exact (7 skill files = 7 template skill files, 54 total stamped); idempotency 0 writes / 54 skipped; all JSON parses; .excn/.gitignore = '*_progress.json'; root .gitignore untouched."
+      "summary": "PASS — 0 violations. execution-epic-grill/ stamps SKILL.md + ADR-FORMAT.md; execution-grill-with-docs/ absent from stamped tree; CONTEXT-FORMAT.md absent from execution-epic-grill/; ./ADR-FORMAT.md link resolves; ../execution-epic-grill/ADR-FORMAT.md cross-ref in context-grill resolves; ./CONTEXT-FORMAT.md in context-grill resolves; framework-version.json carries hashes under execution-epic-grill paths and zero hashes under execution-grill-with-docs; manifest exact (7 skill files = 7 template skill files, 54 total stamped); idempotency 0 writes / 54 skipped; all JSON parses; .excn/.gitignore = '*_progress.json'; root .gitignore untouched."
     },
     {
       "step": "package_qa_pass",
       "at": "2026-06-14",
       "artifact": "execution-context-grill skill split + PHILOSOPHY.md sentinel",
-      "summary": "PASS \u2014 0 violations. All stamp contract checks hold: execution-context-grill/ stamps SKILL.md + CONTEXT-FORMAT.md; execution-grill-with-docs/ stamps without CONTEXT-FORMAT.md; relative link ../execution-context-grill/CONTEXT-FORMAT.md resolves; ./ADR-FORMAT.md resolves; PHILOSOPHY.md contains sentinel; framework-version.json carries hashes for new paths and drops old CONTEXT-FORMAT.md path; manifest exact (54 stamped = 54 template); idempotency 0 writes; all JSON parses; .excn/.gitignore = '*_progress.json'; root .gitignore untouched; skip-safety holds; pointer wiring holds (scratch creates both, pre-existing content preserved, second init no-append, block re-appended after delete, oversized warning fires); migrate contract holds (runtime/progress routing, byte-identical, idempotent, clash skips and preserves home, migrate exits 1 without .excn); EXEC-086 hook-command scope holds (clean renamed, modified/custom left as .js, every command points at existing file, interrupted-prior-run repoints, fully-migrated is no-op); EXEC-087 doctor hook-health holds (dead command flagged with path, twin named with invoking extension, live custom .js not flagged dead, healthy instance reports neither, exits 0 throughout); pack parity holds (new skill files present, old CONTEXT-FORMAT.md path absent); records survive update byte-identical."
+      "summary": "PASS — 0 violations. All stamp contract checks hold: execution-context-grill/ stamps SKILL.md + CONTEXT-FORMAT.md; execution-grill-with-docs/ stamps without CONTEXT-FORMAT.md; relative link ../execution-context-grill/CONTEXT-FORMAT.md resolves; ./ADR-FORMAT.md resolves; PHILOSOPHY.md contains sentinel; framework-version.json carries hashes for new paths and drops old CONTEXT-FORMAT.md path; manifest exact (54 stamped = 54 template); idempotency 0 writes; all JSON parses; .excn/.gitignore = '*_progress.json'; root .gitignore untouched; skip-safety holds; pointer wiring holds (scratch creates both, pre-existing content preserved, second init no-append, block re-appended after delete, oversized warning fires); migrate contract holds (runtime/progress routing, byte-identical, idempotent, clash skips and preserves home, migrate exits 1 without .excn); EXEC-086 hook-command scope holds (clean renamed, modified/custom left as .js, every command points at existing file, interrupted-prior-run repoints, fully-migrated is no-op); EXEC-087 doctor hook-health holds (dead command flagged with path, twin named with invoking extension, live custom .js not flagged dead, healthy instance reports neither, exits 0 throughout); pack parity holds (new skill files present, old CONTEXT-FORMAT.md path absent); records survive update byte-identical."
     },
     {
       "step": "alignment_review_pass",
       "at": "2026-06-14",
       "artifact": ".excn/adr/0009-grill-family-keyed-by-writer-home.md",
-      "summary": "PASS \u2014 0 violations. Change is grounded in PRD-010 retro observation (Single-responsibility), records ownership-keyed taxonomy without coaching cognition, correct artifact type and location, conforms to all project philosophies."
+      "summary": "PASS — 0 violations. Change is grounded in PRD-010 retro observation (Single-responsibility), records ownership-keyed taxonomy without coaching cognition, correct artifact type and location, conforms to all project philosophies."
     },
     {
       "step": "alignment_review_pass",
       "at": "2026-06-14",
       "artifact": ".excn/adr/0010-philosophy-seed-once.md",
-      "summary": "PASS \u2014 0 violations. Retro-loop-as-sole-change-path edge is justified: sentinel is a positive mechanical signal (not an emptiness heuristic), permission is append-only and expires on first established edit, safe failure mode routes to Retro Loop not a silent write. The Principle presupposes established content; the ADR defines the pre-condition, not a carve-out. Grounded in concrete retro observation (PRD-010 adoption-block). Single decision, correct artifact type and location, conforms to all project philosophies."
+      "summary": "PASS — 0 violations. Retro-loop-as-sole-change-path edge is justified: sentinel is a positive mechanical signal (not an emptiness heuristic), permission is append-only and expires on first established edit, safe failure mode routes to Retro Loop not a silent write. The Principle presupposes established content; the ADR defines the pre-condition, not a carve-out. Grounded in concrete retro observation (PRD-010 adoption-block). Single decision, correct artifact type and location, conforms to all project philosophies."
     },
     {
       "step": "alignment_review_pass",
       "at": "2026-06-14",
       "artifact": "src/template/.claude/skills/execution-context-grill/SKILL.md",
-      "summary": "PASS \u2014 0 violations. New skill owns exactly the shared-model writes (CONTEXT.md term-by-term, PHILOSOPHY.md seed-once, ADRs) with explicit write-guardrail; single responsibility clear after split from execution-grill-with-docs; no cognition coaching; seed-once sentinel is mechanical not prescriptive; CONTEXT-FORMAT.md move to writer-home is structure-preserving; cross-reference in execution-grill-with-docs updated correctly; sentinel line in src/template/.excn/PHILOSOPHY.md is a single mechanical addition; grounded in PRD-010/EXEC-092 and ADR-0009 (both previously gated). Conforms to all project philosophies."
+      "summary": "PASS — 0 violations. New skill owns exactly the shared-model writes (CONTEXT.md term-by-term, PHILOSOPHY.md seed-once, ADRs) with explicit write-guardrail; single responsibility clear after split from execution-grill-with-docs; no cognition coaching; seed-once sentinel is mechanical not prescriptive; CONTEXT-FORMAT.md move to writer-home is structure-preserving; cross-reference in execution-grill-with-docs updated correctly; sentinel line in src/template/.excn/PHILOSOPHY.md is a single mechanical addition; grounded in PRD-010/EXEC-092 and ADR-0009 (both previously gated). Conforms to all project philosophies."
     },
     {
       "step": "alignment_review_pass",
       "at": "2026-06-14",
       "artifact": "src/template/.claude/skills/execution-epic-grill/SKILL.md",
-      "summary": "PASS \u2014 0 violations. Rename from execution-grill-with-docs to execution-epic-grill is grounded in PRD-010/EXEC-093 and ADR-0009 (writer-home taxonomy, both previously gated). Single responsibility: before had three write-targets (CONTEXT.md, PHILOSOPHY.md, ADR) plus requirements work; after owns only requirements shaping and optional design analysis, write-guardrail restricts to .excn/adr/ only. Ownership-not-cognition: two phases and four hole-finding moves are executable directives, not cognition coaching; termination condition is a mechanical checklist. Tied to real observation: traceable PRD-010 \u2192 EXEC-093 \u2192 S8-3 \u2192 ADR-0009. Src-First: target is under src/template/. Conforms to all project philosophies."
+      "summary": "PASS — 0 violations. Rename from execution-grill-with-docs to execution-epic-grill is grounded in PRD-010/EXEC-093 and ADR-0009 (writer-home taxonomy, both previously gated). Single responsibility: before had three write-targets (CONTEXT.md, PHILOSOPHY.md, ADR) plus requirements work; after owns only requirements shaping and optional design analysis, write-guardrail restricts to .excn/adr/ only. Ownership-not-cognition: two phases and four hole-finding moves are executable directives, not cognition coaching; termination condition is a mechanical checklist. Tied to real observation: traceable PRD-010 → EXEC-093 → S8-3 → ADR-0009. Src-First: target is under src/template/. Conforms to all project philosophies."
     },
     {
       "step": "alignment_review_fail",
       "at": "2026-06-14",
       "artifact": "EXEC-094: PROCESS.md + CONTEXT.md grill-family wiring + reference sweep (7 files)",
-      "summary": "FAIL \u2014 1 violation. Structured-reference-docs / Minimalism: the proposed change installs _Avoid_: 'Work Grill' unqualified into CONTEXT.md and claims a complete active-reference sweep, but src/template/.claude/skills/execution-to-prd/SKILL.md and .claude/skills/execution-to-prd/SKILL.md (both listed as sweep targets) still contain 'Work Grill' unqualified in their frontmatter description (line 3) and body (line 6). The sweep is incomplete: the change introduces a glossary constraint it does not enforce in the named target files. Revise by updating both SKILL.md files to replace 'Work Grill' with 'Epic Grill' (or remove the unqualified usage) before resubmitting."
+      "summary": "FAIL — 1 violation. Structured-reference-docs / Minimalism: the proposed change installs _Avoid_: 'Work Grill' unqualified into CONTEXT.md and claims a complete active-reference sweep, but src/template/.claude/skills/execution-to-prd/SKILL.md and .claude/skills/execution-to-prd/SKILL.md (both listed as sweep targets) still contain 'Work Grill' unqualified in their frontmatter description (line 3) and body (line 6). The sweep is incomplete: the change introduces a glossary constraint it does not enforce in the named target files. Revise by updating both SKILL.md files to replace 'Work Grill' with 'Epic Grill' (or remove the unqualified usage) before resubmitting."
     },
     {
       "step": "code_standards_fail",
       "at": "2026-06-14",
       "artifact": "EXEC-096: skill retirement migration (src/bin/cli.js, src/bin/migrate-policy.js, src/bin/health-policy.js)",
-      "summary": "FAIL \u2014 2 violations. (1) Exported-function docs + Truthful comments: the JSDoc block above retireOrphanedSkill (cli.js lines 1230-1239) contains the first half of migrateHookLayout's old doc comment, cut off mid-sentence ('A hook with no marker record (untracked) or one that differs from its recorded hash (locally edited) is left untouched and') before pivoting abruptly to the EXEC-096 attribution. The prose does not describe retireOrphanedSkill. (2) Truthful comments: the migrateHookLayout doc block (cli.js lines 1266-1275) now opens with 'reported, never clobbered. Then repoint...' \u2014 a sentence fragment that is the severed tail of the previous function's doc, making migrateHookLayout's own purpose statement begin mid-sentence and contradict the function it documents."
+      "summary": "FAIL — 2 violations. (1) Exported-function docs + Truthful comments: the JSDoc block above retireOrphanedSkill (cli.js lines 1230-1239) contains the first half of migrateHookLayout's old doc comment, cut off mid-sentence ('A hook with no marker record (untracked) or one that differs from its recorded hash (locally edited) is left untouched and') before pivoting abruptly to the EXEC-096 attribution. The prose does not describe retireOrphanedSkill. (2) Truthful comments: the migrateHookLayout doc block (cli.js lines 1266-1275) now opens with 'reported, never clobbered. Then repoint...' — a sentence fragment that is the severed tail of the previous function's doc, making migrateHookLayout's own purpose statement begin mid-sentence and contradict the function it documents."
     },
     {
       "step": "alignment_review_pass",
       "at": "2026-06-14",
-      "artifact": "EXEC-094: PROCESS.md + CONTEXT.md grill-family wiring + reference sweep (7 files) \u2014 revision 1",
-      "summary": "PASS \u2014 0 violations. Prior violation resolved: both execution-to-prd/SKILL.md copies (src/template and root) now read 'Epic Grill' in frontmatter description and body; zero unqualified 'Work Grill' in sweep-target files. PROCESS.md grill node expansion (context-grill \u2192 epic-grill \u2192 PRD \u2192 issues + disk-handoff rule) states ownership constraints without coaching cognition. CONTEXT.md grill-family entry replaces Setup/Work Grill term; glossary shape preserved. README update minimal. All changes tied to chartered observation PRD-010/EXEC-094. Src-First: both src/template and root copies updated. Conforms to all Principles and project Philosophy."
+      "artifact": "EXEC-094: PROCESS.md + CONTEXT.md grill-family wiring + reference sweep (7 files) — revision 1",
+      "summary": "PASS — 0 violations. Prior violation resolved: both execution-to-prd/SKILL.md copies (src/template and root) now read 'Epic Grill' in frontmatter description and body; zero unqualified 'Work Grill' in sweep-target files. PROCESS.md grill node expansion (context-grill → epic-grill → PRD → issues + disk-handoff rule) states ownership constraints without coaching cognition. CONTEXT.md grill-family entry replaces Setup/Work Grill term; glossary shape preserved. README update minimal. All changes tied to chartered observation PRD-010/EXEC-094. Src-First: both src/template and root copies updated. Conforms to all Principles and project Philosophy."
     },
     {
       "step": "alignment_review_fail",
       "at": "2026-06-14",
-      "artifact": "EXEC-094: PROCESS.md + CONTEXT.md grill-family wiring + reference sweep \u2014 fresh re-gate",
-      "summary": "FAIL \u2014 2 violations. (1) Structured-reference-docs: .excn/CONTEXT.md line 5 still reads 'Format authority: .claude/skills/execution-grill-with-docs/CONTEXT-FORMAT.md'; the proposed change claimed 'Format authority repointed' but this pointer is not updated on disk. (2) Structured-reference-docs: .excn/CONTEXT.md lines 69-70 still carry the 'Setup Grill / Work Grill' glossary entry referencing execution-grill-with-docs as the current skill name; the proposed change claimed 'CONTEXT.md glossary updated (Grill Family entry)' but that entry is not updated on disk. Both are live routing pointers in the authoritative structured reference doc. The sweep is incomplete."
+      "artifact": "EXEC-094: PROCESS.md + CONTEXT.md grill-family wiring + reference sweep — fresh re-gate",
+      "summary": "FAIL — 2 violations. (1) Structured-reference-docs: .excn/CONTEXT.md line 5 still reads 'Format authority: .claude/skills/execution-grill-with-docs/CONTEXT-FORMAT.md'; the proposed change claimed 'Format authority repointed' but this pointer is not updated on disk. (2) Structured-reference-docs: .excn/CONTEXT.md lines 69-70 still carry the 'Setup Grill / Work Grill' glossary entry referencing execution-grill-with-docs as the current skill name; the proposed change claimed 'CONTEXT.md glossary updated (Grill Family entry)' but that entry is not updated on disk. Both are live routing pointers in the authoritative structured reference doc. The sweep is incomplete."
     },
     {
       "step": "alignment_review_pass",
       "at": "2026-06-14",
-      "artifact": "EXEC-094: PROCESS.md + CONTEXT.md grill-family wiring + reference sweep \u2014 final re-gate (all 6 disk checks)",
-      "summary": "PASS \u2014 0 violations. All six disk checks confirmed fresh: CONTEXT.md line 5 reads execution-context-grill; lines 69-71 carry Grill Family with Context Grill and Epic Grill; line 94 Lifecycle reads context-grill \u2192 epic-grill; line 109 ambiguity names three grills; both execution-to-prd/SKILL.md copies (src/template and root) read 'Epic Grill' on lines 3 and 6. All Principles hold: Minimalism (point replacements only), Ownership-not-cognition (glossary and skill describe what is owned), Single responsibility (each file unchanged in scope), Non-prescriptive teardowns (none introduced), Structured-reference-docs (CONTEXT.md glossary shape preserved throughout), Tied-to-observation (PRD-010/EXEC-094 chartered retro observation), Src-First (both src/template and root mirrors updated). Conforms to all Principles and project Philosophy."
+      "artifact": "EXEC-094: PROCESS.md + CONTEXT.md grill-family wiring + reference sweep — final re-gate (all 6 disk checks)",
+      "summary": "PASS — 0 violations. All six disk checks confirmed fresh: CONTEXT.md line 5 reads execution-context-grill; lines 69-71 carry Grill Family with Context Grill and Epic Grill; line 94 Lifecycle reads context-grill → epic-grill; line 109 ambiguity names three grills; both execution-to-prd/SKILL.md copies (src/template and root) read 'Epic Grill' on lines 3 and 6. All Principles hold: Minimalism (point replacements only), Ownership-not-cognition (glossary and skill describe what is owned), Single responsibility (each file unchanged in scope), Non-prescriptive teardowns (none introduced), Structured-reference-docs (CONTEXT.md glossary shape preserved throughout), Tied-to-observation (PRD-010/EXEC-094 chartered retro observation), Src-First (both src/template and root mirrors updated). Conforms to all Principles and project Philosophy."
     },
     {
       "step": "code_standards_pass",
       "at": "2026-06-14",
-      "artifact": "EXEC-096: skill retirement migration \u2014 revision 1 (src/bin/cli.js, src/bin/migrate-policy.js, src/bin/health-policy.js)",
-      "summary": "PASS \u2014 0 violations. Both prior violations resolved: retireOrphanedSkill (cli.js lines 1230-1240) carries its own self-contained doc (purpose, params, returns, two failure-mode refusal cases); migrateHookLayout (cli.js lines 1267-1280) opens with a complete sentence and full doc intact. All Structure, CLI, Commenting, and Hooks rules hold across all three files."
+      "artifact": "EXEC-096: skill retirement migration — revision 1 (src/bin/cli.js, src/bin/migrate-policy.js, src/bin/health-policy.js)",
+      "summary": "PASS — 0 violations. Both prior violations resolved: retireOrphanedSkill (cli.js lines 1230-1240) carries its own self-contained doc (purpose, params, returns, two failure-mode refusal cases); migrateHookLayout (cli.js lines 1267-1280) opens with a complete sentence and full doc intact. All Structure, CLI, Commenting, and Hooks rules hold across all three files."
     }
-  ]
+  ],
+  "schema_version": "1.0"
 }

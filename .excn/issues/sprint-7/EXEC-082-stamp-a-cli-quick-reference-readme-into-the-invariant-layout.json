@@ -1,0 +1,28 @@
+{
+  "id": "EXEC-082",
+  "title": "Stamp a CLI quick-reference README into the invariant layout",
+  "status": "closed",
+  "severity": "P3",
+  "scope": [
+    "src/template"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "A stamped Instance carries no in-repo pointer to the Scaffolder verbs, so users and agents must run npx to-execution --help or read the package source to discover init/update/migrate/doctor/view-status/validate. Observed on longrunning-agents: npm install alone stamps nothing and nothing in the repo said so. Add .excn/README.md to the Template (src/template/.excn/README.md) — a light quick-reference: one line per verb (init, update, migrate, doctor, view-status, validate), leading with the gotcha that npm install only downloads the package and init does the stamping. Stamped by init as an invariant file, delivered to old Instances by update, root Instance mirrored Src-First. Precise Minimalism: instruction only, target ≤30 lines.",
+  "prd": null,
+  "acceptance_criteria": [
+    "src/template/.excn/README.md exists, ≤30 lines, covering all six CLI verbs (init, update, migrate, doctor, view-status, validate) one line each, and states that npm install alone stamps nothing — init does",
+    "init on a fresh target writes .excn/README.md; update on a previously-stamped Instance adds it",
+    "Verb descriptions match the CLI's --help text (no drift in what each verb claims to do)",
+    "Root dogfood Instance mirrors the stamped copy (Src-First)",
+    "package-qa PASS (manifest grows by the new template file; pack parity holds)"
+  ],
+  "slice_type": "AFK",
+  "root_cause": "The invariant layout documents process (PROCESS.md) and domain (CONTEXT.md) but never the Scaffolder CLI that maintains it",
+  "fix": "Added src/template/.excn/README.md (13 lines): one line per CLI verb matching --help text, leading with the npm-install-stamps-nothing gotcha. Classifies invariant (stamped by init, restored by update), ships via the existing template/ manifest entry, root copy mirrored byte-identically (Src-First). Executed by team-lead per TEAM_DIRECTIVE src/template ownership.",
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 7,
+  "closed_in_sprint": 7,
+  "notes": "Filed 2026-06-12 (Brooks), motivated by the longrunning-agents viewer confusion: npm install @latest produced no visible change and no in-repo doc explained the init/update path."
+}

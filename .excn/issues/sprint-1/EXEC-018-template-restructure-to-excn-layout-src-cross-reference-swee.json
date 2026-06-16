@@ -1,0 +1,29 @@
+{
+  "id": "EXEC-018",
+  "title": "Template restructure to .excn layout + src/ cross-reference sweep",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/template",
+    "src"
+  ],
+  "classification": null,
+  "actionable_now": true,
+  "description": "Restructure src/template to the .excn layout and sweep every src/ cross-reference to the new paths.",
+  "prd": "PRD-003",
+  "acceptance_criteria": [
+    "src/template carries the full .excn layout incl. .excn/.gitignore (tmp/), .excn/adr/, .excn/research/, .excn/tmp/{sprints,issues,prds,retros}",
+    "template carries NO root instruction file (CLAUDE.md removed — pointer is CLI-owned per PRD-003 M1)",
+    "zero stale tmp/exec or old-path references in src/ docs and agent defs",
+    "package-qa rubric updated to the new manifest + nested-gitignore contract in the same change",
+    "alignment gate PASS"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "Shipped 2026-06-07 by team-lead (sprint_1 item S1-11). All five acceptance criteria met; latent root-gitignore defect found and fixed in passing (retro-logged)."
+}

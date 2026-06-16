@@ -1,5 +1,4 @@
 {
-  "schema_version": "1.0",
   "sprint_id": 6,
   "name": "Sprint 6",
   "status": "closed",
@@ -193,6 +192,36 @@
   "not_shipped": [],
   "defects_discovered": [],
   "decisions": [],
+  "retrospective_notes": [
+    {
+      "title": "Sprint-6 scope is grill-pending; EXEC-065 pulled ahead of it",
+      "body": "The Work Grill for the rest of sprint-6 scope (viewer improvements, progress-file organization/naming, guard hooks) has not run yet. EXEC-065 is a grill-skipping bug fix pulled into sprint 6 by Team Lead directive on 2026-06-10; the remaining scope is filed and pulled only after the grill runs."
+    },
+    {
+      "title": "npm 0.3.0 lagged HEAD at the same version number (PRD-009 grill)",
+      "body": "The published npm 0.3.0 lagged HEAD while carrying the same version number — template content changed without a version bump, so consumers on 0.3.0 silently missed it. Candidate: a preflight guard forcing a version bump when template content changes. Philosophy/process candidate carried for the Retro Loop."
+    },
+    {
+      "title": "Mid-sprint root-restamp clobber (EXEC-065 x EXEC-071)",
+      "body": "Builder's dogfood `update` mirrored viewer's uncommitted template WIP into the root; builder's lane-isolation revert then wiped viewer's hand-mirror. Team Lead ruling for the rest of sprint 6: no update/migrate against the live dogfood root while lanes have WIP (temp-dir verification only; Team Lead sequences dogfood runs at clean-tree points), and never revert paths outside your own lane. Candidate durable rule for the Retro Loop (PROCESS.md or TEAM_DIRECTIVE Don'ts)."
+    },
+    {
+      "title": "clerk hand-edit left a trailing comma in backlog.json",
+      "body": "A clerk record move hand-edited backlog.json as text and left a trailing comma, producing malformed JSON. clerk.md already forbids partial-string edits, but its 'full-file read → modify → write' wording read loosely enough to permit text splicing. The durable lesson: record moves re-serialize through a JSON library — parse the file, mutate the parsed object, stringify the whole file — so malformed output like a trailing comma is structurally impossible. Retro-Loop candidate for clerk.md."
+    },
+    {
+      "title": "Spawn guard blocked legitimate persistent-Teammate spawns until EXEC-079",
+      "body": "Before EXEC-079 the spawn guard keyed only on subagent_type, so it denied legitimate persistent-Teammate spawns (name + team_name) alongside transient one-shot copies; Team Leads fell back to general-purpose with the role inlined, running rostered Teammates without their definitions. EXEC-079 taught the guard to allow a rostered type carrying both name and team_name. This sprint-6 close is itself the first spawn-guard-passing spawn of the rostered scribe."
+    },
+    {
+      "title": "Ad-hoc ajv installs at the host root were pruned by npm install",
+      "body": "Gate agents and clerk validated work-tracking JSON by ad-hoc-installing ajv into the host root; the next npm install pruned those modules, leaving validation broken (observed on the dogfood root 2026-06-11). EXEC-081 is the durable fix: a shipped `to-execution validate` verb with ajv as a real package dependency, and TEAM_DIRECTIVE points gates and clerk at the verb instead of ad-hoc installs."
+    },
+    {
+      "title": "Sprint-close team teardown tracked as backlog EXEC-077",
+      "body": "Team teardown at sprint close is now tracked work rather than an implicit step: backlog EXEC-077 (sprint-close team-teardown reminder hook) holds it."
+    }
+  ],
   "step_log": [
     {
       "step": "alignment_review_pass",
@@ -357,34 +386,5 @@
       "summary": "PASS — 0 violations. clerk.md step 3 reworded to mandate JSON-library re-serialization (parse the file, mutate the parsed object, stringify and write the whole file; never hand-edit or string-splice JSON). Retro-Loop change tied to the sprint-6 retro observation 'clerk hand-edit left a trailing comma in backlog.json'; cycle 1 FAILed Precise Minimalism on a rationale clause, cut in cycle 2. Team-Lead-approved."
     }
   ],
-  "retrospective_notes": [
-    {
-      "title": "Sprint-6 scope is grill-pending; EXEC-065 pulled ahead of it",
-      "body": "The Work Grill for the rest of sprint-6 scope (viewer improvements, progress-file organization/naming, guard hooks) has not run yet. EXEC-065 is a grill-skipping bug fix pulled into sprint 6 by Team Lead directive on 2026-06-10; the remaining scope is filed and pulled only after the grill runs."
-    },
-    {
-      "title": "npm 0.3.0 lagged HEAD at the same version number (PRD-009 grill)",
-      "body": "The published npm 0.3.0 lagged HEAD while carrying the same version number — template content changed without a version bump, so consumers on 0.3.0 silently missed it. Candidate: a preflight guard forcing a version bump when template content changes. Philosophy/process candidate carried for the Retro Loop."
-    },
-    {
-      "title": "Mid-sprint root-restamp clobber (EXEC-065 x EXEC-071)",
-      "body": "Builder's dogfood `update` mirrored viewer's uncommitted template WIP into the root; builder's lane-isolation revert then wiped viewer's hand-mirror. Team Lead ruling for the rest of sprint 6: no update/migrate against the live dogfood root while lanes have WIP (temp-dir verification only; Team Lead sequences dogfood runs at clean-tree points), and never revert paths outside your own lane. Candidate durable rule for the Retro Loop (PROCESS.md or TEAM_DIRECTIVE Don'ts)."
-    },
-    {
-      "title": "clerk hand-edit left a trailing comma in backlog.json",
-      "body": "A clerk record move hand-edited backlog.json as text and left a trailing comma, producing malformed JSON. clerk.md already forbids partial-string edits, but its 'full-file read → modify → write' wording read loosely enough to permit text splicing. The durable lesson: record moves re-serialize through a JSON library — parse the file, mutate the parsed object, stringify the whole file — so malformed output like a trailing comma is structurally impossible. Retro-Loop candidate for clerk.md."
-    },
-    {
-      "title": "Spawn guard blocked legitimate persistent-Teammate spawns until EXEC-079",
-      "body": "Before EXEC-079 the spawn guard keyed only on subagent_type, so it denied legitimate persistent-Teammate spawns (name + team_name) alongside transient one-shot copies; Team Leads fell back to general-purpose with the role inlined, running rostered Teammates without their definitions. EXEC-079 taught the guard to allow a rostered type carrying both name and team_name. This sprint-6 close is itself the first spawn-guard-passing spawn of the rostered scribe."
-    },
-    {
-      "title": "Ad-hoc ajv installs at the host root were pruned by npm install",
-      "body": "Gate agents and clerk validated work-tracking JSON by ad-hoc-installing ajv into the host root; the next npm install pruned those modules, leaving validation broken (observed on the dogfood root 2026-06-11). EXEC-081 is the durable fix: a shipped `to-execution validate` verb with ajv as a real package dependency, and TEAM_DIRECTIVE points gates and clerk at the verb instead of ad-hoc installs."
-    },
-    {
-      "title": "Sprint-close team teardown tracked as backlog EXEC-077",
-      "body": "Team teardown at sprint close is now tracked work rather than an implicit step: backlog EXEC-077 (sprint-close team-teardown reminder hook) holds it."
-    }
-  ]
+  "schema_version": "1.0"
 }

@@ -1,0 +1,23 @@
+{
+  "id": "EXEC-016",
+  "title": "First publish 0.1.0",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "npm"
+  ],
+  "classification": "local",
+  "actionable_now": true,
+  "description": "Publish `to-execution` 0.1.0 to the public registry from a clean tagged tree, behind the EXEC-015 guards. Publish requires explicit Team Lead approval per packager constraints. Prompt execution matters: unscoped names are first-come, unreserved until first publish. Acceptance: `npx to-execution@latest init` in a scratch dir stamps a manifest identical to a local `node src/bin/cli.js init` run.",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-015"
+  ],
+  "related_tickets": [
+    "PRD-002"
+  ],
+  "assigned_sprint": 1,
+  "closed_in_sprint": 1,
+  "notes": "HITL — publish requires explicit Team Lead approval. PRD-002 P5. Shipped 2026-06-07 (sprint_1 item S1-10): to-execution@0.1.0 on the registry, shasum verified; acceptance byte-identical; name reserved."
+}

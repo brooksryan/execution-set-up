@@ -1,0 +1,28 @@
+{
+  "id": "EXEC-091",
+  "title": "Settle grill-family decisions: writer-home + seed-once ADRs, epic-grill rename-vs-keep, format-doc homes",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "src skill content",
+    ".excn/adr"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "The decision slice that gates the rest of PRD-010. Record the ADR for the grill family keyed by writer-home (each grill owns one artifact: setup-grill the scaffold/seeds, context-grill CONTEXT.md, epic-grill the PRD/ADRs), and the ADR for the context-grill PHILOSOPHY seed-once edge on Retro-loop-as-sole-change-path; both clear the alignment gate. Rule on whether the reframed Work-Grill skill keeps the published name execution-grill-with-docs or renames to an epic-grill name, weighing the breaking-consumer migration ADR-0003 names. Decide the home of CONTEXT-FORMAT.md (context-grill, which owns CONTEXT.md) and ADR-FORMAT.md (both grills offer ADRs, so its home needs a ruling). Fix the seed-once detection mechanism. These rulings determine how EXEC-092..096 are built and whether EXEC-096 is in scope.",
+  "prd": "PRD-010",
+  "acceptance_criteria": [
+    "ADR recorded for the grill family keyed by writer-home; alignment PASS.",
+    "ADR recorded for the context-grill PHILOSOPHY seed-once edge on Retro-loop-as-sole-change-path, including the detection mechanism (an explicit positive marker, not an emptiness heuristic); alignment PASS.",
+    "A ruling on epic-grill rename-vs-keep-name is recorded with the ADR-0003 breaking-consumer-migration tradeoff weighed; the ruling sets whether EXEC-096 stays in scope.",
+    "The home of CONTEXT-FORMAT.md and ADR-FORMAT.md is decided and recorded so EXEC-092/093/094 can repoint links."
+  ],
+  "slice_type": "HITL",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [],
+  "related_tickets": [],
+  "assigned_sprint": 8,
+  "closed_in_sprint": null,
+  "notes": "Filed from the PRD-010 breakdown 2026-06-14. Decision slice; its rulings gate EXEC-092..096. SETTLED 2026-06-14 (Team Lead grill): (1) rename the reframed skill to execution-epic-grill (EXEC-096 confirmed in scope); (2) two ADRs, one decision each (writer-home taxonomy; PHILOSOPHY seed-once edge); (3) CONTEXT-FORMAT.md home is context-grill, ADR-FORMAT.md canonical home is epic-grill with context-grill referencing it by path; (4) seed-once detection is a stamped sentinel line in PHILOSOPHY.md ('<!-- principles: unestablished -->') that the first established edit removes. The two ADRs still need authoring and alignment PASS to close this issue."
+}

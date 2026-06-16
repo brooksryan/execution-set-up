@@ -1,0 +1,30 @@
+{
+  "id": "EXEC-055",
+  "title": "Ship the viewer server as a separate globally-installed package; sessions detect or connect to it",
+  "status": "open",
+  "severity": "P3",
+  "scope": [
+    "viewer",
+    "packaging"
+  ],
+  "classification": "macro",
+  "actionable_now": true,
+  "description": "Once EXEC-054 validates the in-repo auto-run server, extract it into its own package installed globally (separate from the to-execution Scaffolder package). Individual execution repos/sessions check whether the global server exists and connect to it instead of each running their own — one server, many Instances. Same hard requirements: lightweight, fast-running, zero/near-zero dependencies. Needs design decisions (port/discovery convention, multi-repo serving, version skew between server and Instances) — grill before implementation.",
+  "prd": "PRD-008",
+  "acceptance_criteria": [
+    "One globally-installed server on a well-known port serves every registered repo at a stable URL",
+    "SessionStart hooks register the repo instead of spawning a per-repo server when the global server is present",
+    "Viewer assets served from the repo, not the package (version-skew policy per ADR-0007)",
+    "Idle/orphan and lockdown guarantees of EXEC-054 hold"
+  ],
+  "slice_type": "AFK",
+  "root_cause": null,
+  "fix": null,
+  "depends_on": [
+    "EXEC-054"
+  ],
+  "related_tickets": [],
+  "assigned_sprint": null,
+  "closed_in_sprint": null,
+  "notes": "Filed 2026-06-10 (Brooks). Step 2 of the viewer-server track; acceptance criteria set after EXEC-054 validates and a grill resolves discovery/packaging. Re-identified from EXEC-047 on 2026-06-10: the original id collided with a PRD-007 hook slice filed in a parallel session; sprint-4 close gate caught the lineage mismatch."
+}
