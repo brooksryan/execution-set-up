@@ -20,7 +20,7 @@
 // health-check policy, and the schema-detection rules live in the sibling data modules.
 
 const crypto = require('crypto');
-const { spawn } = require('child_process');
+const { spawn, execFileSync } = require('child_process');
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
@@ -69,6 +69,19 @@ const {
   ORPHAN_SKILL_SKILLS_DIR,
 } = require('./health-policy');
 const { SCHEMA_DIR_RELATIVE, DETECTION_RULES } = require('./validate-policy');
+const { writeRecord, updateRecord, appendStepLog, mintUuidV7 } = require('./write-record');
+const { migrateRecords } = require('./migrate-records');
+const {
+  RECORD_KIND,
+  FLAG_TYPE,
+  ISSUE_FIELD_FLAGS,
+  ISSUE_CREATE_REQUIRED_FLAG,
+  STEP_LOG_FLAGS,
+  STEP_LOG_REQUIRED_FLAGS,
+  STEP_LOG_DATE_FIELD,
+  ISO_DATE_LENGTH,
+  LIST_VALUE_SEPARATOR,
+} = require('./write-policy');
 
 // Package root is one level up from bin/; the template ships beside it.
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
@@ -920,9 +933,15 @@ function printUsage() {
       '  npx to-execution init --force    overwrite existing files',
       '  npx to-execution update [target] re-stamp invariant files at the installed version',
       '  npx to-execution migrate [target] relocate legacy records and move .js hooks to .cjs',
+      '  npx to-execution migrate-records [target]  one-time: split issue collections into per-file records, retrofit sprints',
       '  npx to-execution doctor [target] report per-feature hook health and outdated status',
       '  npx to-execution view-status [target]  start the viewer server if needed and open the status page',
       '  npx to-execution validate <file> [--schema <path>]  validate a work-tracking JSON file against its schema',
+      '  npx to-execution issue create --title "..." [flags]  mint and write a new per-record issue file',
+      '  npx to-execution issue update <id> [flags]       update an issue / relocate its sprint partition',
+      '  npx to-execution sprint write <file>             upsert a whole sprint record (canonical-sentinel form)',
+      '  npx to-execution sprint append-step <id> [flags] append one verdict to a sprint step_log',
+      '  npx to-execution uuid                            print one fresh UUIDv7 (for PRD/ADR id minting)',
       '',
       'init stamps the .excn/ namespace; .excn/.gitignore keeps per-session *_progress.json out of git.',
       'init records the framework version and stamped-form hashes in .excn/framework-version.json.',
@@ -933,6 +952,12 @@ function printUsage() {
       'to .cjs so a host "type":"module" package.json cannot mis-load them as ESM. Idempotent; only',
       'hooks byte-identical to their stamped form are renamed — locally modified hooks are reported,',
       'never clobbered. doctor flags both legacy layouts and names this command.',
+      'migrate-records is the one-time cutover to the per-file UUIDv7 layout (ADR-0011), distinct from',
+      'migrate: it splits backlog.json and each sprint-<N>-issues.json into per-file <id>-<slug>.json',
+      'records (grandfathering legacy ids) and retrofits sprint_<N>.json to canonical-sentinel form, all',
+      'through the writeRecord helper. It resolves the repo root by git (absolute path), is idempotent,',
+      'never clobbers an existing per-file record, and verifies every record schema-valid before deleting',
+      'a monolith; inputs are committed, so a botched run is recoverable with git checkout.',
       'init wires a pointer block into existing CLAUDE.md / AGENTS.md (append-only,',
       'even under --force; both created if neither exists).',
       'init never overwrites an existing manifest file unless --force.',
@@ -946,6 +971,14 @@ function printUsage() {
       'health authority. validate auto-detects the schema (backlog/sprint-issues, sprint, PRD, progress,',
       'hooks-config, verdict-ledger) from the file shape, or takes --schema; exit 0 valid, non-zero lists',
       'each violation with its JSON path. Both verbs exit non-zero on a non-stamped target.',
+      'issue create mints a UUIDv7 id, freezes a title-derived slug, and writes',
+      '.excn/issues/<uuid>-<slug>.json atomically through the writeRecord helper (ADR-0011: the',
+      'directory is the tracker, no manifest); it rejects a caller-supplied id and exits non-zero on a',
+      'schema-invalid record. issue update edits an existing record (the id is immutable) and relocates',
+      'its file to .excn/issues/sprint-<N>/ when --assigned-sprint changes (location-as-state). sprint',
+      'write upserts a whole sprint_<N>.json in canonical-sentinel form (accreting arrays last, the',
+      'constant schema_version key dead-last); sprint append-step appends one step_log verdict as a',
+      'minimal, sibling-stable diff. All issue/sprint writes go through the single helper write path.',
       '',
     ].join('\n')
   );
@@ -1409,6 +1442,57 @@ function migrate(args) {
 }
 
 /**
+ * Run the one-time `migrate-records` command (EXEC-102, ADR-0011): split the legacy
+ * backlog/sprint-issue collections into per-file records (grandfathering legacy ids) and
+ * retrofit sprint records to canonical-sentinel form, via the migrate-records module. The
+ * repo root is resolved by absolute path with `git rev-parse --show-toplevel` — never an
+ * inherited cwd (the phantom-wipe lesson). Distinct from `migrate`, which stays location-only.
+ * @param {string[]} args - args after the command word (an optional start directory).
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) when the root cannot be git-resolved, a
+ *   collection/sprint is malformed, or a monolith was kept because a record failed to verify.
+ */
+function migrateRecordsCommand(args) {
+  const startDir = path.resolve(args.find((arg) => !arg.startsWith(FLAG_PREFIX)) || '.');
+  let root;
+  try {
+    root = execFileSync('git', ['-C', startDir, 'rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
+  } catch (cause) {
+    process.stderr.write(`error: cannot resolve the repo root via git at ${startDir} (${cause.message}) — migrate-records needs a git repo\n`);
+    process.exit(1);
+  }
+  if (root === '') {
+    process.stderr.write(`error: git resolved an empty repo root at ${startDir}\n`);
+    process.exit(1);
+  }
+
+  let report;
+  try {
+    report = migrateRecords({ targetRoot: root });
+  } catch (cause) {
+    process.stderr.write(`error: ${cause.message}\n`);
+    process.exit(1);
+  }
+
+  const lines = [`Migrated records in ${root} (one-time, ADR-0011)`];
+  for (const collection of report.collections) {
+    lines.push(
+      `  ${collection.source}: split ${collection.written.length} new + ${collection.skipped.length} existing record(s); monolith ${collection.deleted ? 'deleted' : 'KEPT (verification failed)'}`
+    );
+    if (collection.failures.length > 0) lines.push(`    verification failures: ${collection.failures.join(', ')}`);
+  }
+  if (report.collections.length === 0) lines.push('  no legacy issue collections found (already split)');
+  for (const sprint of report.sprints) lines.push(`  ${sprint.source}: retrofitted to canonical-sentinel form`);
+  if (report.sprints.length === 0) lines.push('  no sprint records to retrofit');
+  if (report.aborted.length > 0) {
+    lines.push(`  WARNING: ${report.aborted.length} monolith(s) kept after a verification failure — inputs are committed; recover with \`git checkout\``);
+  }
+  lines.push('');
+  process.stdout.write(lines.join('\n'));
+  if (report.aborted.length > 0) process.exit(1); // a verification failure is a failure
+}
+
+/**
  * Auto-detect which schema a parsed work-tracking file should validate against, by
  * the shape signatures in validate-policy (first match wins).
  * @param {*} data - the parsed JSON.
@@ -1455,6 +1539,254 @@ function buildAjv() {
     ajv.addSchema(schema, file);
   }
   return ajv;
+}
+
+/**
+ * Parse flags into a field object per a flag table (ISSUE_FIELD_FLAGS / STEP_LOG_FLAGS):
+ * STRING takes the next arg, INTEGER parses it as an integer, LIST splits it on commas
+ * (trimmed, empties dropped), BOOLEAN is a presence toggle (true), NULL is a presence flag
+ * that sets its field to null. Enum/shape validation is the schema's job, not the parser's.
+ * @param {string[]} args - the args to parse (flags and their values).
+ * @param {object} flagTable - the flag → {field, type} table.
+ * @param {string} context - the command label for error messages.
+ * @returns {object} the assembled field object.
+ * @throws {Error} on an unknown flag, a value-taking flag missing its value, or a bad integer.
+ */
+function parseFlags(args, flagTable, context) {
+  const values = {};
+  for (let index = 0; index < args.length; index += 1) {
+    const flag = args[index];
+    const spec = flagTable[flag];
+    if (!spec) {
+      throw new Error(`unknown flag ${flag} for ${context} — known flags: ${Object.keys(flagTable).join(', ')}`);
+    }
+    if (spec.type === FLAG_TYPE.BOOLEAN) {
+      values[spec.field] = true;
+      continue;
+    }
+    if (spec.type === FLAG_TYPE.NULL) {
+      values[spec.field] = null;
+      continue;
+    }
+    const value = args[index + 1];
+    // A value-taking flag whose next token is missing or is itself a known flag has no value.
+    if (value === undefined || flagTable[value]) {
+      throw new Error(`flag ${flag} needs a value`);
+    }
+    index += 1;
+    if (spec.type === FLAG_TYPE.LIST) {
+      values[spec.field] = value.split(LIST_VALUE_SEPARATOR).map((item) => item.trim()).filter((item) => item !== '');
+    } else if (spec.type === FLAG_TYPE.INTEGER) {
+      const parsed = Number(value);
+      if (!Number.isInteger(parsed)) {
+        throw new Error(`flag ${flag} needs an integer, got ${JSON.stringify(value)}`);
+      }
+      values[spec.field] = parsed;
+    } else {
+      values[spec.field] = value;
+    }
+  }
+  return values;
+}
+
+/**
+ * Run `issue create`: parse the flags, write the record through the writeRecord helper
+ * (which mints the UUIDv7, validates, and writes atomically), and print the created file
+ * path and id. The required --title flag must be present.
+ * @param {string[]} args - the args after `issue create`.
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) on a parse error, a missing --title, or
+ *   a helper failure (supplied id, schema-invalid record, or I/O failure).
+ */
+function issueCreate(args) {
+  let record;
+  try {
+    record = parseFlags(args, ISSUE_FIELD_FLAGS, '`issue create`');
+  } catch (cause) {
+    process.stderr.write(`error: ${cause.message}\n`);
+    process.exit(1);
+  }
+  const titleField = ISSUE_FIELD_FLAGS[ISSUE_CREATE_REQUIRED_FLAG].field;
+  if (record[titleField] === undefined) {
+    process.stderr.write(`error: \`issue create\` needs ${ISSUE_CREATE_REQUIRED_FLAG} — usage: to-execution issue create ${ISSUE_CREATE_REQUIRED_FLAG} "..."\n`);
+    process.exit(1);
+  }
+
+  let result;
+  try {
+    result = writeRecord(RECORD_KIND.ISSUE, record);
+  } catch (cause) {
+    process.stderr.write(`error: ${cause.message}\n`);
+    process.exit(1);
+  }
+  process.stdout.write(`created issue ${result.id}\n  ${result.path}\n`);
+}
+
+/**
+ * Run `issue update <id>`: parse the field flags, apply them through the updateRecord helper
+ * (which rejects an id change, validates, relocates the file when assigned_sprint changes,
+ * and writes atomically), and print the path (and any partition move). At least one field
+ * flag is required.
+ * @param {string[]} args - `<id>` followed by field flags.
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) on a missing id, no field flags, a parse
+ *   error, or a helper failure (id change, no/ambiguous match, schema-invalid result).
+ */
+function issueUpdate(args) {
+  const id = args[0];
+  if (!id || id.startsWith(FLAG_PREFIX)) {
+    process.stderr.write('error: `issue update` needs an <id> — usage: to-execution issue update <id> --status ...\n');
+    process.exit(1);
+  }
+  let changes;
+  try {
+    changes = parseFlags(args.slice(1), ISSUE_FIELD_FLAGS, '`issue update`');
+  } catch (cause) {
+    process.stderr.write(`error: ${cause.message}\n`);
+    process.exit(1);
+  }
+  if (Object.keys(changes).length === 0) {
+    process.stderr.write('error: `issue update` needs at least one field flag to change\n');
+    process.exit(1);
+  }
+
+  let result;
+  try {
+    result = updateRecord(RECORD_KIND.ISSUE, id, changes);
+  } catch (cause) {
+    process.stderr.write(`error: ${cause.message}\n`);
+    process.exit(1);
+  }
+  const moved = result.movedFrom ? `\n  moved from ${result.movedFrom}` : '';
+  process.stdout.write(`updated issue ${result.id}\n  ${result.path}${moved}\n`);
+}
+
+/**
+ * Run the `issue` command: dispatch on the action word. `create` mints and writes a new
+ * per-record issue file; `update <id>` edits an existing one; any other word fails non-zero
+ * with usage.
+ * @param {string[]} args - args after the `issue` command word (the action and its args).
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) on a missing or unrecognized action.
+ */
+function issue(args) {
+  const [action, ...rest] = args;
+  if (action === 'create') return issueCreate(rest);
+  if (action === 'update') return issueUpdate(rest);
+  process.stderr.write(
+    `error: unknown issue action ${action === undefined ? '(none)' : action} — usage: to-execution issue create|update ...\n`
+  );
+  process.exit(1);
+}
+
+/**
+ * Run `sprint write <file>`: read a full sprint record from a JSON file and write it through
+ * the writeRecord helper (validate, canonical-sentinel serialize, atomic write to
+ * sprints/sprint_<N>.json). This is scribe's whole-sprint open/close path.
+ * @param {string[]} args - the args after `sprint write` (the source file path).
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) on a missing/unreadable file or an invalid record.
+ */
+function sprintWrite(args) {
+  const file = args.find((arg) => !arg.startsWith(FLAG_PREFIX));
+  if (!file) {
+    process.stderr.write('error: `sprint write` needs a <file> — usage: to-execution sprint write <file>\n');
+    process.exit(1);
+  }
+  let record;
+  try {
+    record = JSON.parse(fs.readFileSync(path.resolve(file), 'utf8'));
+  } catch (cause) {
+    process.stderr.write(`error: cannot read or parse ${file}: ${cause.message}\n`);
+    process.exit(1);
+  }
+  let result;
+  try {
+    result = writeRecord(RECORD_KIND.SPRINT, record);
+  } catch (cause) {
+    process.stderr.write(`error: ${cause.message}\n`);
+    process.exit(1);
+  }
+  process.stdout.write(`wrote sprint ${result.sprintId}\n  ${result.path}\n`);
+}
+
+/**
+ * Run `sprint append-step <id>`: build one verdict-ledger entry from the flags and append it
+ * to the sprint's step_log through the appendStepLog helper (a minimal, sibling-stable diff).
+ * --at defaults to today's ISO date; --step, --artifact, and --summary are required.
+ * @param {string[]} args - `<id>` followed by the entry flags.
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) on a bad id, a missing required flag, a
+ *   parse error, or a helper failure (missing sprint file, schema-invalid entry).
+ */
+function sprintAppendStep(args) {
+  const id = args[0];
+  const sprintId = Number(id);
+  if (!id || id.startsWith(FLAG_PREFIX) || !Number.isInteger(sprintId)) {
+    process.stderr.write('error: `sprint append-step` needs an integer <id> — usage: to-execution sprint append-step <id> --step ... --artifact ... --summary ...\n');
+    process.exit(1);
+  }
+  let entry;
+  try {
+    entry = parseFlags(args.slice(1), STEP_LOG_FLAGS, '`sprint append-step`');
+  } catch (cause) {
+    process.stderr.write(`error: ${cause.message}\n`);
+    process.exit(1);
+  }
+  for (const required of STEP_LOG_REQUIRED_FLAGS) {
+    if (entry[STEP_LOG_FLAGS[required].field] === undefined) {
+      process.stderr.write(`error: \`sprint append-step\` needs ${required}\n`);
+      process.exit(1);
+    }
+  }
+  if (entry[STEP_LOG_DATE_FIELD] === undefined) {
+    entry[STEP_LOG_DATE_FIELD] = new Date().toISOString().slice(0, ISO_DATE_LENGTH);
+  }
+
+  let result;
+  try {
+    result = appendStepLog(sprintId, entry);
+  } catch (cause) {
+    process.stderr.write(`error: ${cause.message}\n`);
+    process.exit(1);
+  }
+  process.stdout.write(`appended step_log entry to sprint ${result.sprintId} (now ${result.entries})\n  ${result.path}\n`);
+}
+
+/**
+ * Run the `sprint` command: dispatch on the action word. `write <file>` upserts a whole
+ * sprint record; `append-step <id> ...` appends one step_log entry; any other word fails
+ * non-zero with usage.
+ * @param {string[]} args - args after the `sprint` command word (the action and its args).
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) on a missing or unrecognized action.
+ */
+function sprint(args) {
+  const [action, ...rest] = args;
+  if (action === 'write') return sprintWrite(rest);
+  if (action === 'append-step') return sprintAppendStep(rest);
+  process.stderr.write(
+    `error: unknown sprint action ${action === undefined ? '(none)' : action} — usage: to-execution sprint write <file> | append-step <id> ...\n`
+  );
+  process.exit(1);
+}
+
+/**
+ * Run the `uuid` command: print one fresh UUIDv7 to stdout (wraps mintUuidV7), exit 0. The
+ * minting primitive for skills/agents authoring a PRD or ADR (EXEC-105), since a valid
+ * RFC 9562 v7 id cannot be hand-generated. Takes no arguments.
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) only if minting fails its self-assertion.
+ */
+function uuid() {
+  let id;
+  try {
+    id = mintUuidV7();
+  } catch (cause) {
+    process.stderr.write(`error: ${cause.message}\n`);
+    process.exit(1);
+  }
+  process.stdout.write(`${id}\n`);
 }
 
 /**
@@ -1534,9 +1866,12 @@ function validate(args) {
 /**
  * Entry point: dispatch on the first CLI argument. `init` stamps; `update`
  * re-stamps invariants; `migrate` relocates legacy records into their ADR-0008 homes;
+ * `migrate-records` is the one-time per-file/UUIDv7 cutover (ADR-0011);
  * `doctor` reports hook health; `view-status` opens the status page; `validate`
- * checks a work-tracking file against its schema; no command or -h/--help prints usage
- * and exits zero; any other word fails non-zero with usage.
+ * checks a work-tracking file against its schema; `issue` creates/updates a per-record
+ * issue file; `sprint` upserts a sprint record or appends a step_log verdict; `uuid` prints
+ * one fresh UUIDv7; no command or -h/--help prints usage and exits zero; any other word
+ * fails non-zero with usage.
  * @returns {void}
  * @throws Exits non-zero (after usage on stderr+stdout) on an unrecognized command.
  */
@@ -1549,12 +1884,20 @@ function main() {
       return update(args);
     case 'migrate':
       return migrate(args);
+    case 'migrate-records':
+      return migrateRecordsCommand(args);
     case 'doctor':
       return doctor(args);
     case 'view-status':
       return viewStatus(args);
     case 'validate':
       return validate(args);
+    case 'issue':
+      return issue(args);
+    case 'sprint':
+      return sprint(args);
+    case 'uuid':
+      return uuid();
     case undefined:
     case '-h':
     case '--help':

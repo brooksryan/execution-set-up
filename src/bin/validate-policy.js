@@ -39,8 +39,12 @@ const DETECTION_RULES = [
   { schema: 'hooks-config.schema.json', requiredKeys: ['features'] },
   // Load telemetry: a records array under a schema_version, no current_step.
   { schema: 'load-progress.schema.json', requiredKeys: ['schema_version', 'records'] },
-  // Issue partition (backlog or a sprint's issues file): schema_version + issues, with
-  // the more specific PRD rule already tried above.
+  // Single per-record issue (ADR-0011: .excn/issues/<uuid>-<slug>.json): a bare issue
+  // object, distinguished by severity + actionable_now, which no other artifact carries.
+  // It has no schema_version/issues wrapper, so it precedes the collection rule below.
+  { schema: 'issue-record.schema.json', requiredKeys: ['severity', 'actionable_now'] },
+  // Issue partition collection (legacy backlog or a sprint's archived issues file):
+  // schema_version + issues, with the more specific PRD rule already tried above.
   { schema: 'issue.schema.json', requiredKeys: ['schema_version', 'issues'] },
 ];
 

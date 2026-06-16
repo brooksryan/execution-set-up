@@ -11,7 +11,7 @@
 // - VARIANT_FILES are the Setup Grill's project-specific outputs (and teammate
 //   defs): seeded by init, owned by the Instance afterward — update never writes them.
 // - WORK_TRACKING_DIR_PREFIXES cover the Instance's work-tracking state; anything
-//   under them (including the template's backlog seed) is update-untouchable.
+//   under them is update-untouchable — the template ships these dirs empty.
 // - VERSION_MARKER_PATH must stay outside every ignore rule in the stamped
 //   .excn/.gitignore so the marker survives being committed.
 
@@ -30,9 +30,10 @@ const VARIANT_FILES = [
 
 // Work-tracking state roots: everything beneath them belongs to the Instance.
 // progress/ and runtime/ are the two ADR-0008 record homes — Progress Records
-// (agent/gate-written) and Runtime Records (hook/machine-written); the template
-// ships them empty (a .gitkeep) so update never refreshes or drift-reports the
-// records placed inside.
+// (agent/gate-written) and Runtime Records (hook/machine-written). The template
+// ships every one of these dirs empty (a .gitkeep) so update never refreshes or
+// drift-reports the records placed inside; issues/ ships empty too, so a fresh
+// Instance starts per-file with no backlog monolith (ADR-0011).
 const WORK_TRACKING_DIR_PREFIXES = [
   '.excn/issues/',
   '.excn/sprints/',

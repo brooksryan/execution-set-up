@@ -1,0 +1,254 @@
+{
+  "schema_version": "1.0",
+  "sprint_id": 9,
+  "name": "Sprint 9",
+  "status": "active",
+  "dates": {
+    "start": "2026-06-15",
+    "end": null,
+    "duration_note": null
+  },
+  "team": [
+    {
+      "name": "team-lead",
+      "role": "Team Lead",
+      "owns": "arbitration, src/template content, ADRs, final approval"
+    },
+    {
+      "name": "builder",
+      "role": "Builder",
+      "owns": "src/bin (writeRecord helper, CLI, channel-guard hook, migrate-records)"
+    },
+    {
+      "name": "viewer",
+      "role": "Viewer",
+      "owns": "status-page viewer that reads .excn work-tracking JSON"
+    },
+    {
+      "name": "scribe",
+      "role": "Scribe",
+      "owns": "work-tracking JSON, CONTEXT.md terms, Retro Loop"
+    },
+    {
+      "name": "packager",
+      "role": "Packager",
+      "owns": "npm release: src/package.json, versioning, tagging, publishing"
+    }
+  ],
+  "goal": "Ship PRD-011 conflict-free work-tracking — UUIDv7 self-minted ids, the writeRecord helper + CLI as sole write path for issues/sprints, the default-off channel guard, the migrate-records migration, template stamp, viewer, and PRD/ADR uuid-minting.",
+  "issues_addressed": [
+    "EXEC-097",
+    "EXEC-098",
+    "EXEC-099",
+    "EXEC-100",
+    "EXEC-101",
+    "EXEC-102",
+    "EXEC-103",
+    "EXEC-104",
+    "EXEC-105"
+  ],
+  "shipped": [
+    {
+      "id": "S9-1",
+      "type": "FEAT",
+      "title": "EXEC-097: writeRecord helper core, per-record issue schema, and `issue create` CLI",
+      "owner": "builder",
+      "summary": "Stand up the single write path for issues: author a per-record issue schema, widen issue id / prd reference / PRD id patterns to accept legacy EXEC-NNN/PRD-NNN OR UUIDv7, and build writeRecord (mints UUIDv7, rejects caller-supplied id, derives frozen slug, validates with bundled ajv, canonical serialize, atomic write to .excn/issues/<uuid>-<slug>.json). Exposed as `to-execution issue create`.",
+      "closes_issues": [
+        "EXEC-097"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S9-2",
+      "type": "FEAT",
+      "title": "EXEC-098: `issue update` and partition move through the helper",
+      "owner": "builder",
+      "summary": "Extend helper and CLI with `to-execution issue update`: update any field except the immutable id, including status flips and relocating a per-file record between backlog and sprint-<N>/ partitions (location-as-state). Rejects id changes; reuses canonical serialization and atomic write.",
+      "closes_issues": [
+        "EXEC-098"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S9-3",
+      "type": "FEAT",
+      "title": "EXEC-099: Sprint authoring through the helper — whole-file write and step_log append",
+      "owner": "builder",
+      "summary": "Teach the helper to write sprint records (kind=sprint): whole-sprint create/update and a step_log append mode. Emit canonical-sentinel form (arrays last, constant sentinel key dead-last) so concurrent appends produce minimal non-conflicting diffs. Exposed as `to-execution sprint ...`.",
+      "closes_issues": [
+        "EXEC-099"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S9-4",
+      "type": "FEAT",
+      "title": "EXEC-100: Channel guard: deny raw writes to the issues and sprints homes (feature flag, default off)",
+      "owner": "builder",
+      "summary": "PreToolUse channel guard denying raw Write/Edit to .excn/issues/ and .excn/sprints/, redirecting to the to-execution CLI. Modeled on progress-location-guard with a -rules.cjs data module split from decision logic. Adds a hooks-config feature flag, default OFF in the Template; fail-safe exits 0.",
+      "closes_issues": [
+        "EXEC-100"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S9-9",
+      "type": "FEAT",
+      "title": "EXEC-105: `execution-to-prd` and the grill mint UUIDv7 for new PRDs and ADRs",
+      "owner": "team-lead",
+      "summary": "Update the execution-to-prd skill and the grill so newly authored PRDs (JSON) and ADRs (markdown) mint a UUIDv7 id instead of the next sequential number. Ships only after EXEC-097's prd/PRD id-pattern widening so a UUID PRD validates and is referenceable.",
+      "closes_issues": [
+        "EXEC-105"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S9-7",
+      "type": "FEAT",
+      "title": "EXEC-103: Stamp the per-file layout into `src/template` (fresh-Instance path)",
+      "owner": "team-lead",
+      "summary": "Src-First: land the per-record schema, the issue/sprint CLI, the channel-guard hook + hooks-config flag, and an empty .excn/issues/ layout in src/template so a freshly-stamped Instance starts in the per-file world with no backlog.json. Fresh path does not error on an empty issues directory; package-qa and code-standards pass.",
+      "closes_issues": [
+        "EXEC-103"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S9-8",
+      "type": "FEAT",
+      "title": "EXEC-104: Viewer reads the per-file issues directory",
+      "owner": "viewer",
+      "summary": "Point the status-page viewer at the per-file layout: glob .excn/issues/**/*.json instead of reading backlog.json. Handle an empty issues directory and a missing backlog.json without erroring, and sort sanely when legacy ids and UUIDv7 ids coexist.",
+      "closes_issues": [
+        "EXEC-104"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S9-5",
+      "type": "REFACTOR",
+      "title": "EXEC-101: Adopt the CLI in the team's own write-paths (clerk, scribe, gates)",
+      "owner": "team-lead",
+      "summary": "Move every live team write-path for issues and sprints onto the to-execution CLI/helper: clerk's partition moves and status flips, scribe's sprint open/close, and the gates' step_log verdict appends. Lands before the channel guard is enabled here. Agent-definition edits route through the Retro Loop / alignment gate.",
+      "closes_issues": [
+        "EXEC-101"
+      ],
+      "notes": null
+    }
+  ],
+  "in_progress": [],
+  "not_shipped": [
+    {
+      "id": "S9-6",
+      "type": "FEAT",
+      "title": "EXEC-102: One-time `migrate-records` command: split partitions, retrofit sprints, then enable the guard",
+      "owner": "builder",
+      "summary": "Build a one-time `to-execution migrate-records` (distinct from location-only migrate): split backlog.json and each sprint issue-companion into per-file <uuid>-<slug>.json records (grandfathering legacy ids), retrofit every sprint_<N>.json to canonical-sentinel form, all via the guard-safe helper. Verify-before-destroy and idempotent; dogfood run and guard enablement sequenced by the Team Lead.",
+      "closes_issues": [
+        "EXEC-102"
+      ],
+      "notes": null
+    }
+  ],
+  "defects_discovered": [],
+  "decisions": [],
+  "retrospective_notes": [
+    {
+      "title": "Named-constants rule tripped by a pre-existing bare literal surfaced by new code",
+      "body": "EXEC-104's daemon endpoint added a second occurrence of a pre-existing bare 'no-store' literal, which tripped the named-constants gate even though the literal predated the change. Pattern: when new code touches a file carrying a pre-existing bare literal, promote that literal to a named constant as part of the change rather than leaving it for later."
+    },
+    {
+      "title": "Adversarial gap-hunt on the breakdown caught schema and lockout hazards pre-code",
+      "body": "The adversarial gap-hunt against the PRD-011 breakdown caught the schema collection-vs-per-record contradiction and the self-lockout hazard (the running team locking itself out via the channel guard before adopting the CLI) before any code was written. High value; it kept its place in the flow."
+    },
+    {
+      "title": "Adversarial breakdown review covered read logic but missed the serving layer",
+      "body": "The viewer-server daemon gap — the whitelist could not serve the per-file layout — was caught by viewer during EXEC-104 implementation, not by the adversarial breakdown review. The review covered the viewer's read logic but did not reach the daemon serving layer."
+    },
+    {
+      "title": "Trust deployed state over message order resolved stale re-acks",
+      "body": "Teammate message-crossing produced stale re-acks (builder re-acking already-shipped work). The PROCESS rule 'trust deployed state over message order' resolved it cleanly: reading disk showed the true shipped state regardless of message arrival order."
+    }
+  ],
+  "step_log": [
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-097 (S9-1): writeRecord helper, per-record issue schema, `issue create` CLI",
+      "summary": "PASS — 0 violations. UUIDv7-regex-in-JSON-schema mirroring ruled conformant: declarative data, single canonical JS home UUIDV7_PATTERN with cross-ref comments."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-097 (S9-1): writeRecord helper, per-record issue schema, `issue create` CLI",
+      "summary": "PASS — 0 violations. Full stamp contract holds in temp; ajv resolves from the tarball; version still 0.6.0."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-098 (S9-2) issue update + partition move; EXEC-099 (S9-3) sprint authoring + step_log append",
+      "summary": "PASS — 0 violations. schema_version-as-sentinel reuse and serializeSprint fail-closed-on-unknown-key coupling ruled sound and truthfully documented."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-098 (S9-2) issue update + partition move; EXEC-099 (S9-3) sprint authoring + step_log append",
+      "summary": "PASS — 0 violations. issue update relocate/to-backlog, sprint write upsert with schema_version dead-last, append-step byte-stable, validate auto-detects both schemas; version still 0.6.0."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-100 (S9-4): channel guard for .excn/issues/ and .excn/sprints/ (default off)",
+      "summary": "PASS — 0 violations. Data/logic split mirrors progress-location-guard exactly; fail-safe logging cannot break the guard."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-100 (S9-4): channel guard for .excn/issues/ and .excn/sprints/ (default off)",
+      "summary": "PASS — 0 violations. Fresh stamp reports channel_guard 'disabled (wired)' not broken, confirming the Src-First transient; 18/18 tests; version 0.6.0."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-105 (S9-9): `to-execution uuid` mint command (the primitive the skills call)",
+      "summary": "PASS — 0 violations. Gated alongside package-qa; 19/19 tests; version 0.6.0."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-105 (S9-9): `to-execution uuid` mint command + execution-to-prd / execution-epic-grill ADR-FORMAT skill edits (Src-First, root-mirrored)",
+      "summary": "PASS — 0 violations. 19/19 tests; version 0.6.0. Skill edits write PRDs/ADRs with UUIDv7 ids minted via `npx to-execution uuid`; skills are not gated persistent docs (process-adherence sweeps at sprint close)."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-103 (S9-7): stamp the per-file layout into src/template (fresh-Instance path)",
+      "summary": "PASS — 0 violations. Fresh Instance starts per-file with no backlog.json; .gitkeep git-tracked; doctor/update clean; version 0.6.0."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-103 (S9-7): stamp the per-file layout into src/template (fresh-Instance path)",
+      "summary": "PASS — 0 violations. Fresh `init` stamps the per-record schema, issue/sprint CLI, and channel-guard hook + flag; empty .excn/issues/ does not error; version 0.6.0."
+    },
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-104 (S9-8): viewer reads the per-file issues directory (viewer.js + daemon endpoint)",
+      "summary": "PASS — 0 violations on re-gate. One named-constants FAIL on a 'no-store' literal fixed and re-passed."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-104 (S9-8): viewer daemon endpoint serving the per-file issues directory",
+      "summary": "PASS — 0 violations. Path-safety probes 404, POST 405, localhost-only."
+    },
+    {
+      "step": "alignment_review_pass",
+      "at": "2026-06-16",
+      "artifact": "EXEC-101 (S9-5): clerk.md + scribe.md agent-def edits adopting the to-execution CLI for guarded-home writes (Src-First, root-mirrored)",
+      "summary": "PASS — 0 violations. One Precise-Minimalism FAIL on a clerk.md benefit clause cut and re-passed. Team Lead approved (chartered change, ADR-0004); def edits describe the post-migration steady state."
+    }
+  ]
+}

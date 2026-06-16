@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Issue Record",
+  "description": "One file per issue at .excn/issues/<uuid>-<slug>.json — the per-record form that supersedes the backlog.json collection for NEW issues (ADR-0011: the directory is the tracker, no manifest). This schema validates a SINGLE issue object, not the {schema_version, issues:[]} wrapper. The collection schema issue.schema.json is retained for legacy/archive validation only: backlog.json before migration and the closed sprint-<N>/sprint-<N>-issues.json partitions. New writes go through the writeRecord helper (src/bin/write-record.js), which mints the id and validates against THIS schema. id is a UUIDv7 for new records or a grandfathered legacy id (EXEC-NNN) on migrated ones; prd likewise accepts a legacy PRD-NNN or a UUIDv7. The widened id/prd patterns mirror UUIDV7_PATTERN in src/bin/write-policy.js — keep the UUIDv7 branch in sync.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "status", "severity", "scope", "actionable_now", "description"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^([A-Z][A-Z0-9]*-\\d{3,}|[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$",
+      "description": "Stable identifier, never reused: a UUIDv7 for new records or a grandfathered legacy id (e.g. EXEC-097) on migrated ones."
+    },
+    "title": { "type": "string" },
+    "status": { "type": "string", "enum": ["open", "in_progress", "closed"] },
+    "severity": {
+      "type": "string",
+      "enum": ["P1", "P2", "P3"],
+      "description": "P1 blocking, P2 significant, P3 low-priority."
+    },
+    "scope": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Which area(s) the fix lives in — project-defined."
+    },
+    "classification": {
+      "type": ["string", "null"],
+      "enum": ["macro", "local", "macro+local", "pre-existing", null],
+      "description": "macro = architecture-level; local = tactical; pre-existing = predates current work."
+    },
+    "actionable_now": {
+      "type": "boolean",
+      "description": "false = tracking only, no sprint work planned."
+    },
+    "description": { "type": "string" },
+    "prd": {
+      "type": ["string", "null"],
+      "pattern": "^(PRD-\\d{3}|[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$",
+      "description": "The PRD this issue traces to, null if filed directly: a legacy PRD-NNN or a UUIDv7."
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Verifiable criteria; the issue closes only when all hold."
+    },
+    "slice_type": {
+      "type": ["string", "null"],
+      "enum": ["HITL", "AFK", null],
+      "description": "HITL = needs human interaction; AFK = completable without it."
+    },
+    "root_cause": { "type": ["string", "null"] },
+    "fix": { "type": ["string", "null"] },
+    "depends_on": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Issue IDs that must close first."
+    },
+    "related_tickets": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "External tracker IDs."
+    },
+    "assigned_sprint": { "type": ["integer", "null"] },
+    "closed_in_sprint": { "type": ["integer", "null"] },
+    "notes": { "type": ["string", "null"] }
+  }
+}

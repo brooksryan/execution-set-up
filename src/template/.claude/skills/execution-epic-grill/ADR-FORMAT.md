@@ -1,15 +1,16 @@
 # ADR Format
 
-ADRs live in `.excn/adr/`, sequentially numbered: `0001-slug.md`, `0002-slug.md`. Scan `.excn/adr/` for the highest existing number and increment by one. Never create `docs/adr/` or any other ADR home.
+ADRs live in `.excn/adr/`, identified by a UUIDv7: mint one with `npx to-execution uuid`, put it in the `id:` frontmatter, and name the file `<uuid>-slug.md`. Never self-increment a sequential number — legacy `0001-slug.md` ADRs are grandfathered; new ADRs are always UUIDv7. Never create `docs/adr/` or any other ADR home.
 
 ## Template
 
 ```md
 ---
+id: {uuidv7}
 status: accepted
 date: {YYYY-MM-DD}
 ---
-# {NNNN} — {Short title of the decision}
+# {Short title of the decision}
 
 {1–3 sentences: the context, what was decided, and why.}
 ```
@@ -24,7 +25,7 @@ Include only when they add genuine value; most ADRs won't need them.
 - **`## Consequences`** — when non-obvious downstream effects need calling out.
 - **`## Amendment — {date}`** — when a later decision revises this one without rewriting history.
 
-Status frontmatter values: `accepted | proposed | deprecated | superseded by ADR-NNNN`.
+Status frontmatter values: `accepted | proposed | deprecated | superseded by <id>` (the superseding ADR's id or 8-char short prefix).
 
 ## When to offer an ADR
 

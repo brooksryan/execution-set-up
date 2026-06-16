@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Issue Collection",
-  "description": "One shape for every issue partition: .excn/issues/backlog.json (open, unpulled issues) and .excn/issues/sprint-<N>/sprint-<N>-issues.json (a sprint's pulled issues — its archive once the sprint closes). An issue's file location is its lifecycle state; the record fields are identical in every partition. IDs are globally unique across all files and depends_on may reference any partition, so validation reads across files, not within one. scribe moves issues between files at sprint boundaries and updates status; descriptions are not rewritten.",
+  "title": "Issue Collection (legacy/archive)",
+  "description": "LEGACY/ARCHIVE form of the {schema_version, issues:[]} wrapper. As of ADR-0011 new issues are one file per record at .excn/issues/<uuid>-<slug>.json (see issue-record.schema.json), so this collection schema is retained ONLY to validate pre-migration backlog.json and the closed sprint-<N>/sprint-<N>-issues.json archive partitions; the per-record schema is authoritative for new writes. An issue's file location is its lifecycle state; the record fields are identical in every partition. IDs are globally unique across all files and depends_on may reference any partition, so validation reads across files, not within one. scribe moves issues between files at sprint boundaries and updates status; descriptions are not rewritten. The widened id/prd patterns mirror UUIDV7_PATTERN in src/bin/write-policy.js.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "issues"],
@@ -17,8 +17,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^[A-Z][A-Z0-9]*-\\d{3,}$",
-          "description": "Stable identifier (e.g. PROJ-001), never reused."
+          "pattern": "^([A-Z][A-Z0-9]*-\\d{3,}|[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$",
+          "description": "Stable identifier, never reused: a legacy id (e.g. PROJ-001) or a UUIDv7."
         },
         "title": { "type": "string" },
         "status": { "type": "string", "enum": ["open", "in_progress", "closed"] },
@@ -45,8 +45,8 @@
         "description": { "type": "string" },
         "prd": {
           "type": ["string", "null"],
-          "pattern": "^PRD-\\d{3}$",
-          "description": "The PRD this issue traces to, null if filed directly."
+          "pattern": "^(PRD-\\d{3}|[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$",
+          "description": "The PRD this issue traces to, null if filed directly: a legacy PRD-NNN or a UUIDv7."
         },
         "acceptance_criteria": {
           "type": "array",

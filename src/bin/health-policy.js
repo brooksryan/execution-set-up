@@ -56,6 +56,11 @@ const HOOK_FEATURES = [
     scripts: ['progress-location-guard.cjs'],
     evidence: null,
   },
+  {
+    key: 'channel_guard',
+    scripts: ['channel-guard.cjs'],
+    evidence: null,
+  },
 ];
 
 // The unified hook invocation log (CODE_STANDARDS ## Hooks) — doctor's primary

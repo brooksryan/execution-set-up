@@ -50,18 +50,41 @@ const SPAWN_POLL_INTERVAL_MS = 100;
 // Serving whitelist (ADR-0007): viewer assets (under the .excn namespace per
 // ADR-0002) plus the .excn JSON the page reads — top-level .excn/*.json,
 // .excn/schemas/*.json, the sprint/backlog JSON viewer.js fetches from
-// .excn/sprints/ and .excn/issues/, and the Runtime Records under .excn/runtime/
-// (ADR-0008) the hook-health view reads (e.g. hook-invocations_progress.json,
-// load_progress.json). Patterns match the root-relative POSIX path of the
-// *resolved* request; anything unmatched is a 404.
+// .excn/sprints/ and .excn/issues/, the per-file issue records one partition-level
+// deep (.excn/issues/sprint-<N>/<uuid>-<slug>.json, ADR-0011 — location-as-state),
+// and the Runtime Records under .excn/runtime/ (ADR-0008) the hook-health view reads
+// (e.g. hook-invocations_progress.json, load_progress.json). Patterns match the
+// root-relative POSIX path of the *resolved* request; anything unmatched is a 404.
+// The issue patterns stay tightly scoped — only .json, only the top level and a
+// numbered sprint-<N> partition, `[^/]+` forbids any deeper nesting (ADR-0007: no
+// arbitrary file serving, no traversal beyond issue records).
 const PATH_WHITELIST = [
   /^\.excn\/viewer\/[^/]+$/,
   /^\.excn\/[^/]+\.json$/,
   /^\.excn\/schemas\/[^/]+\.json$/,
   /^\.excn\/sprints\/[^/]+\.json$/,
   /^\.excn\/issues\/[^/]+\.json$/,
+  /^\.excn\/issues\/sprint-\d+\/[^/]+\.json$/,
   /^\.excn\/runtime\/[^/]+\.json$/,
 ];
+
+// Directory-index whitelist (EXEC-104, ADR-0011): the only directories the daemon
+// will enumerate, since a browser cannot list a directory and the issues tracker is
+// now a directory of per-file records with no manifest. Strictly the issues home and
+// its numbered sprint-<N> partitions — never the viewer-asset, schemas, sprints, or
+// runtime dirs (no general directory listing). Matched against the resolved
+// root-relative path (path.resolve has already dropped any trailing slash).
+const DIRECTORY_INDEX_WHITELIST = [
+  /^\.excn\/issues$/,
+  /^\.excn\/issues\/sprint-\d+$/,
+];
+
+// A directory index lists only the entries the viewer follows: *.json records (this
+// extension) and sprint-<N> partition subdirectories (this name), the latter emitted
+// with a trailing slash so viewer.js recurses into them. No other entry is exposed.
+const INDEX_JSON_EXTENSION = '.json';
+const PARTITION_DIR_NAME = /^sprint-\d+$/;
+const INDEX_DIR_SUFFIX = '/';
 
 // The page the bare URL lands on.
 const INDEX_RELATIVE_PATH = '.excn/viewer/index.html';
@@ -80,6 +103,10 @@ const DEFAULT_MIME_TYPE = 'application/octet-stream';
 
 // Content type for the daemon's plain-text error bodies (404/405).
 const ERROR_CONTENT_TYPE = 'text/plain; charset=utf-8';
+
+// Cache-Control on every served body: work-tracking JSON and the directory index change
+// constantly, so the page must never read a stale cached copy.
+const CACHE_CONTROL_NO_STORE = 'no-store';
 
 // SessionStart additionalContext announcing the live page; CONTEXT_URL_PLACEHOLDER
 // is the token the hook substitutes the server URL into.
@@ -105,10 +132,15 @@ module.exports = {
   SPAWN_POLL_ATTEMPTS,
   SPAWN_POLL_INTERVAL_MS,
   PATH_WHITELIST,
+  DIRECTORY_INDEX_WHITELIST,
+  INDEX_JSON_EXTENSION,
+  PARTITION_DIR_NAME,
+  INDEX_DIR_SUFFIX,
   INDEX_RELATIVE_PATH,
   MIME_TYPES,
   DEFAULT_MIME_TYPE,
   ERROR_CONTENT_TYPE,
+  CACHE_CONTROL_NO_STORE,
   CONTEXT_URL_PLACEHOLDER,
   CONTEXT_TEMPLATE,
 };

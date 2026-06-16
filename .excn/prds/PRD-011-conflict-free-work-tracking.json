@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "id": "PRD-011",
+  "title": "Conflict-free work-tracking: UUIDv7 ids and a directory-as-tracker",
+  "status": "published",
+  "created": "2026-06-15",
+  "amended": null,
+  "problem_statement": "When teammates on separate branches author issues, PRDs, or ADRs in the same Instance and push, the work-tracking set collides in git. Two structural causes: backlog.json is a single JSON array, so every appended issue fights the same closing bracket; and ids are locally-allocated sequential counters (EXEC-NNN, PRD-NNN, sequential ADRs), so two authors offline both grab the next number. Sprint files compound it \u2014 concurrent step_log appends contend for the same line. The pain is real and already on record: Sprint 4's retro logged 'Issue-id collision from parallel filing', and Sprint 6's logged a clerk hand-edit that left a trailing comma in backlog.json.",
+  "solution": "Make work-tracking records self-identifying and stop storing them in monoliths. Every new record carries a UUIDv7 id, minted offline with no coordinator, so two branches never contend for the same identifier. backlog.json is replaced by one file per issue under .excn/issues/, named <uuid>-<slug>.json \u2014 the directory is the tracker, with deliberately no manifest (a list-of-all file would reintroduce the conflict). Two branches then never touch the same path. Format is guaranteed at a single choke point: a writeRecord helper is the exclusive write path for issues and sprints, minting the uuid, validating against the schema, and emitting canonical serialization; a thin PreToolUse channel guard denies raw writes to those homes so the helper can't be bypassed. Existing EXEC-NNN/PRD-NNN/sequential-ADR ids are grandfathered (schemas widen to accept legacy or UUIDv7); a one-time migration splits the existing backlog and retrofits sprint files. No server is needed \u2014 UUIDv7 removes the only thing a coordinator was ever for. Decisions recorded in ADR-0011; prior art in .excn/research/prior-art-shared-coordination-team-server.md.",
+  "user_stories": [
+    {
+      "id": 1,
+      "actor": "teammate authoring issues on a feature branch",
+      "want": "to file new issues while a teammate on another branch files theirs",
+      "benefit": "both branches push and merge with no git conflict in the work-tracking set."
+    },
+    {
+      "id": 2,
+      "actor": "scribe or clerk recording work",
+      "want": "a single sanctioned way to create and update issues and append sprint verdicts",
+      "benefit": "records are always schema-valid and canonically serialized, and a hand-edit can never corrupt the JSON."
+    },
+    {
+      "id": 3,
+      "actor": "Team Lead upgrading an existing Instance",
+      "want": "a one-time command that splits the legacy backlog and retrofits sprint files without rewriting history or losing data",
+      "benefit": "the Instance moves to the new layout safely and idempotently, recoverable via git if anything goes wrong."
+    },
+    {
+      "id": 4,
+      "actor": "anyone reading where the work stands",
+      "want": "the issue directory and the viewer to reflect the per-file layout, with records referenceable by short id prefix",
+      "benefit": "work history stays browsable and citable without a monolith or a running coordinator."
+    }
+  ],
+  "implementation_decisions": [
+    {
+      "title": "UUIDv7 self-minted ids",
+      "summary": "Every new record's id is a UUIDv7, minted offline with no coordinator; the timestamp prefix keeps records time-sortable. Humans and agents reference a record by its 8-char short prefix, the way they already reference commit SHAs. The tidy sequential integer and 'EXEC-091..096' range shorthand are given up; chronological order survives, contiguous numeric ranges do not."
+    },
+    {
+      "title": "Directory is the tracker, no manifest",
+      "summary": "backlog.json is replaced by one file per issue under the issues home, named <uuid>-<slug>.json with the slug required and frozen at create (the title may drift in-content; the filename never moves, since references key off the uuid). There is deliberately no manifest or index file \u2014 readers glob the directory. This amends ADR-0005's 'backlog.json is the single issue tracker'."
+    },
+    {
+      "title": "writeRecord helper \u2014 exclusive write path for issues and sprints",
+      "summary": "A shared helper accepts a JSON record, validates it against the schema with a bundled ajv (never a host-root install), writes atomically, and emits canonical serialization. For issues it mints the UUIDv7 and rejects a caller-supplied id (id immutable; other fields stay updatable). For sprints it emits canonical-sentinel form (accreting arrays last, a constant sentinel key dead-last) and exposes a step_log append mode so a gate adds one verdict without rewriting the file. This is the single format authority; it supersedes the scribe-assigns-ids role in ADR-0007 (scribe remains the owner, not the id authority)."
+    },
+    {
+      "title": "CLI surface over the helper",
+      "summary": "Agent-facing commands (to-execution issue create|update, to-execution sprint ...) wrap the helper. scribe, clerk, and gates call these instead of authoring JSON directly \u2014 closing the read-write gap the same way the Scaffolder did for the invariant layout."
+    },
+    {
+      "title": "One thin channel guard, not a content re-check",
+      "summary": "Because the helper writes via the filesystem and never the agent Write tool, any raw Write/Edit to the issues or sprints home is by definition a bypass. A single PreToolUse guard \u2014 modeled on progress-location-guard, a hard deny whose reason redirects to the CLI \u2014 denies those raw writes and needs no uuid/shape/schema logic. It subsumes the monolith-shape ban and the uuid/serialization checks; format is guaranteed by construction at the helper. A new toggle joins the hooks-config features."
+    },
+    {
+      "title": "Grandfather legacy ids; widen the schemas",
+      "summary": "Existing EXEC-NNN / PRD-NNN / sequential-ADR ids are kept as-is; issue and PRD id-patterns widen to accept legacy or UUIDv7. New records always mint UUIDv7. No historical record is rewritten."
+    },
+    {
+      "title": "One-time migration command, distinct from migrate",
+      "summary": "A separate command splits backlog.json into per-issue files (preserving legacy ids) and retrofits existing sprint files to canonical-sentinel form. It resolves the repo root by absolute path, is idempotent (no-op once split), never clobbers an existing per-issue file, and verifies every write re-reads schema-valid before deleting the monolith. It does not ride under migrate, which stays location-only per ADR-0008. All inputs are committed, so a botched run is git-recoverable."
+    },
+    {
+      "title": "PRDs and ADRs stay manually authored",
+      "summary": "PRDs (JSON, by execution-to-prd) and ADRs (markdown, by the grill) are low-churn, already one-file-per-record, and not the conflict hot path. They are created manually and not channel-guarded; each mints its own UUIDv7 by skill/grill instruction."
+    },
+    {
+      "title": "process-adherence is the set-level backstop",
+      "summary": "The issue-set schema/integrity check folds into process-adherence at the lifecycle transition (orphans, references resolve, a manual sequential-id regression in PRDs/ADRs) \u2014 for every artifact type. No adversarial Adherence Agent per issue file; the channel already guarantees per-file format."
+    },
+    {
+      "title": "Viewer reads the per-file directory",
+      "summary": "The status-page viewer globs the issues directory instead of reading backlog.json; the time-sortable UUIDv7 prefix yields creation order for free."
+    }
+  ],
+  "testing_decisions": [
+    "writeRecord helper: mints a valid UUIDv7 on create; rejects a caller-supplied id; preserves the id and allows other-field updates; emits canonical-sentinel serialization for sprints; step_log append adds one entry without rewriting siblings; write is atomic (no partial file on failure); filename is <uuid>-<slug>.json.",
+    "Migration command: idempotent (second run is a no-op); splits every backlog issue into its own file preserving legacy ids; retrofits sprint files to canonical-sentinel; verifies all writes schema-valid before deleting the monolith; never clobbers an existing per-issue file; resolves repo root by absolute path.",
+    "Channel guard: denies a raw Write/Edit to the issues and sprints homes with a redirect reason; allows helper-originated writes; leaves PRD/ADR and other paths untouched."
+  ],
+  "out_of_scope": [
+    "Any shared coordination server or ID-minting service \u2014 UUIDv7 removes the need; the write-capable viewer server (EXEC-056) is now an orthogonal live-editing UX feature, not conflict machinery.",
+    "Rewriting historical EXEC-NNN/PRD-NNN/ADR ids to UUIDv7 \u2014 grandfathered, not migrated.",
+    "Splitting sprint files into per-entry records \u2014 sprints stay one file with the sentinel trick (one team, one branch; low real concurrency).",
+    "Channel-guarding PRDs and ADRs \u2014 they stay manually authored.",
+    "An opt-in, config-gated remote-sync cron that pulls others' issues mid-session \u2014 parked as a future idea (see notes)."
+  ],
+  "issues": [
+    "EXEC-097",
+    "EXEC-098",
+    "EXEC-099",
+    "EXEC-100",
+    "EXEC-101",
+    "EXEC-102",
+    "EXEC-103",
+    "EXEC-104",
+    "EXEC-105"
+  ],
+  "notes": [
+    "Provenance: Epic Grill on 2026-06-15 (requirements + design pass); decisions recorded in ADR-0011 (alignment PASS x2); prior art in .excn/research/prior-art-shared-coordination-team-server.md.",
+    "Open at breakdown: the one-time migration command's name (e.g. split-issues) and the channel-guard feature default (on vs off in the Template until proven on the dogfood Instance).",
+    "Future idea (out of scope, not filed): a config-gated read-only issue-drift notice or an explicit to-execution sync \u2014 the uuid file-split makes pulling others' issues from main conflict-free by construction; the only hazard is mutating the working tree mid-session, so the safe form is read-only or explicit, never a sneaky working-tree write.",
+    "Src-First: all of this lands in src/ first, then the root Instance mirrors. The PRD itself is PRD-011 (sequential, grandfathered \u2014 authored before the cutover)."
+  ]
+}

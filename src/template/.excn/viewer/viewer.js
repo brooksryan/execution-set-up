@@ -18,9 +18,24 @@
 // browser back/forward and a ?sprint=N URL both work.
 //
 // The sprint record itself carries the shipped/in_progress/not_shipped lanes, so
-// the other fetches are the backlog and the optional per-Teammate load records
+// the other fetches are the issues and the optional per-Teammate load records
 // (EXEC-045). A 404 ends sprint probing; any other fetch failure aborts loudly —
 // except the optional load file, whose absence means load reporting is off.
+//
+// Issues (EXEC-104, ADR-0011): the issue tracker is now the .excn/issues/
+// directory — one <uuid>-<slug>.json file per issue, deliberately with no
+// manifest. A browser cannot list a directory, so the viewer asks the server for
+// a directory index of the issues home and each sprint-<N>/ partition (a JSON
+// array of names, or an autoindex HTML page — python3 -m http.server and most
+// static servers emit one) and reads each per-file record. It also reads the
+// legacy collection files (backlog.json and any sprint-<N>/sprint-<N>-issues.json)
+// and unions the two, so nothing vanishes before or during the one-time migration;
+// where an id appears in both, the per-file record wins. Three layouts therefore
+// render without special-casing: per-file records, legacy collections, and a fresh
+// empty issues directory (an empty board, never an error). A server that exposes
+// no directory index (the whitelist-only viewer daemon) still renders the
+// top-level backlog.json directly; enumerating per-file records there awaits a
+// daemon listing endpoint (builder-owned, follow-up).
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -33,7 +48,74 @@
 const EXCN_ROOT = '/.excn';
 
 const SPRINT_PATH = (n) => `${EXCN_ROOT}/sprints/sprint_${n}.json`;
-const BACKLOG_PATH = `${EXCN_ROOT}/issues/backlog.json`;
+
+// The issues home (directory-as-tracker, ADR-0011). The trailing slash requests a
+// directory index; per-file records and the legacy collections both live under it.
+const ISSUES_HOME_PATH = `${EXCN_ROOT}/issues/`;
+
+// The legacy collection at the issues-home root. Fetched directly (one level deep,
+// so the whitelist-only daemon can serve it) so the board renders even when no
+// directory index is available. Pre-migration it holds the open backlog; post-
+// migration it is absent (a clean 404), and per-file records take over.
+const BACKLOG_PATH = `${ISSUES_HOME_PATH}backlog.json`;
+
+// The extension every record/collection file carries; the index entries we keep.
+const JSON_EXTENSION = '.json';
+
+// A JSON-array directory index begins with this marker; an autoindex HTML page
+// does not, so the marker chooses the parse strategy in parseIndexEntries.
+const JSON_ARRAY_PREFIX = '[';
+
+// URL component delimiters trimmed from an index entry before it names a child.
+const URL_FRAGMENT_DELIMITER = '#';
+const URL_QUERY_DELIMITER = '?';
+
+// The path segment separator a directory URL ends with and partition names join on.
+const PATH_SEGMENT_SEPARATOR = '/';
+
+// A sprint partition subdirectory under the issues home (issues/sprint-<N>/),
+// where issues assigned to sprint N relocate (location-as-state, EXEC-098). The
+// viewer recurses one level into these to read their per-file records and the
+// legacy sprint-<N>-issues.json companion. Matches a bare or slash-suffixed name.
+const ISSUE_PARTITION_DIR = /^sprint-\d+\/?$/;
+
+// An autoindex page links each entry as <a href="name">; this lifts the targets.
+// JSON-array indexes are parsed first, so this only runs on HTML directory pages.
+const HREF_PATTERN = /href\s*=\s*"([^"]+)"/gi;
+
+// A directory index entry we never follow: an absolute path, a scheme URL, a
+// parent/self link, or python's autoindex column-sort query links (start with ?).
+const INDEX_ENTRY_REJECT = /^(\/|\?|\.{1,2}\/?$|[a-z][a-z0-9+.-]*:)/i;
+
+// The field a collection file carries (the {schema_version, issues:[...]} wrapper);
+// its presence distinguishes a collection from a single per-record issue file.
+const ISSUE_COLLECTION_FIELD = 'issues';
+
+// A per-record issue file carries its id and these markers at top level (issue-
+// record.schema.json); the pair tells a single record from a collection wrapper.
+const ISSUE_ID_FIELD = 'id';
+const ISSUE_RECORD_MARKERS = ['severity', 'actionable_now'];
+
+// Closed issues are archived, not backlog; the backlog lane shows live work only.
+const ISSUE_STATUS_CLOSED = 'closed';
+
+// Issue sort (EXEC-104): legacy EXEC-NNN ids predate the UUIDv7 cutover (forward-
+// only, ADR-0011), so they are the earliest-created and sort first; UUIDv7 records
+// follow in timestamp order. GROUP_* are the comparator's primary rank.
+const GROUP_LEGACY = 0;
+const GROUP_UUID = 1;
+
+// Canonical UUIDv7, lowercase-hex and hyphenated. Mirrors UUIDV7_PATTERN in
+// src/bin/write-policy.js (the viewer cannot require() the Node policy module);
+// keep the two in lockstep. A lowercase-hex v7 string sorts lexicographically in
+// timestamp order, since the first 48 bits are a big-endian millisecond prefix.
+const UUIDV7_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+// The trailing integer of a legacy id (EXEC-097 → 97); orders legacy ids among
+// themselves. An id with no numeric tail degrades to LEGACY_ID_FALLBACK_NUMBER.
+const LEGACY_ID_SUFFIX = /-(\d+)$/;
+const LEGACY_ID_FALLBACK_NUMBER = 0;
+const LEGACY_ID_RADIX = 10;
 
 // Per-Teammate load telemetry (EXEC-045, load-progress.schema.json). A Runtime
 // Record under .excn/runtime/ (ADR-0008, EXEC-067). Optional: the load-report
@@ -265,13 +347,237 @@ function defaultSprint(sprints) {
 }
 
 /**
- * Load the open backlog issues.
- * @returns {Promise<Array<object>>} the backlog issue records (possibly empty).
- * @throws {Error} if backlog.json is missing or unparseable.
+ * Normalise a directory-index entry name, or reject it. Strips a query/fragment,
+ * percent-decodes, and drops the entries an index lists that are not children to
+ * follow (absolute paths, scheme URLs, parent/self links, autoindex sort links).
+ * @param {string} raw - one raw href target or JSON array entry.
+ * @returns {string} the cleaned child name, or '' to reject the entry.
  */
-async function loadBacklog() {
-  const collection = await fetchJson(BACKLOG_PATH);
-  return collection.issues;
+function cleanIndexEntry(raw) {
+  if (typeof raw !== 'string') {
+    return '';
+  }
+  let name = raw.split(URL_FRAGMENT_DELIMITER)[0].split(URL_QUERY_DELIMITER)[0];
+  if (name === '') {
+    return '';
+  }
+  try {
+    name = decodeURIComponent(name);
+  } catch {
+    return ''; // a malformed escape is not a fetchable name
+  }
+  return INDEX_ENTRY_REJECT.test(name) ? '' : name;
+}
+
+/**
+ * Parse a directory index body into child entry names. A JSON array of names is
+ * preferred (a server that exposes a structured listing); otherwise the body is
+ * treated as an autoindex HTML page and its <a href> targets are lifted.
+ * @param {string} body - the index response body.
+ * @returns {Array<string>} the cleaned child names (files and subdirectories).
+ */
+function parseIndexEntries(body) {
+  const trimmed = body.trim();
+  if (trimmed.startsWith(JSON_ARRAY_PREFIX)) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.map(cleanIndexEntry).filter((name) => name !== '');
+      }
+    } catch {
+      // Not a JSON array after all; fall through to the HTML href parse.
+    }
+  }
+  const names = [];
+  HREF_PATTERN.lastIndex = 0;
+  let match = HREF_PATTERN.exec(body);
+  while (match !== null) {
+    const name = cleanIndexEntry(match[1]);
+    if (name !== '') {
+      names.push(name);
+    }
+    match = HREF_PATTERN.exec(body);
+  }
+  return names;
+}
+
+/**
+ * Fetch a directory index and return its child entry names. Tolerant by design:
+ * a server with no index for the path (the whitelist-only daemon 404s a directory
+ * request) yields an empty list rather than an error, so enumeration degrades to
+ * the directly-fetched legacy collections.
+ * @param {string} dirUrl - the directory URL (trailing slash).
+ * @returns {Promise<Array<string>>} the child entry names (empty when unavailable).
+ */
+async function fetchIndexEntries(dirUrl) {
+  let response;
+  try {
+    response = await fetch(dirUrl, { cache: 'no-store' });
+  } catch {
+    return []; // no index available (network/CORS) — degrade, don't fail the board
+  }
+  if (!response.ok) {
+    return []; // no directory index served for this path
+  }
+  let body;
+  try {
+    body = await response.text();
+  } catch {
+    return [];
+  }
+  return parseIndexEntries(body);
+}
+
+/**
+ * Enumerate every per-record and collection JSON file URL under the issues home,
+ * via the server's directory index: the *.json at the top level plus the *.json one
+ * level down in each sprint-<N>/ partition. No manifest file is read (ADR-0011);
+ * an unavailable index yields no URLs.
+ * @returns {Promise<Array<string>>} absolute file URLs to fetch (possibly empty).
+ */
+async function listIssueFileUrls() {
+  const urls = [];
+  for (const entry of await fetchIndexEntries(ISSUES_HOME_PATH)) {
+    if (entry.endsWith(JSON_EXTENSION)) {
+      urls.push(`${ISSUES_HOME_PATH}${entry}`);
+    } else if (ISSUE_PARTITION_DIR.test(entry)) {
+      const partitionName = entry.endsWith(PATH_SEGMENT_SEPARATOR) ? entry : `${entry}${PATH_SEGMENT_SEPARATOR}`;
+      const partitionUrl = `${ISSUES_HOME_PATH}${partitionName}`;
+      for (const child of await fetchIndexEntries(partitionUrl)) {
+        if (child.endsWith(JSON_EXTENSION)) {
+          urls.push(`${partitionUrl}${child}`);
+        }
+      }
+    }
+  }
+  return urls;
+}
+
+/**
+ * Test whether a parsed JSON document is a single per-record issue file (id and the
+ * issue markers at top level), as opposed to a {schema_version, issues:[]} collection.
+ * @param {object} doc - a parsed JSON document.
+ * @returns {boolean} true when doc is a single issue record.
+ */
+function isIssueRecord(doc) {
+  return doc !== null
+    && typeof doc === 'object'
+    && !Array.isArray(doc[ISSUE_COLLECTION_FIELD])
+    && typeof doc[ISSUE_ID_FIELD] === 'string'
+    && ISSUE_RECORD_MARKERS.every((marker) => marker in doc);
+}
+
+/**
+ * Merge collection-sourced and per-file issues into one set, keyed by id. Per-file
+ * records win over a collection entry of the same id (ADR-0011 cutover). Entries
+ * without a string id are dropped (not addressable).
+ * @param {Array<object>} collectionIssues - issues from collection files.
+ * @param {Array<object>} perFileIssues - issues from per-record files.
+ * @returns {Array<object>} the unioned issues, de-duplicated by id.
+ */
+function mergeIssues(collectionIssues, perFileIssues) {
+  const byId = new Map();
+  for (const issue of collectionIssues) {
+    if (typeof issue[ISSUE_ID_FIELD] === 'string') {
+      byId.set(issue[ISSUE_ID_FIELD], issue);
+    }
+  }
+  for (const issue of perFileIssues) {
+    if (typeof issue[ISSUE_ID_FIELD] === 'string') {
+      byId.set(issue[ISSUE_ID_FIELD], issue); // per-file record wins on a clash
+    }
+  }
+  return Array.from(byId.values());
+}
+
+/**
+ * Load every issue across all three layouts, unioned and de-duplicated. The
+ * top-level backlog.json is fetched directly (daemon-reachable) so the board
+ * renders without a directory index; the index enumeration then adds per-file
+ * records and the sprint-partition collections. A single broken per-file record is
+ * skipped rather than blanking the board — the live status view is best-effort over
+ * the directory, and atomic writes (EXEC-097) mean a reader never sees a partial.
+ * @returns {Promise<Array<object>>} every known issue (possibly empty).
+ * @throws {Error} only if backlog.json is present but unparseable (fail-closed on
+ *   the one required legacy collection, matching the board's other required reads).
+ */
+async function loadAllIssues() {
+  const collectionIssues = [];
+  const perFileIssues = [];
+
+  const backlog = await fetchOptionalJson(BACKLOG_PATH);
+  if (backlog !== null && Array.isArray(backlog[ISSUE_COLLECTION_FIELD])) {
+    collectionIssues.push(...backlog[ISSUE_COLLECTION_FIELD]);
+  }
+
+  for (const url of await listIssueFileUrls()) {
+    let doc;
+    try {
+      doc = await fetchOptionalJson(url);
+    } catch {
+      continue; // a broken individual file never takes down the whole board
+    }
+    if (doc === null) {
+      continue;
+    }
+    if (Array.isArray(doc[ISSUE_COLLECTION_FIELD])) {
+      collectionIssues.push(...doc[ISSUE_COLLECTION_FIELD]);
+    } else if (isIssueRecord(doc)) {
+      perFileIssues.push(doc);
+    }
+  }
+
+  return mergeIssues(collectionIssues, perFileIssues);
+}
+
+/**
+ * Build a stable sort key for an issue id that mixes legacy and UUIDv7 forms.
+ * Legacy ids precede UUIDv7 (the cutover is forward-only, so they were created
+ * first) and order by their trailing integer; UUIDv7 ids order by the string,
+ * which equals creation order via the timestamp prefix. A non-string or
+ * suffix-less id degrades gracefully instead of crashing the sort.
+ * @param {object} issue - an issue record.
+ * @returns {{group: number, num: number, id: string}} the comparison key.
+ */
+function issueSortKey(issue) {
+  const id = typeof issue[ISSUE_ID_FIELD] === 'string' ? issue[ISSUE_ID_FIELD] : '';
+  if (UUIDV7_PATTERN.test(id)) {
+    return { group: GROUP_UUID, num: LEGACY_ID_FALLBACK_NUMBER, id };
+  }
+  const match = LEGACY_ID_SUFFIX.exec(id);
+  const num = match === null ? LEGACY_ID_FALLBACK_NUMBER : Number.parseInt(match[1], LEGACY_ID_RADIX);
+  return { group: GROUP_LEGACY, num, id };
+}
+
+/**
+ * Compare two issues for a sane, stable order across mixed id forms.
+ * @param {object} a - an issue record.
+ * @param {object} b - an issue record.
+ * @returns {number} negative, zero, or positive per the standard comparator contract.
+ */
+function compareIssues(a, b) {
+  const keyA = issueSortKey(a);
+  const keyB = issueSortKey(b);
+  if (keyA.group !== keyB.group) {
+    return keyA.group - keyB.group;
+  }
+  if (keyA.num !== keyB.num) {
+    return keyA.num - keyB.num;
+  }
+  if (keyA.id < keyB.id) {
+    return -1;
+  }
+  return keyA.id > keyB.id ? 1 : 0;
+}
+
+/**
+ * Select and order the issues the backlog lane shows: live work only (closed
+ * issues are archived, not backlog), sorted into a stable creation order.
+ * @param {Array<object>} issues - every known issue.
+ * @returns {Array<object>} the backlog-lane issues, ordered.
+ */
+function backlogIssues(issues) {
+  return issues.filter((issue) => issue.status !== ISSUE_STATUS_CLOSED).sort(compareIssues);
 }
 
 /**
@@ -1057,8 +1363,7 @@ async function initHooksPanel() {
 async function init() {
   try {
     const sprints = await probeSprints();
-    const backlog = await loadBacklog();
-    renderBacklogLane(backlog);
+    renderBacklogLane(backlogIssues(await loadAllIssues()));
     if (sprints.length === 0) {
       byId(ELEMENT_IDS.sprintLine).textContent = 'No sprints yet.';
       byId(ELEMENT_IDS.board).hidden = false;

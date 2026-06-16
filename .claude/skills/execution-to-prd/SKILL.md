@@ -15,9 +15,9 @@ Never "search the docs." Read these paths.
 ## Process
 1. Reconstruct the problem, solution, and user stories from the grill conversation, in the glossary's vocabulary.
 2. Sketch the major modules to build or modify. Look for deep modules — much functionality behind a simple, testable interface that rarely changes. Check the sketch with the user. Ask which modules they want tests for. The sketch becomes `implementation_decisions`; the test answers become `testing_decisions`.
-3. Write the PRD as schema-valid JSON to `.excn/prds/PRD-<NNN>-<slug>.json`:
+3. Write the PRD as schema-valid JSON to `.excn/prds/<uuid>-<slug>.json`:
    - **Format authority:** `.excn/schemas/prd.schema.json`. Conform to it exactly. There is no markdown template.
-   - **NNN:** scan `.excn/prds/` for the highest existing `PRD-NNN`, increment, zero-pad to 3 digits.
+   - **id:** mint a UUIDv7 with `npx to-execution uuid` — use it as the `id` field and the `<uuid>` filename prefix. Never self-increment a sequential `PRD-NNN` (legacy ids are grandfathered; the schema accepts legacy or UUIDv7).
    - `status`: `"published"`. `created`: today's date.
    - `implementation_decisions`: name the artifacts and decisions, never file paths or code.
    - `issues`: leave empty — `execution-to-issues` populates it.
