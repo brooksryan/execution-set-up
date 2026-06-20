@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "framework_version": "0.6.0",
-  "stamped": "2026-06-16T15:38:30.918Z",
+  "framework_version": "0.8.0",
+  "stamped": "2026-06-20T04:30:41.513Z",
   "files": {
     ".claude/agents/_adherence-agent.template.md": "0417f72a32ad1f26787421f76007c9d4017034fabc8da68a49337f986a2810f7",
     ".claude/agents/_teammate.template.md": "f1e1071831424d4f619cd16f777d72b0eea0d8887a9eb385e2c6dd1f84392e4d",
@@ -29,10 +29,10 @@
     ".claude/skills/execution-context-grill/SKILL.md": "a6e88c032d58c6e87fc045ee56458546c33ea313d013888ac0fccee4781fdaeb",
     ".claude/skills/execution-epic-grill/ADR-FORMAT.md": "6f57580935a6fa15215dac77419ffef6878f7536f5f07213a22bd44a8f7c013f",
     ".claude/skills/execution-epic-grill/SKILL.md": "9e355308cb9640d1358eae983ff0eb2eb04ce869a5a530f3a54e1e754a879e63",
-    ".claude/skills/execution-to-issues/SKILL.md": "357c9d055496b5e32aecb64a632c73c70a954bf213beec498d6804b9f486e035",
+    ".claude/skills/execution-to-issues/SKILL.md": "b3290091323c12f0c9fd623e4a66fd41d528ced97c5307b86f96b4d2de85f806",
     ".claude/skills/execution-to-prd/SKILL.md": "f93bf12024534754fded27710ccbcb467f53b01ec3a1e60254728b669b0036d2",
     ".claude/skills/make-teammate/SKILL.md": "a18982008c13fb9f79605244c86f191d422af8ca8bd71fadc8cd6c762f53d8a2",
-    ".excn/PROCESS.md": "f5dad5c5e075d5f863716ae385d9ee2d654af1c83862e49cfc7bc3113b9cebbf",
+    ".excn/PROCESS.md": "389bd9d6bb644ac5df52615de9786ef0ce701fe1837761ec150e74c83ca2787f",
     ".excn/README.md": "054dad5eb9b6b9f999b4e21805dd4b1f3aaf0b7a76c44e009b051c4579642c71",
     ".excn/adr/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     ".excn/.gitignore": "bf9623160a004f3850520af7b54387ba2a21c53e669a84aedfd84ec46ad663d5",
