@@ -1,0 +1,23 @@
+{
+  "id": "019ee185-cb0b-725d-a71f-a0dfce56ce49",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "src/bin"
+  ],
+  "actionable_now": true,
+  "description": "parseFlags (src/bin/cli.js) splits every LIST flag value on a comma (LIST_VALUE_SEPARATOR in write-policy.js) and a repeated LIST flag is last-wins. Acceptance criteria are prose sentences full of commas; one criterion silently becomes N items and the record ships wrong with no error. Fix: a LIST flag contributes exactly one verbatim item per occurrence; repeats append. Drop comma-splitting and retire LIST_VALUE_SEPARATOR; correct the write-policy comment. Affects --scope --acceptance-criteria --depends-on --related-tickets.",
+  "title": "LIST flags append per occurrence and stop comma-splitting prose",
+  "classification": "local",
+  "slice_type": "AFK",
+  "root_cause": "LIST type splits on a comma that legitimately appears inside prose list items; repeat overwrites instead of appending so the obvious workaround also fails silently.",
+  "fix": "In parseFlags: for FLAG_TYPE.LIST push the whole trimmed value as one element and append on repeat (initialize the array on first sight). Remove the split on LIST_VALUE_SEPARATOR and the constant; update the FLAG_TYPE/write-policy comments to say 'repeatable; one item per occurrence'.",
+  "acceptance_criteria": [
+    "Two repeated --acceptance-criteria flags whose values each contain internal commas produce exactly two array items each held verbatim",
+    "A single --scope value containing a comma is stored as one item and is not split",
+    "LIST_VALUE_SEPARATOR is removed and no code path splits a LIST value",
+    "A parseFlags unit test covers repeat-append and the no-split behavior"
+  ],
+  "assigned_sprint": 10,
+  "closed_in_sprint": 10
+}

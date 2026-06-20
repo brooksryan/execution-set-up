@@ -1,0 +1,26 @@
+{
+  "id": "019ee186-0ef9-7833-82ae-6409d293e897",
+  "status": "closed",
+  "severity": "P3",
+  "scope": [
+    "src/template/.claude/skills/execution-to-issues"
+  ],
+  "actionable_now": true,
+  "description": "The execution-to-issues SKILL.md still tells agents to append schema-valid objects to .excn/issues/backlog.json (pre-ADR-0011) and never names the to-execution issue create CLI. That doc rot is why agents improvise the invocation and hit the flag landmines. Rewrite the write step to the real CLI recipe: one issue create per slice; minted UUIDv7 ids; repeated list flags for multi-item fields; bare presence flags; capture each minted id to wire depends_on in dependency order.",
+  "title": "Refresh execution-to-issues skill to teach the issue create CLI",
+  "classification": "local",
+  "slice_type": "AFK",
+  "root_cause": "Skill predates the per-file UUIDv7 cutover; it documents the monolith backlog.json append flow and omits the CLI entirely.",
+  "fix": "Replace the backlog.json append section with a to-execution issue create recipe covering required flags, list flags shown as repeated occurrences, bare booleans, and dependency-order id capture; drop the scan-for-max-EXEC-NNN id guidance.",
+  "acceptance_criteria": [
+    "SKILL.md no longer instructs appending to backlog.json",
+    "It shows a to-execution issue create invocation using a repeated --acceptance-criteria flag",
+    "It documents capturing the minted id to populate --depends-on in dependency order",
+    "No remaining claim that the author hand-assigns EXEC-NNN ids"
+  ],
+  "depends_on": [
+    "019ee185-cb0b-725d-a71f-a0dfce56ce49"
+  ],
+  "assigned_sprint": 10,
+  "closed_in_sprint": 10
+}

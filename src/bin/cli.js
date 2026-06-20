@@ -74,13 +74,13 @@ const { migrateRecords } = require('./migrate-records');
 const {
   RECORD_KIND,
   FLAG_TYPE,
+  FLAG_TYPE_LABEL,
   ISSUE_FIELD_FLAGS,
   ISSUE_CREATE_REQUIRED_FLAG,
   STEP_LOG_FLAGS,
   STEP_LOG_REQUIRED_FLAGS,
   STEP_LOG_DATE_FIELD,
   ISO_DATE_LENGTH,
-  LIST_VALUE_SEPARATOR,
 } = require('./write-policy');
 
 // Package root is one level up from bin/; the template ships beside it.
@@ -100,6 +100,8 @@ const MS_PER_HOUR = 60 * MS_PER_MINUTE;
 const FLAG_PREFIX = '-';
 const FORCE_FLAG = '--force';
 const SCHEMA_FLAG = '--schema';
+// Either spelling requests a subcommand's help reference instead of running it.
+const HELP_FLAGS = ['-h', '--help'];
 
 // Where the canonical schemas ship inside the package (beside the template the bin
 // stamps); validate resolves auto-detected schemas here, so the npm-installed package
@@ -1543,14 +1545,16 @@ function buildAjv() {
 
 /**
  * Parse flags into a field object per a flag table (ISSUE_FIELD_FLAGS / STEP_LOG_FLAGS):
- * STRING takes the next arg, INTEGER parses it as an integer, LIST splits it on commas
- * (trimmed, empties dropped), BOOLEAN is a presence toggle (true), NULL is a presence flag
- * that sets its field to null. Enum/shape validation is the schema's job, not the parser's.
+ * STRING takes the next arg, INTEGER parses it as an integer, LIST is repeatable — each
+ * occurrence appends one verbatim (trimmed) item, never split, BOOLEAN is a presence toggle
+ * (true), NULL is a presence flag that sets its field to null. A presence flag handed a
+ * trailing value is rejected by name. Enum/shape validation is the schema's job, not the parser's.
  * @param {string[]} args - the args to parse (flags and their values).
  * @param {object} flagTable - the flag → {field, type} table.
  * @param {string} context - the command label for error messages.
  * @returns {object} the assembled field object.
- * @throws {Error} on an unknown flag, a value-taking flag missing its value, or a bad integer.
+ * @throws {Error} on an unknown flag, a value-taking flag missing its value, a presence flag
+ *   handed a value, or a bad integer.
  */
 function parseFlags(args, flagTable, context) {
   const values = {};
@@ -1560,12 +1564,13 @@ function parseFlags(args, flagTable, context) {
     if (!spec) {
       throw new Error(`unknown flag ${flag} for ${context} — known flags: ${Object.keys(flagTable).join(', ')}`);
     }
-    if (spec.type === FLAG_TYPE.BOOLEAN) {
-      values[spec.field] = true;
-      continue;
-    }
-    if (spec.type === FLAG_TYPE.NULL) {
-      values[spec.field] = null;
+    if (spec.type === FLAG_TYPE.BOOLEAN || spec.type === FLAG_TYPE.NULL) {
+      // A presence flag carries no value; a following non-flag token is a misuse, not the next flag.
+      const next = args[index + 1];
+      if (next !== undefined && !flagTable[next]) {
+        throw new Error(`flag ${flag} is a presence flag; pass it with no value`);
+      }
+      values[spec.field] = spec.type === FLAG_TYPE.BOOLEAN ? true : null;
       continue;
     }
     const value = args[index + 1];
@@ -1575,7 +1580,9 @@ function parseFlags(args, flagTable, context) {
     }
     index += 1;
     if (spec.type === FLAG_TYPE.LIST) {
-      values[spec.field] = value.split(LIST_VALUE_SEPARATOR).map((item) => item.trim()).filter((item) => item !== '');
+      // Repeatable: one verbatim item per occurrence. Initialize on first sight, then append.
+      if (values[spec.field] === undefined) values[spec.field] = [];
+      values[spec.field].push(value.trim());
     } else if (spec.type === FLAG_TYPE.INTEGER) {
       const parsed = Number(value);
       if (!Number.isInteger(parsed)) {
@@ -1590,6 +1597,36 @@ function parseFlags(args, flagTable, context) {
 }
 
 /**
+ * Whether the args request help — `-h` or `--help` appearing anywhere.
+ * @param {string[]} args - the args after the action word.
+ * @returns {boolean} true when a help flag is present.
+ */
+function hasHelpFlag(args) {
+  return args.some((arg) => HELP_FLAGS.includes(arg));
+}
+
+/**
+ * Print the `issue <action>` flag reference to stdout: every ISSUE_FIELD_FLAGS flag with its
+ * type label (STRING / LIST-repeatable / BOOLEAN / INTEGER / PRESENCE) and the record field it
+ * sets, plus a note that list flags repeat one item per occurrence. Driven by the flag table
+ * so it cannot drift from what the parser accepts.
+ * @param {string} action - `create` or `update`, for the usage line.
+ * @returns {void}
+ */
+function printIssueHelp(action) {
+  const flags = Object.keys(ISSUE_FIELD_FLAGS);
+  const flagWidth = Math.max(...flags.map((flag) => flag.length));
+  const labelWidth = Math.max(...flags.map((flag) => FLAG_TYPE_LABEL[ISSUE_FIELD_FLAGS[flag].type].length));
+  const lines = [`usage: to-execution issue ${action} [flags]`, '', 'flags:'];
+  for (const flag of flags) {
+    const spec = ISSUE_FIELD_FLAGS[flag];
+    lines.push(`  ${flag.padEnd(flagWidth)}  ${FLAG_TYPE_LABEL[spec.type].padEnd(labelWidth)}  → ${spec.field}`);
+  }
+  lines.push('', 'List flags repeat one item per occurrence.');
+  process.stdout.write(`${lines.join('\n')}\n`);
+}
+
+/**
  * Run `issue create`: parse the flags, write the record through the writeRecord helper
  * (which mints the UUIDv7, validates, and writes atomically), and print the created file
  * path and id. The required --title flag must be present.
@@ -1599,6 +1636,7 @@ function parseFlags(args, flagTable, context) {
  *   a helper failure (supplied id, schema-invalid record, or I/O failure).
  */
 function issueCreate(args) {
+  if (hasHelpFlag(args)) return printIssueHelp('create');
   let record;
   try {
     record = parseFlags(args, ISSUE_FIELD_FLAGS, '`issue create`');
@@ -1633,6 +1671,7 @@ function issueCreate(args) {
  *   error, or a helper failure (id change, no/ambiguous match, schema-invalid result).
  */
 function issueUpdate(args) {
+  if (hasHelpFlag(args)) return printIssueHelp('update');
   const id = args[0];
   if (!id || id.startsWith(FLAG_PREFIX)) {
     process.stderr.write('error: `issue update` needs an <id> — usage: to-execution issue update <id> --status ...\n');
@@ -1909,4 +1948,9 @@ function main() {
   }
 }
 
-main();
+// Run as a CLI when invoked directly; stay import-safe so tests can require parseFlags.
+if (require.main === module) {
+  main();
+}
+
+module.exports = { parseFlags };

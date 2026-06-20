@@ -1,0 +1,26 @@
+{
+  "id": "019ee186-326a-7be2-a4ad-b782b6ebb71e",
+  "status": "closed",
+  "severity": "P3",
+  "scope": [
+    "src/bin"
+  ],
+  "actionable_now": false,
+  "description": "Issue flags surface only inside a parse-error string; there is no per-subcommand help. Add issue create --help and issue update --help (and -h) that print the flag table with each flag's type — STRING / LIST-repeatable / BOOLEAN / INTEGER — and a note that LIST flags repeat one item per occurrence. Depends on S1 so the type labels and the repeat note describe the shipped behavior.",
+  "title": "issue create and issue update print a --help flag reference",
+  "classification": "local",
+  "slice_type": "AFK",
+  "depends_on": [
+    "019ee185-cb0b-725d-a71f-a0dfce56ce49"
+  ],
+  "root_cause": "Flag discovery relies on triggering an error; the known-flags list carries no types or repeat semantics.",
+  "fix": "Add a help renderer driven by ISSUE_FIELD_FLAGS that prints flag, type label, and target field; register -h/--help handling in the issue subcommand dispatch before required-flag checks.",
+  "acceptance_criteria": [
+    "issue create --help exits zero and lists every issue flag with its type label",
+    "The output states that list flags repeat one item per occurrence",
+    "issue update --help renders the same reference",
+    "-h is accepted as an alias"
+  ],
+  "assigned_sprint": 10,
+  "closed_in_sprint": 10
+}

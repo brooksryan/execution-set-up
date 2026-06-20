@@ -121,10 +121,22 @@ const SPRINT_KEY_ORDER = [
 const SPRINT_SENTINEL_KEY = 'schema_version';
 
 // How a flag's value is read. STRING takes the next arg verbatim; INTEGER parses it as an
-// integer; LIST splits the next arg on LIST_VALUE_SEPARATOR; BOOLEAN is a presence flag
-// (no value, sets true); NULL is a presence flag that sets its field to null (e.g. moving an
-// issue back to the backlog). Named so the parser branches on constants, not bare strings.
+// integer; LIST is repeatable — each occurrence contributes one item per occurrence, held
+// verbatim (repeats append, no splitting); BOOLEAN is a presence flag (no value, sets true);
+// NULL is a presence flag that sets its field to null (e.g. moving an issue back to the
+// backlog). Named so the parser branches on constants, not bare strings.
 const FLAG_TYPE = { STRING: 'string', INTEGER: 'integer', LIST: 'list', BOOLEAN: 'boolean', NULL: 'null' };
+
+// Human-readable type labels for `issue --help`, keyed by FLAG_TYPE. LIST is annotated
+// repeatable because each occurrence contributes exactly one verbatim item; BOOLEAN and NULL
+// are presence flags that carry no value.
+const FLAG_TYPE_LABEL = {
+  [FLAG_TYPE.STRING]: 'STRING',
+  [FLAG_TYPE.INTEGER]: 'INTEGER',
+  [FLAG_TYPE.LIST]: 'LIST-repeatable',
+  [FLAG_TYPE.BOOLEAN]: 'BOOLEAN',
+  [FLAG_TYPE.NULL]: 'PRESENCE',
+};
 
 // Issue field-flag table shared by `issue create` and `issue update`: each flag maps to the
 // record field it sets and how its value is read (FLAG_TYPE). There is deliberately no id
@@ -166,9 +178,6 @@ const STEP_LOG_DATE_FIELD = 'at';
 // An ISO-8601 timestamp's leading date portion is its first 10 chars (YYYY-MM-DD).
 const ISO_DATE_LENGTH = 10;
 
-// How a 'list'-typed flag's single argument is split into an array.
-const LIST_VALUE_SEPARATOR = ',';
-
 module.exports = {
   RECORD_KIND,
   RECORD_FILE_EXTENSION,
@@ -197,11 +206,11 @@ module.exports = {
   SPRINT_KEY_ORDER,
   SPRINT_SENTINEL_KEY,
   FLAG_TYPE,
+  FLAG_TYPE_LABEL,
   ISSUE_FIELD_FLAGS,
   ISSUE_CREATE_REQUIRED_FLAG,
   STEP_LOG_FLAGS,
   STEP_LOG_REQUIRED_FLAGS,
   STEP_LOG_DATE_FIELD,
   ISO_DATE_LENGTH,
-  LIST_VALUE_SEPARATOR,
 };

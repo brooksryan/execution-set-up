@@ -1,10 +1,12 @@
 'use strict';
 
-// Unit tests for the writeRecord helper (EXEC-097, PRD-011). Run with `node --test` from
-// src/ (so require('ajv') resolves against src/node_modules). Covers the create AC and the
-// PRD testing_decisions for issues: valid UUIDv7 mint, supplied-id rejection, slug
-// derivation, atomic write (no partial/temp file), and schema-invalid rejection. These
-// tests live outside the package `files` set, so they are not published.
+// Unit tests for the writeRecord helper and the issue-flag CLI surface (EXEC-097, PRD-011).
+// Run with `node --test` from src/ (so require('ajv') resolves against src/node_modules).
+// Covers the create AC and the PRD testing_decisions for issues: valid UUIDv7 mint,
+// supplied-id rejection, slug derivation, atomic write (no partial/temp file), schema-invalid
+// rejection, the sprint step_log append, the `uuid` command, and the parseFlags contract —
+// LIST repeat-append (no comma split), presence-flag misuse rejection, and `issue
+// create|update --help`. These tests live outside the package `files` set, so they are not published.
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -16,7 +18,8 @@ const { execFileSync } = require('node:child_process');
 const CLI_PATH = path.join(__dirname, '..', 'bin', 'cli.js');
 
 const { writeRecord, updateRecord, appendStepLog, mintUuidV7, deriveSlug, serializeSprint } = require('../bin/write-record');
-const { UUIDV7_PATTERN, RECORD_TEMP_SUFFIX, RECORD_KIND, SPRINT_SENTINEL_KEY, SPRINT_STEP_LOG_FIELD } = require('../bin/write-policy');
+const { UUIDV7_PATTERN, RECORD_TEMP_SUFFIX, RECORD_KIND, SPRINT_SENTINEL_KEY, SPRINT_STEP_LOG_FIELD, ISSUE_FIELD_FLAGS } = require('../bin/write-policy');
+const { parseFlags } = require('../bin/cli');
 
 const ISSUES_DIR_RELATIVE = '.excn/issues';
 const SPRINTS_DIR_RELATIVE = '.excn/sprints';
@@ -266,4 +269,53 @@ test('appendStepLog throws when the sprint file is missing', () => {
 test('`to-execution uuid` prints one fresh UUIDv7', () => {
   const out = execFileSync(process.execPath, [CLI_PATH, 'uuid'], { encoding: 'utf8' }).trim();
   assert.match(out, UUIDV7_PATTERN);
+});
+
+// ── parseFlags: issue flag parsing (S1 list-append, S2 presence-flag misuse) ──
+
+test('parseFlags appends one verbatim LIST item per occurrence and never comma-splits', () => {
+  const parsed = parseFlags(
+    [
+      '--acceptance-criteria', 'Given a record, when X happens, then Y, Z follow',
+      '--acceptance-criteria', 'A second criterion, with its own comma',
+      '--scope', 'src/bin, src/test',
+    ],
+    ISSUE_FIELD_FLAGS,
+    '`issue create`'
+  );
+  assert.deepEqual(parsed.acceptance_criteria, [
+    'Given a record, when X happens, then Y, Z follow',
+    'A second criterion, with its own comma',
+  ], 'two repeats produce two items, each held verbatim through internal commas');
+  assert.deepEqual(parsed.scope, ['src/bin, src/test'], 'a single comma-bearing value is one unsplit item');
+});
+
+test('parseFlags rejects a presence flag handed a trailing value, by name', () => {
+  assert.throws(
+    () => parseFlags(['--actionable-now', 'true'], ISSUE_FIELD_FLAGS, '`issue create`'),
+    /flag --actionable-now is a presence flag; pass it with no value/
+  );
+});
+
+test('parseFlags sets a lone presence flag true and parses a following known flag normally', () => {
+  const parsed = parseFlags(['--actionable-now', '--title', 'A title'], ISSUE_FIELD_FLAGS, '`issue create`');
+  assert.equal(parsed.actionable_now, true);
+  assert.equal(parsed.title, 'A title');
+});
+
+// ── issue --help reference (S3) ──────────────────────────────────────────────
+
+test('`issue create --help` exits zero and lists every flag with its type label', () => {
+  const out = execFileSync(process.execPath, [CLI_PATH, 'issue', 'create', '--help'], { encoding: 'utf8' });
+  for (const flag of Object.keys(ISSUE_FIELD_FLAGS)) {
+    assert.ok(out.includes(flag), `help lists ${flag}`);
+  }
+  assert.match(out, /LIST-repeatable/, 'list flags carry the repeatable type label');
+  assert.match(out, /List flags repeat one item per occurrence\./, 'help states the repeat semantics');
+});
+
+test('`issue update -h` renders the same reference via the alias', () => {
+  const out = execFileSync(process.execPath, [CLI_PATH, 'issue', 'update', '-h'], { encoding: 'utf8' });
+  assert.match(out, /usage: to-execution issue update/);
+  assert.match(out, /--acceptance-criteria/);
 });

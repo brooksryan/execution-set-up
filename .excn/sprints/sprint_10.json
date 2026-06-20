@@ -1,0 +1,120 @@
+{
+  "sprint_id": 10,
+  "name": "Sprint 10",
+  "status": "closed",
+  "dates": {
+    "start": "2026-06-19",
+    "end": "2026-06-19",
+    "duration_note": null
+  },
+  "team": [
+    {
+      "name": "team-lead",
+      "role": "Team Lead",
+      "owns": "arbitration, src/template content, ADRs, final approval"
+    },
+    {
+      "name": "builder",
+      "role": "Builder",
+      "owns": "src/bin (CLI flag parsing, issue/sprint helpers)"
+    },
+    {
+      "name": "scribe",
+      "role": "Scribe",
+      "owns": "work-tracking JSON, CONTEXT.md terms, Retro Loop"
+    }
+  ],
+  "goal": "Harden to-execution issue create flag parsing so agents stop hitting silent data corruption and misleading errors.",
+  "issues_addressed": [
+    "019ee185-cb0b-725d-a71f-a0dfce56ce49",
+    "019ee186-0ebc-7729-8149-464397a1a540",
+    "019ee186-326a-7be2-a4ad-b782b6ebb71e",
+    "019ee186-0ef9-7833-82ae-6409d293e897"
+  ],
+  "shipped": [
+    {
+      "id": "S10-1",
+      "type": "BUG",
+      "title": "LIST flags append per occurrence and stop comma-splitting prose",
+      "owner": "builder",
+      "summary": "parseFlags now contributes exactly one verbatim trimmed item per LIST-flag occurrence and appends on repeat; comma-splitting and LIST_VALUE_SEPARATOR are retired and the write-policy comment corrected. Affects --scope, --acceptance-criteria, --depends-on, --related-tickets. Closes the silent-corruption path where a prose criterion full of commas collapsed into N items with no error.",
+      "closes_issues": [
+        "019ee185-cb0b-725d-a71f-a0dfce56ce49"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S10-2",
+      "type": "BUG",
+      "title": "Presence flags reject a trailing value with a legible error",
+      "owner": "builder",
+      "summary": "A BOOLEAN/NULL presence flag handed a trailing non-flag token (e.g. --actionable-now true) now throws a by-name error naming the flag as a presence flag to pass alone, instead of the misleading 'unknown flag true'. A bare presence flag still sets the field; a known flag following one still parses normally.",
+      "closes_issues": [
+        "019ee186-0ebc-7729-8149-464397a1a540"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S10-3",
+      "type": "FEAT",
+      "title": "issue create and issue update print a --help flag reference",
+      "owner": "builder",
+      "summary": "issue create --help and issue update --help (and -h) render the ISSUE_FIELD_FLAGS reference from FLAG_TYPE_LABEL — each flag with its type label (STRING / LIST-repeatable / BOOLEAN / INTEGER) and a note that list flags repeat one item per occurrence. Depends on S10-1 so the labels and the repeat note describe the shipped behavior.",
+      "closes_issues": [
+        "019ee186-326a-7be2-a4ad-b782b6ebb71e"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S10-4",
+      "type": "DOCS",
+      "title": "Refresh execution-to-issues skill to teach the issue create CLI",
+      "owner": "team-lead",
+      "summary": "Rewrote the execution-to-issues SKILL.md write step from the pre-ADR-0011 backlog.json append flow to the real to-execution issue create recipe: one create per slice, minted UUIDv7 ids, repeated list flags for multi-item fields, bare presence flags, and dependency-order id capture for --depends-on. Dropped the scan-for-max-EXEC-NNN id guidance. Depends on S10-1 so the recipe shows the shipped flag behavior.",
+      "closes_issues": [
+        "019ee186-0ef9-7833-82ae-6409d293e897"
+      ],
+      "notes": null
+    }
+  ],
+  "in_progress": [],
+  "not_shipped": [],
+  "defects_discovered": [],
+  "decisions": [
+    {
+      "title": "List flags are repeatable; comma-splitting removed",
+      "summary": "A LIST flag contributes one verbatim item per occurrence and repeats append; comma-splitting and LIST_VALUE_SEPARATOR were retired. Chosen over switching to a different separator character because no single character is prose-safe. The change is mildly breaking, but the blast radius is one documented caller and ephemeral records — acceptable pre-1.0."
+    },
+    {
+      "title": "parseFlags exported and main() guarded for unit-testing",
+      "summary": "parseFlags was exported and main() guarded with require.main === module, so requiring cli.js exposes the parser without firing the CLI and the parsing behavior is unit-testable in isolation."
+    }
+  ],
+  "retrospective_notes": [
+    {
+      "title": "Filing these issues tripped the very bug they fix",
+      "body": "Filing the Sprint 10 issues hit the comma-split bug first-hand: an --acceptance-criteria value full of prose commas collapsed into one blob item. That is direct evidence the fix was needed, and it is captured in S10-1's acceptance criteria. All four slices were chartered (planned slices, not emergent), so the Retro Loop needs no alignment gate and no teammate-definition edits — the observation is recorded here only."
+    }
+  ],
+  "step_log": [
+    {
+      "step": "code_standards_pass",
+      "at": "2026-06-19",
+      "artifact": "S10-1/S10-2/S10-3 issue-flag hardening: src/bin/cli.js (parseFlags LIST repeat-append, presence-flag misuse error, issue create|update --help, parseFlags export + require.main guard), src/bin/write-policy.js (FLAG_TYPE_LABEL, retire LIST_VALUE_SEPARATOR), src/test/write-record.test.js",
+      "summary": "PASS — 0 violations on re-gate. Named constants (HELP_FLAGS, FLAG_TYPE_LABEL), data/logic split (labels live in write-policy.js), and fail-closed error paths all hold."
+    },
+    {
+      "step": "package_qa_pass",
+      "at": "2026-06-19",
+      "artifact": "S10-1/S10-2/S10-3 issue-flag hardening: src/bin/cli.js + src/bin/write-policy.js",
+      "summary": "PASS — 0 violations. require.main===module guard confirmed (requiring cli.js returns { parseFlags } without firing main()); full stamp contract intact; 31/31 node:test tests green; src/package.json untouched."
+    },
+    {
+      "step": "process_review_pass",
+      "at": "2026-06-19",
+      "artifact": "close sprint 10",
+      "summary": "PASS — 0 violations. Transition conforms to .excn/PROCESS.md."
+    }
+  ],
+  "schema_version": "1.0"
+}

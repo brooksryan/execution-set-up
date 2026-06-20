@@ -1,0 +1,22 @@
+{
+  "id": "019ee186-0ebc-7729-8149-464397a1a540",
+  "status": "closed",
+  "severity": "P3",
+  "scope": [
+    "src/bin"
+  ],
+  "actionable_now": true,
+  "description": "Passing a value to a presence flag (e.g. --actionable-now true) fails with 'unknown flag true' because the parser reads the value as the next flag. The error blames the value rather than naming the misuse. Fix: when a BOOLEAN or NULL flag is immediately followed by a non-flag token throw a message that names the flag as a presence flag to be passed alone.",
+  "title": "Presence flags reject a trailing value with a legible error",
+  "classification": "local",
+  "slice_type": "AFK",
+  "root_cause": "parseFlags treats a presence flag's neighbouring token as the next flag; a stray value surfaces as a misleading unknown-flag error.",
+  "fix": "In parseFlags after handling a BOOLEAN/NULL flag: if the next token exists and is not a known flag throw 'flag X is a presence flag; pass it with no value'.",
+  "acceptance_criteria": [
+    "issue create with --actionable-now true exits non-zero with a message naming --actionable-now as a presence flag",
+    "--actionable-now passed alone still sets the field true",
+    "A known flag following --actionable-now is still parsed normally"
+  ],
+  "assigned_sprint": 10,
+  "closed_in_sprint": 10
+}
