@@ -1,0 +1,24 @@
+{
+  "id": "019ef76b-2615-7826-8cf3-fe93f0cf30c3",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "src/bin",
+    "runtime"
+  ],
+  "actionable_now": true,
+  "description": "A deterministic policy module resolves a Grounding Pack Runtime Record at .excn/runtime/grounding-pack.json with no model call — schema digest, glossary terms, ADR index, CLI stamp, and a UUIDv7 pool — exposed as a new warm Scaffolder verb runnable by hand and by the hook.",
+  "prd": "019ef6f4-4617-7f65-acfd-7b83c541f3a9",
+  "title": "Grounding Pack regenerator and the warm verb",
+  "slice_type": "AFK",
+  "classification": "macro",
+  "acceptance_criteria": [
+    "node src/bin/cli.js warm writes .excn/runtime/grounding-pack.json and exits 0",
+    "Identical inputs produce a byte-identical pack — all object keys sorted before serialization",
+    "The schema digest records the notes field type per-schema: prd.schema.json's array shape distinct from the string shape in the issue and sprint schemas",
+    "The pack carries a non-empty UUIDv7 pool, the CONTEXT.md glossary terms, and the ADR index (id + title + status)",
+    "A node --test unit asserts determinism and per-schema notes correctness"
+  ],
+  "assigned_sprint": 11,
+  "closed_in_sprint": 11
+}

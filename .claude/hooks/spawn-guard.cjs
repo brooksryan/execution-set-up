@@ -2,20 +2,25 @@
 'use strict';
 
 // spawn-guard — the spawn_guard hook feature (EXEC-064, ADR-0006 toggle plumbing;
-// default OFF). Wired in settings.json as PreToolUse on the one-shot agent-spawn
-// tool. When the toggle is on and the requested agent type is in the Instance's
-// configured persistent-Teammate list (hooks.config.json, variant-classed per
-// Instance), it denies the spawn with a reason citing the TEAM_DIRECTIVE routing
-// rule; every other spawn passes untouched (exit 0, no output). Every firing logs
-// one invocation record via hook-lib (CODE_STANDARDS ## Hooks) — outcome semantics:
-// a deny emitted is `ok` (the enabled guard acted), a pass-through is `noop`, a
-// missing/malformed persistent-types list is `noop` (nothing to guard against).
-// FAIL SAFE: missing/malformed config or payload, or any internal error, exits 0
-// with no output (ADR-0006) — a broken guard never blocks legitimate spawns.
+// default OFF). Wired in settings.json as PreToolUse on the agent-spawn tool. When the
+// toggle is on and the requested agent type is in the Instance's configured
+// persistent-Teammate list (hooks.config.json, variant-classed per Instance), it denies
+// a spawn that does NOT run the type as an addressable, continuable Teammate, with a
+// reason citing the TEAM_DIRECTIVE routing rule; every other spawn passes untouched
+// (exit 0, no output). The addressability signal is a non-empty `name` in the payload:
+// a named spawn is the rostered Teammate (its .claude/agents definition, addressable via
+// SendMessage); an unnamed one-shot spawn of a rostered type is the transient copy the
+// routing rule forbids for sprint work (sprint-11 S9 — the earlier name+team_name signal
+// is gone now the Agent/Task API ignores team_name). Every firing logs one invocation
+// record via hook-lib (CODE_STANDARDS ## Hooks) — outcome semantics: a deny emitted is
+// `ok` (the enabled guard acted), a pass-through is `noop`, a missing/malformed
+// persistent-types list is `noop` (nothing to guard against). FAIL SAFE: missing/malformed
+// config or payload, or any internal error, exits 0 with no output (ADR-0006) — a broken
+// guard never blocks legitimate spawns.
 
 const path = require('path');
 const lib = require('./hook-lib.cjs');
-const { AGENT_TYPE_KEYS, TEAM_SPAWN_KEYS, TYPE_PLACEHOLDER, DENY_REASON_TEMPLATE } = require('./spawn-guard-rules.cjs');
+const { AGENT_TYPE_KEYS, PERSISTENT_SPAWN_KEY, TYPE_PLACEHOLDER, DENY_REASON_TEMPLATE } = require('./spawn-guard-rules.cjs');
 
 const FEATURE = 'spawn_guard';
 
@@ -69,31 +74,32 @@ function requestedType(payload) {
 }
 
 /**
- * Is this a persistent-Teammate spawn into a team? True only when the payload carries
- * a value for every TEAM_SPAWN_KEYS key (name AND team_name) — the legitimate rostered
- * mechanism, which the guard allows even for a rostered type. A bare one-shot spawn
- * carries neither and is not exempt.
+ * Is this spawn an addressable, continuable persistent Teammate? True only when the
+ * payload carries a non-empty `name` (PERSISTENT_SPAWN_KEY) — a named spawn runs the
+ * rostered Teammate with its .claude/agents definition, addressable via SendMessage, so
+ * the guard allows it even for a rostered type. A bare unnamed one-shot spawn carries no
+ * name and is not exempt.
  * @param {object} payload - the PreToolUse hook payload.
- * @returns {boolean} true when both team-spawn keys carry a non-empty string.
+ * @returns {boolean} true when the persistent-spawn key carries a non-empty string.
  */
-function isTeamSpawn(payload) {
-  const toolInput = toolInputOf(payload);
-  return TEAM_SPAWN_KEYS.every((key) => typeof toolInput[key] === 'string' && toolInput[key] !== '');
+function isNamedSpawn(payload) {
+  const name = toolInputOf(payload)[PERSISTENT_SPAWN_KEY];
+  return typeof name === 'string' && name !== '';
 }
 
 /**
- * Decide this spawn: deny a configured persistent-Teammate type spawned as a one-shot
- * copy with the routing reason; pass everything else — including a rostered type
- * spawned into a team (name + team_name), the legitimate persistent-Teammate mechanism.
+ * Decide this spawn: deny a configured persistent-Teammate type spawned unnamed (a
+ * transient copy) with the routing reason; pass everything else — including a rostered
+ * type spawned with a name, the legitimate addressable-Teammate mechanism.
  * @param {object} payload - the PreToolUse hook payload.
  * @param {string} projectRoot - the Instance root.
  * @returns {string} an invocation-log outcome: OUTCOME_OK when the deny was emitted,
- * OUTCOME_NOOP when the spawn passed (not a guarded type, no list, or a team spawn).
+ * OUTCOME_NOOP when the spawn passed (not a guarded type, no list, or a named spawn).
  */
 function guard(payload, projectRoot) {
   const type = requestedType(payload);
   if (type === null || !persistentTypes(projectRoot).includes(type)) return lib.OUTCOME_NOOP;
-  if (isTeamSpawn(payload)) return lib.OUTCOME_NOOP;
+  if (isNamedSpawn(payload)) return lib.OUTCOME_NOOP;
   lib.emit({
     hookSpecificOutput: {
       hookEventName: HOOK_EVENT,

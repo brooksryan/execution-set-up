@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "PRD Artifact",
-  "description": "One file per PRD at .excn/prds/PRD-<NNN>-<slug>.json. PRDs are adherence artifacts — agents execute against them (to-issues consumes user_stories and implementation_decisions; issues link back via their prd field). Prose for humans lives inside the string fields.",
+  "description": "One file per PRD at .excn/prds/<id>-<slug>.json (legacy PRD-<NNN> grandfathered; new PRDs are UUIDv7). PRDs are adherence artifacts — agents execute against them (to-issues consumes user_stories and implementation_decisions; issues link back via their prd field). Prose for humans lives inside the string fields.",
   "type": "object",
   "additionalProperties": false,
   "required": [

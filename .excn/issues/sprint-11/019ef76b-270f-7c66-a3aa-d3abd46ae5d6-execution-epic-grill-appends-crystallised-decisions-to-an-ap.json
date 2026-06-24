@@ -1,0 +1,24 @@
+{
+  "id": "019ef76b-270f-7c66-a3aa-d3abd46ae5d6",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "skills"
+  ],
+  "actionable_now": true,
+  "description": "The epic-grill skill appends each crystallised decision to .excn/runtime/grill-decisions.log as one JSON object per line; any reader splits on newline and skips a line that fails to parse, surviving a torn final write.",
+  "prd": "019ef6f4-4617-7f65-acfd-7b83c541f3a9",
+  "title": "execution-epic-grill appends crystallised decisions to an append-only log",
+  "slice_type": "AFK",
+  "classification": "local",
+  "acceptance_criteria": [
+    "execution-epic-grill appends one JSONL entry per crystallised decision to grill-decisions.log",
+    "A reader skips an unparseable torn last line rather than throwing",
+    "Src-First: byte-identical src/template and root mirror"
+  ],
+  "depends_on": [
+    "019ef76b-2654-7bb4-9576-dade72307f7f"
+  ],
+  "assigned_sprint": 11,
+  "closed_in_sprint": 11
+}

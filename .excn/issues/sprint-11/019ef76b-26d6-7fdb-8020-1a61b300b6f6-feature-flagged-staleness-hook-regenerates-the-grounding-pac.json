@@ -1,0 +1,28 @@
+{
+  "id": "019ef76b-26d6-7fdb-8020-1a61b300b6f6",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "hooks",
+    "template"
+  ],
+  "actionable_now": true,
+  "description": "A data/logic hook pair regenerates the pack when a schema, CONTEXT, or ADR source is newer-or-equal than the pack; default-off in hooks.config.json, gated by featureEnabled, logging one invocation per firing, exiting 0 on any error, and writing the pack from the hook's own process — never blocking the triggering Write.",
+  "prd": "019ef6f4-4617-7f65-acfd-7b83c541f3a9",
+  "title": "Feature-flagged staleness hook regenerates the Grounding Pack",
+  "slice_type": "AFK",
+  "classification": "macro",
+  "acceptance_criteria": [
+    "A new grounding-pack feature flag in hooks.config.json defaults false; HOOK_FEATURES and the hooks-config schema carry it",
+    "With the flag off the hook is a logged no-op (OUTCOME_DISABLED) and writes no pack",
+    "With a deliberately broken regenerator the hook exits 0, logs the error outcome, and does not block the triggering Write",
+    "The hook writes the pack from its own process (not Claude's Write tool), so PostToolUse does not re-enter",
+    "Staleness uses a >= mtime comparison with a content-hash fallback on the CONTEXT and ADR sources"
+  ],
+  "depends_on": [
+    "019ef76b-2615-7826-8cf3-fe93f0cf30c3",
+    "019ef76b-2654-7bb4-9576-dade72307f7f"
+  ],
+  "assigned_sprint": 11,
+  "closed_in_sprint": 11
+}

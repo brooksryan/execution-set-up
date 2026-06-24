@@ -61,6 +61,11 @@ const HOOK_FEATURES = [
     scripts: ['channel-guard.cjs'],
     evidence: null,
   },
+  {
+    key: 'grounding_pack',
+    scripts: ['grounding-pack-watch.cjs'],
+    evidence: '.excn/runtime/grounding-pack-watch_progress.json',
+  },
 ];
 
 // The unified hook invocation log (CODE_STANDARDS ## Hooks) — doctor's primary

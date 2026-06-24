@@ -18,12 +18,23 @@ When the requirements pass is complete, ask the lead: **"Is this design-heavy en
 You may only write to:
 
 - `.excn/adr/` — offer an ADR only when all three criteria hold: hard to reverse, surprising without context, the result of a real trade-off. Write ADRs in the format at [ADR-FORMAT.md](./ADR-FORMAT.md).
+- `.excn/runtime/grill-decisions.log` — as each requirement or decision crystallises, append it as one JSON object per line (an append-only Runtime Record). This is the continuously-updated surface a speculative PRD draft reads while the grill is still running; a reader splits on newline and skips any line that fails to parse, so a torn final write is never an error. Append-only — never rewrite or truncate it.
 
 Do not write to `.excn/CONTEXT.md` or `.excn/PHILOSOPHY.md` — terms and principles are owned by `execution-context-grill`. If you discover a term that needs sharpening, name it and tell the lead to run a context-grill session.
 
 No other files. The output of this grill is the conversation itself — `execution-to-prd` synthesizes it into the PRD.
 
 </write-guardrail>
+
+<live-draft>
+
+Keep a speculative PRD draft warm as the grill runs. `execution-to-prd` verifies and lands it — the draft is never authoritative.
+
+- **Spawn at the first answer.** When the first question is answered, spawn a long-lived drafter with the Agent tool, passing a `name` so it runs as an addressable, continuable Teammate you can feed. Its task: read `.excn/runtime/grounding-pack.json` and `.excn/runtime/grill-decisions.log`, and write a PRD-shaped draft to `.excn/runtime/prd-draft.json` by writing a temp file and renaming it over the target. It writes ONLY under `.excn/runtime/` — never `.excn/prds/` or `.excn/adr/`.
+- **Feed it each answer.** After every answer, append the decision to `grill-decisions.log` and message the drafter to redraft from the updated log.
+- **Stable fields only.** The drafter fills the fields that settle early — problem, actors, user stories. It leaves the decision-bearing fields (`implementation_decisions`, `testing_decisions`) to `execution-to-prd`, which authors them live at hand-back.
+
+</live-draft>
 
 <supporting-info>
 

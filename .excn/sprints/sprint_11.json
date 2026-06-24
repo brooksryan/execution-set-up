@@ -1,0 +1,184 @@
+{
+  "sprint_id": 11,
+  "name": "Speculative pre-warm of the synthesis tail",
+  "status": "closed",
+  "dates": {
+    "start": "2026-06-23",
+    "end": "2026-06-24",
+    "duration_note": "9 slices over two days: #1 Grounding Pack (S1-S5), #2 Speculative Prerender (S6-S8), and the S9 spawn-guard realignment. Every code slice gated by code-standards + cli-code-quality-reviewer + package-qa; every skill/doc change by alignment. Dogfooded the grill to PRD to issues to sprint pipeline end-to-end."
+  },
+  "team": [
+    {
+      "name": "Team Lead",
+      "role": "arbitration, src/template content, one-off authoring",
+      "owns": "skills, gitignore, ADR/PRD, gates"
+    },
+    {
+      "name": "builder",
+      "role": "Scaffolder/CLI code",
+      "owns": "src/bin, hooks"
+    },
+    {
+      "name": "scribe",
+      "role": "structured artifacts",
+      "owns": "sprint/issue JSON"
+    }
+  ],
+  "goal": "Pre-warm and overlap the grill to PRD synthesis tail so work starts the moment the grill ends.",
+  "issues_addressed": [
+    "019ef76b-25d4-71b9-a88a-c96707f1ed0f",
+    "019ef76b-2615-7826-8cf3-fe93f0cf30c3",
+    "019ef76b-2654-7bb4-9576-dade72307f7f",
+    "019ef76b-2698-76f6-b79d-11c255232c8e",
+    "019ef76b-26d6-7fdb-8020-1a61b300b6f6",
+    "019ef76b-270f-7c66-a3aa-d3abd46ae5d6",
+    "019ef76b-274c-7d4d-b33a-308e0f98d953",
+    "019ef76b-278d-749d-83c5-78440da6f412",
+    "019efa78-56f8-73e6-91d3-24e699d5a0df"
+  ],
+  "shipped": [
+    {
+      "id": "S11-1",
+      "type": "INFRA",
+      "title": "Bump dogfood root to-execution range to 0.8.0",
+      "owner": "Team Lead",
+      "summary": "Root dependency changed ^0.6.0 -> ^0.8.0 and reinstalled; npx to-execution now resolves the dogfooded version and exposes uuid/issue/sprint/warm.",
+      "closes_issues": [
+        "019ef76b-25d4-71b9-a88a-c96707f1ed0f"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S11-2",
+      "type": "FEAT",
+      "title": "Grounding Pack regenerator and the warm verb",
+      "owner": "builder",
+      "summary": "Deterministic grounding-policy.js (data) + grounding-pack.js (logic) resolve a Grounding Pack at .excn/runtime/grounding-pack.json (schema digest with per-schema notes type, glossary, ADR index, CLI stamp, UUIDv7 pool); new warm CLI verb; deep key-sort determinism; SCAFFOLDER_VERBS drift-guard test.",
+      "closes_issues": [
+        "019ef76b-2615-7826-8cf3-fe93f0cf30c3"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S11-3",
+      "type": "INFRA",
+      "title": "Widen gitignore contract for pre-warm Runtime Records",
+      "owner": "Team Lead",
+      "summary": "Stamped .excn/.gitignore gains runtime/-anchored patterns for grounding-pack.json, prd-draft.json, grill-decisions.log (ADR-0005 widened by ADR-019ef6f4); package-qa rubric swept to the new contract in the same change.",
+      "closes_issues": [
+        "019ef76b-2654-7bb4-9576-dade72307f7f"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S11-4",
+      "type": "FEAT",
+      "title": "Feature-flagged Grounding Pack staleness hook",
+      "owner": "builder",
+      "summary": "PostToolUse data/logic hook pair (default-off grounding_pack flag) regenerates the pack in-process (require.resolve, G1 no re-entry) when stale (mtime >= + sha256 digest fallback, G2); fail-safe exit-0 incl. unresolvable regenerator on the dogfood.",
+      "closes_issues": [
+        "019ef76b-26d6-7fdb-8020-1a61b300b6f6"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S11-5",
+      "type": "FEAT",
+      "title": "execution-to-prd reads the Grounding Pack",
+      "owner": "Team Lead",
+      "summary": "PRD synthesis reads the pack as its starting point and drains a UUIDv7 from the pool, with a pure-accelerator fallback to tree-read when the pack is absent or stale.",
+      "closes_issues": [
+        "019ef76b-2698-76f6-b79d-11c255232c8e"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S11-6",
+      "type": "FEAT",
+      "title": "execution-epic-grill appends crystallised decisions to the log",
+      "owner": "Team Lead",
+      "summary": "The grill write-guardrail widened to permit an append-only JSONL grill-decisions.log Runtime Record; readers skip torn lines (G5).",
+      "closes_issues": [
+        "019ef76b-270f-7c66-a3aa-d3abd46ae5d6"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S11-7",
+      "type": "FEAT",
+      "title": "Long-lived live PRD drafter spawned at first grill answer",
+      "owner": "Team Lead",
+      "summary": "execution-epic-grill spawns a long-lived named drafter at the first answer and feeds it each answer; it continuously rewrites .excn/runtime/prd-draft.json (atomic) and writes only under runtime/. Lead chose live-from-first-answer over the originally-scoped checkpoint-respawn; PRD amended.",
+      "closes_issues": [
+        "019ef76b-274c-7d4d-b33a-308e0f98d953"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S11-8",
+      "type": "FEAT",
+      "title": "execution-to-prd verify-and-land of the speculative draft",
+      "owner": "Team Lead",
+      "summary": "At hand-back, to-prd takes the draft's stable fields only when it is parseable, schema-valid, newer than the decisions log, and from this session; decision-bearing fields are always authored live; invalid/stale/prior-session drafts are discarded.",
+      "closes_issues": [
+        "019ef76b-278d-749d-83c5-78440da6f412"
+      ],
+      "notes": null
+    },
+    {
+      "id": "S11-9",
+      "type": "REFACTOR",
+      "title": "Realign spawn-guard to name-based addressability",
+      "owner": "Team Lead",
+      "summary": "The rostered-spawn exemption was rekeyed from name+team_name to a non-empty name (isNamedSpawn) after the Agent/Task API deprecated team_name; deny reason minimized; premise re-grounded on addressability. Spiked + type-grilled before building; proven live (builder spawned where it was blocked).",
+      "closes_issues": [
+        "019efa78-56f8-73e6-91d3-24e699d5a0df"
+      ],
+      "notes": null
+    }
+  ],
+  "in_progress": [],
+  "not_shipped": [],
+  "defects_discovered": [],
+  "decisions": [
+    {
+      "title": "Speculative pre-warm is gitignored, never-authoritative runtime staging",
+      "summary": "ADR-019ef6f4: pre-warm artifacts (grounding-pack.json, prd-draft.json, grill-decisions.log) live under .excn/runtime/, gitignored, regenerable; synthesis verifies-and-lands them and never trusts decision-bearing fields. Channel guard untouched (ADR-0011 already exempts runtime/)."
+    },
+    {
+      "title": "Live-from-first-answer drafter over checkpoint-respawn",
+      "summary": "The lead chose a long-lived drafter spawned at the first grill answer and fed each answer, over the PRD's originally-scoped checkpoint-respawn, for maximum grill overlap. PRD impl-decision #5 amended 2026-06-24."
+    },
+    {
+      "title": "spawn-guard rekeyed on name after team_name deprecation",
+      "summary": "S9: the prior name+team_name exemption became unsatisfiable when the Agent/Task API collapsed to a single implicit team and dropped team_name; the exemption now keys on a non-empty name."
+    },
+    {
+      "title": "package-qa false-positives adjudicated",
+      "summary": "package-qa flagged pointer-wiring one-exists/no-phantom and migrate skip-untracked as contract failures; Team Lead adjudicated both as intended behavior per cli.js:965-966/957-958 and prior passing runs. S3 landed on its clean gitignore checks."
+    }
+  ],
+  "retrospective_notes": [
+    {
+      "title": "Precise-Minimalism rationale tails recurred",
+      "body": "Team-Lead-authored skill/doc edits tripped the alignment Precise-Minimalism rule five times (S3 rubric parenthetical, S6 closing clause, S7 two clauses) by appending a rationale or consequence clause to an otherwise-complete instruction. The corrective is mechanical: stop after the imperative. A standing reminder for skill/doc authoring would prevent the re-gate churn."
+    },
+    {
+      "title": "Teammate self-reports can diverge from disk; parity is not presence",
+      "body": "builder reported adding the E3 comment and edits that were not on disk; its cp+diff check proved template==root but never that the intended edit landed. Gate-on-disk verification caught it. Lesson: verify teammate deliverables on disk, and treat a mirror-parity check as distinct from an edit-presence check."
+    },
+    {
+      "title": "package-qa misjudged intended behaviors as failures",
+      "body": "package-qa twice flagged contract-conformant behavior (pointer one-exists/no-phantom, migrate skip-untracked) as failures, requiring Team Lead adjudication. Candidate Retro-Loop edit: encode these as conformant in the package-qa rubric so it grades the change, not pre-existing intended behavior."
+    },
+    {
+      "title": "Dogfood dep range silently lagged the shipped version",
+      "body": "The root pinned to-execution@^0.6.0, which cannot resolve 0.8.0, so npx ran a stale CLI missing newer verbs despite a 'dogfood on 0.8.0' commit. S1 corrected it to ^0.8.0. A resolvable-range assertion (or a doctor check) would catch a future drift."
+    },
+    {
+      "title": "Pre-warm features ship inert until the next publish",
+      "body": "The staleness hook resolves its regenerator from the installed package; on the dogfood (0.8.0, no regenerator) it fail-safes to no-op, so the pre-warm features cannot fire on the root until 0.9.0 is published. Tracked as the ship step following this close."
+    }
+  ],
+  "schema_version": "1.0"
+}

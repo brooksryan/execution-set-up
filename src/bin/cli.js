@@ -71,6 +71,7 @@ const {
 const { SCHEMA_DIR_RELATIVE, DETECTION_RULES } = require('./validate-policy');
 const { writeRecord, updateRecord, appendStepLog, mintUuidV7 } = require('./write-record');
 const { migrateRecords } = require('./migrate-records');
+const { regenerateGroundingPack } = require('./grounding-pack');
 const {
   RECORD_KIND,
   FLAG_TYPE,
@@ -944,6 +945,7 @@ function printUsage() {
       '  npx to-execution sprint write <file>             upsert a whole sprint record (canonical-sentinel form)',
       '  npx to-execution sprint append-step <id> [flags] append one verdict to a sprint step_log',
       '  npx to-execution uuid                            print one fresh UUIDv7 (for PRD/ADR id minting)',
+      '  npx to-execution warm [target]                   regenerate the deterministic grounding pack (no model call)',
       '',
       'init stamps the .excn/ namespace; .excn/.gitignore keeps per-session *_progress.json out of git.',
       'init records the framework version and stamped-form hashes in .excn/framework-version.json.',
@@ -981,6 +983,11 @@ function printUsage() {
       'write upserts a whole sprint_<N>.json in canonical-sentinel form (accreting arrays last, the',
       'constant schema_version key dead-last); sprint append-step appends one step_log verdict as a',
       'minimal, sibling-stable diff. All issue/sprint writes go through the single helper write path.',
+      'warm regenerates .excn/runtime/grounding-pack.json with no model call — a per-schema notes-type',
+      'digest, the CONTEXT.md glossary terms, an id-sorted ADR index, the CLI stamp (verbs +',
+      'issue-create flags), and a fresh UUIDv7 pool — every derived section deterministic (all object',
+      'keys sorted) so two runs on identical sources differ only in the pool. Exits non-zero on a',
+      'non-stamped target.',
       '',
     ].join('\n')
   );
@@ -1829,6 +1836,35 @@ function uuid() {
 }
 
 /**
+ * Run the `warm` command: regenerate the Grounding Pack at .excn/runtime/grounding-pack.json for
+ * the target Instance with NO model call — a deterministic schema digest, glossary terms, ADR
+ * index, CLI stamp, and a fresh UUIDv7 pool, all derived from on-disk sources by the regenerator
+ * (its sole writer). Fail-closed: a non-stamped target (no version marker) exits non-zero, mirroring
+ * view-status; so does any failure to read a core source or write the pack.
+ * @param {string[]} args - args after the command word (target only).
+ * @returns {void}
+ * @throws Exits non-zero (after a stderr message) on a non-stamped target or a regenerate failure.
+ */
+function warm(args) {
+  const target = path.resolve(args.find((arg) => !arg.startsWith(FLAG_PREFIX)) || '.');
+  if (!fs.existsSync(path.join(target, VERSION_MARKER_PATH))) {
+    process.stderr.write(
+      `error: not a stamped Instance — no version marker at ${path.join(target, VERSION_MARKER_PATH)}; run \`to-execution init\` first\n`
+    );
+    process.exit(1);
+  }
+
+  let result;
+  try {
+    result = regenerateGroundingPack({ targetRoot: target });
+  } catch (cause) {
+    process.stderr.write(`error: cannot regenerate the grounding pack: ${cause.message}\n`);
+    process.exit(1);
+  }
+  process.stdout.write(`wrote grounding pack ${result.path}\n  sections: ${Object.keys(result.pack).sort().join(', ')}\n`);
+}
+
+/**
  * Run the `validate` command: validate a work-tracking JSON file against its schema —
  * auto-detected from the file shape (validate-policy) or named by --schema. Exit 0 on
  * a valid file; non-zero with each violation (JSON path + message) on an invalid one.
@@ -1909,8 +1945,8 @@ function validate(args) {
  * `doctor` reports hook health; `view-status` opens the status page; `validate`
  * checks a work-tracking file against its schema; `issue` creates/updates a per-record
  * issue file; `sprint` upserts a sprint record or appends a step_log verdict; `uuid` prints
- * one fresh UUIDv7; no command or -h/--help prints usage and exits zero; any other word
- * fails non-zero with usage.
+ * one fresh UUIDv7; `warm` regenerates the deterministic Grounding Pack; no command or -h/--help
+ * prints usage and exits zero; any other word fails non-zero with usage.
  * @returns {void}
  * @throws Exits non-zero (after usage on stderr+stdout) on an unrecognized command.
  */
@@ -1937,6 +1973,8 @@ function main() {
       return sprint(args);
     case 'uuid':
       return uuid();
+    case 'warm':
+      return warm(args);
     case undefined:
     case '-h':
     case '--help':

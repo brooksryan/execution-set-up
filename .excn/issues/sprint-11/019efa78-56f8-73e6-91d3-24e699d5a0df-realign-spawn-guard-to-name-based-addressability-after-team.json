@@ -1,0 +1,24 @@
+{
+  "id": "019efa78-56f8-73e6-91d3-24e699d5a0df",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "hooks",
+    "template"
+  ],
+  "actionable_now": true,
+  "description": "The shipped spawn-guard's rostered-spawn exemption requires both name and team_name, but the Agent/Task API deprecated team_name (a single implicit team now), so the conjunction is unsatisfiable and every rostered persistent-Teammate spawn falls through to deny. Rekey the exemption on a non-empty name (isNamedSpawn), drop team_name from the guard logic and the rules vocabulary, re-ground the deny premise on addressability rather than definition-less copy, and minimize the deny reason to point at .excn/TEAM_DIRECTIVE.md.",
+  "assigned_sprint": 11,
+  "title": "Realign spawn-guard to name-based addressability after team_name deprecation",
+  "slice_type": "AFK",
+  "classification": "local",
+  "acceptance_criteria": [
+    "isNamedSpawn exempts a rostered spawn when tool_input.name is a non-empty string; team_name is removed from both the guard logic and the rules-module vocabulary",
+    "A rostered type spawned with a name passes (noop, logged); the same type spawned unnamed denies with the reason; both outcomes log one invocation record",
+    "DENY_REASON_TEMPLATE is the minimal form pointing to .excn/TEAM_DIRECTIVE.md, with no stale team_name instruction",
+    "The guard header premise is re-grounded on addressability/continuability, not definition-less copy",
+    "A node --test case covers named-pass and unnamed-deny for a rostered type",
+    "Src-First: src/template and root .claude/hooks spawn-guard.cjs and spawn-guard-rules.cjs are byte-identical"
+  ],
+  "closed_in_sprint": 11
+}

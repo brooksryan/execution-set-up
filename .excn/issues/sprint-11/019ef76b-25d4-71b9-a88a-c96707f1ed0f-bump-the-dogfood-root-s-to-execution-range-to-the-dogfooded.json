@@ -1,0 +1,20 @@
+{
+  "id": "019ef76b-25d4-71b9-a88a-c96707f1ed0f",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "dogfood-root"
+  ],
+  "actionable_now": true,
+  "description": "The dogfood root pins to-execution at a range that cannot resolve the dogfooded version, so npx silently runs a stale CLI missing the newer verbs. Bump the range so npx resolves the shipped version the root claims to dogfood.",
+  "prd": "019ef6f4-4617-7f65-acfd-7b83c541f3a9",
+  "title": "Bump the dogfood root's to-execution range to the dogfooded version",
+  "slice_type": "AFK",
+  "classification": "local",
+  "acceptance_criteria": [
+    "Root package.json to-execution range resolves the current src/package.json version",
+    "npx to-execution uuid succeeds from the dogfood root (no longer 'unknown command: uuid')"
+  ],
+  "assigned_sprint": 11,
+  "closed_in_sprint": 11
+}

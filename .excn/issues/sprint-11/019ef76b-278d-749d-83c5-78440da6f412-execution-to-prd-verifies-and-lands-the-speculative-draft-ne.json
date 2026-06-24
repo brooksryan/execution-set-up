@@ -1,0 +1,27 @@
+{
+  "id": "019ef76b-278d-749d-83c5-78440da6f412",
+  "status": "closed",
+  "severity": "P1",
+  "scope": [
+    "skills"
+  ],
+  "actionable_now": true,
+  "description": "At hand-back, execution-to-prd reads prd-draft.json catching a SyntaxError as a missing draft, discards a draft that is schema-invalid, staler than its decisions log, or from a prior session, accepts only the stable fields, and authors the decision-bearing fields (implementation_decisions, testing_decisions) live.",
+  "prd": "019ef6f4-4617-7f65-acfd-7b83c541f3a9",
+  "title": "execution-to-prd verifies and lands the speculative draft, never trusting decision fields",
+  "slice_type": "AFK",
+  "classification": "macro",
+  "acceptance_criteria": [
+    "A schema-invalid prd-draft.json is discarded and a from-scratch PRD lands with no error",
+    "A draft with poisoned implementation_decisions yields decision fields authored live, not copied from the draft",
+    "A draft staler than its grill-decisions.log, or from a prior session, is not loaded",
+    "Src-First: byte-identical src/template and root mirror"
+  ],
+  "depends_on": [
+    "019ef76b-2698-76f6-b79d-11c255232c8e",
+    "019ef76b-270f-7c66-a3aa-d3abd46ae5d6",
+    "019ef76b-274c-7d4d-b33a-308e0f98d953"
+  ],
+  "assigned_sprint": 11,
+  "closed_in_sprint": 11
+}

@@ -38,8 +38,9 @@ Sprint slices route to the rostered persistent Teammates; Invoked Agents are for
 | Teammate-def / persistent-doc change | alignment | yes — during setup too |
 | `builder` / `viewer` code change | code-standards | yes |
 | `src/bin` or `src/package.json` change | package-qa (with code-standards for `src/bin`) | yes |
+| `src/bin` / framework-JS change | cli-code-quality-reviewer (adversarial; logs its verdict to the work's step_log) | recommended |
 
-One-off agents this project needs: `package-qa`, `code-standards` (rubric `.excn/CODE_STANDARDS.md`).
+One-off agents this project needs: `package-qa`, `code-standards` (rubric `.excn/CODE_STANDARDS.md`), `cli-code-quality-reviewer` (adversarial code-quality review of this repo's Node CLI / framework JS — project-scoped, **not** shipped in `src/template`; appends its PASS/FAIL verdict to the active progress record's `step_log`).
 
 Gate agents and `clerk` validate work-tracking JSON with `npx to-execution validate <file>` (it auto-detects the schema, or takes `--schema <path>`) — never an ad-hoc `npm install ajv`, which the next install prunes.
 

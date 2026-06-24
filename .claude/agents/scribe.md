@@ -38,7 +38,7 @@ Issues are per-file records, one `<id>-<slug>.json` per issue (ADR-0011); a reco
 When sprint status is being set to `closed`:
 - Confirm the sprint is complete (no `in_progress` items; decisions and retro recorded). If not, do not close — return to the Team Lead.
 - Set `sprint_<N>.json` `status` to `"closed"`.
-- Confirm `closed_in_sprint` is set on each resolved issue in the sprint's companion file — it is stamped the moment each issue closes, not held for the sprint-close ceremony.
+- Confirm `closed_in_sprint` is set on each resolved issue record in the sprint's partition directory `.excn/issues/sprint-<N>/` — it is stamped the moment each issue closes, not held for the sprint-close ceremony.
 
 ## Constraints
 - No next-steps language anywhere — describe what is, not what comes next.

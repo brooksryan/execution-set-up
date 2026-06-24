@@ -1,0 +1,29 @@
+{
+  "id": "019ef76b-274c-7d4d-b33a-308e0f98d953",
+  "status": "closed",
+  "severity": "P2",
+  "scope": [
+    "skills",
+    "runtime"
+  ],
+  "actionable_now": true,
+  "description": "The grill (execution-epic-grill) spawns a long-lived, named PRD drafter when the FIRST grill question is answered; each subsequent answer is fed to it live (appended to grill-decisions.log and signalled). The drafter continuously rewrites .excn/runtime/prd-draft.json (write-temp-then-rename), reading the Grounding Pack plus the live decisions log, and writes ONLY under .excn/runtime/ — never the authoritative .excn/prds/ or .excn/adr/. Skill-level work: the spawn+feed integration lives in execution-epic-grill.",
+  "prd": "019ef6f4-4617-7f65-acfd-7b83c541f3a9",
+  "title": "Checkpoint-respawned background drafter overwrites the speculative PRD draft",
+  "slice_type": "HITL",
+  "classification": "macro",
+  "acceptance_criteria": [
+    "execution-epic-grill spawns a named long-lived drafter when the first question is answered (not at a phase boundary, not at grill end)",
+    "Each subsequent answer is fed to the drafter live: the decisions log is appended per answer and the drafter is signalled to re-draft",
+    "The drafter continuously rewrites .excn/runtime/prd-draft.json via temp-file-then-rename (atomic, G4); no torn/partial draft is left behind",
+    "The drafter writes ONLY under .excn/runtime/ — never .excn/prds/ or .excn/adr/; the channel guard is never on its path and is not modified",
+    "Src-First: the execution-epic-grill skill change is byte-identical between src/template and the root mirror"
+  ],
+  "depends_on": [
+    "019ef76b-2615-7826-8cf3-fe93f0cf30c3",
+    "019ef76b-2698-76f6-b79d-11c255232c8e",
+    "019ef76b-270f-7c66-a3aa-d3abd46ae5d6"
+  ],
+  "assigned_sprint": 11,
+  "closed_in_sprint": 11
+}
